@@ -4,6 +4,7 @@
    find-git-repos
    repo-name
    git-repo-p
+   with-repo
    with-each-repo
    with-each-repo-simple)
   (:documentation

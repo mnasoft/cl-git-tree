@@ -134,3 +134,7 @@ ARGUMENTS:
   (dolist (repo-dir (find-git-repos))
     (funcall fn repo-dir)))
 
+
+(defun with-repo (fn args)
+  (dolist (repo-dir (find-git-repos))
+    (funcall fn repo-dir args)))
