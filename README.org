@@ -1,1 +1,46 @@
-[[file:~/.git-tree/locations.configure]]
+#+TITLE: cl-git-tree
+#+AUTHOR: Mykola Matvyeyev
+#+LANGUAGE: ru
+
+* Описание
+cl-git-tree — инструмент для управления git‑локациями и синхронизации репозиториев,
+написанный на Common Lisp.  
+Он позволяет регистрировать шаблоны локаций, строить URL для репозиториев,
+автоматизировать операции clone/unclone и управлять удалёнными репозиториями.
+
+* Возможности
+- Регистрация и хранение локаций в глобальной таблице *locations*.
+- Построение git‑URL на основе шаблонов.
+- Поддержка локальных путей, UNC и архивов (.tar, .xz).
+- Набор команд для работы с репозиториями:
+  - clone / unclone
+  - pull / push / commit / add
+  - remote‑add / remote‑remove / remote‑readd
+  - remake‑xz, info, aliases
+
+* Архитектура
+- =cl-git-tree= — основная система, объединяющая подсистемы и команды.
+- =cl-git-tree/loc= — подсистема для работы с локациями (<location>, *locations*, API).
+- =cl-git-tree/git-utils= — вспомогательные функции для работы с git.
+- =src/commands/= — набор CLI‑команд.
+- =src/fs/= — подсистема для работы с файловой системой.
+
+* Установка
+#+begin_src lisp
+(ql:quickload "cl-git-tree")
+#+end_src
+
+* Использование
+Пример регистрации локации и клонирования репозитория:
+
+#+begin_src lisp
+(cl-git-tree/loc:add-location "gh"
+  :name "GitHub"
+  :url-git "https://github.com/")
+
+(cl-git-tree/loc:repo-url "gh" "cl-git-tree")
+;; => "https://github.com/cl-git-tree.git"
+#+end_src
+
+* Лицензия
+Проект распространяется под лицензией GNU GPL v3 или более поздней версии.

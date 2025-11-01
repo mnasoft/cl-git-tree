@@ -2,30 +2,15 @@
 
 (defpackage :cl-git-tree/commands/add
   (:use :cl)
-  (:import-from cl-git-tree
-                *locations*
-                location-url-git
-                )
-  (:import-from cl-git-tree/fs
-                repo-name
-                with-each-repo
-                with-each-repo-simple
-                )
-  (:import-from cl-git-tree/git-utils
-                git-run
-                current-branch
-                repo-remotes
-                )
-  (:export run
-           ))
-
+  (:export cmd-add))
 
 (in-package :cl-git-tree/commands/add)
 
 (defparameter *tracked-patterns*
-  '("*.lisp" "*.org" "*.asd" "*.c*" "*.h*" "*.tcl*" ".gitignore"))
+  '("*.lisp" "*.org" "*.asd" "*.c*" "*.h*" "*.tcl*" ".gitignore")
+  "Список шаблонов файлов, которые автоматически добавляются в индекс.")
 
-(defun find-tracked-files (repo-dir &optional (patterns '("*.lisp" "*.org" "*.asd" "*.c*" "*.h*" "*.tcl*" ".gitignore")))
+(defun find-tracked-files (repo-dir &optional (patterns *tracked-patterns*))
   "Ищет файлы по шаблонам PATTERNS внутри REPO-DIR, исключая .git."
   (let* ((args (append
                 '("find" "." "-type" "f"
@@ -44,23 +29,23 @@
     (remove-if #'uiop:emptyp
                (uiop:split-string cwd :separator '(#\Newline)))))
 
-
 (defun add-repo (repo-dir)
   "Добавляет отслеживаемые файлы в git-индекс."
-  (multiple-value-bind (files _err _code)
-      (find-tracked-files repo-dir)
-    (declare (ignore _err _code))
-    (format t "✔ ~A: добавлены ~D файл(ов)~%" repo-dir (length files))
+  (let ((files (find-tracked-files repo-dir)))
+    (format t "✔ ~A: найдено ~D файл(ов)~%" repo-dir (length files))
     (multiple-value-bind (_out err code)
-        (apply #'git-run repo-dir "add" files)
+        (apply #'cl-git-tree/git-utils:git-run repo-dir "add" files)
       (declare (ignore _out))
       (if (zerop code)
           (format t "✔ ~A: файлы добавлены~%" repo-dir)
           (format t "❌ ~A: ошибка при git add:~%~A" repo-dir err)))))
 
 
-(defun run (&rest _args)
-  (with-each-repo-simple #'add-repo))
+(defun cmd-add (&rest _args)
+  "Команда CLI: добавить отслеживаемые файлы во все репозитории."
+  (cl-git-tree/fs:with-each-repo-simple #'add-repo))
 
-(push (cons "add" #'run) cl-git-tree:*commands*)
-
+;; регистрация команды при загрузке
+(eval-when (:load-toplevel :execute)
+  (cl-git-tree/dispatch:register-command
+   "add" #'cmd-add "Добавить файлы в индекс"))

@@ -2,25 +2,16 @@
 
 (defpackage :cl-git-tree/commands/clone
   (:use :cl)
-  (:import-from cl-git-tree/git-utils
-                git-run)
-  (:import-from cl-git-tree
-                find-location
-                all-locations
-                location-url-git
-                location-local-p)
-  (:import-from cl-git-tree/fs
-                repo-name
-                with-each-repo-simple)
-  (:export run))
+  (:export cmd-clone))
 
 (in-package :cl-git-tree/commands/clone)
 
 (defun clone-repo (repo-dir location)
-  (let* ((repo-name (repo-name repo-dir))
-         (url (location-url-git location))
+  "Клонирует репозиторий REPO-DIR в указанную LOCATION как bare-репозиторий."
+  (let* ((repo-name (cl-git-tree/fs:repo-name repo-dir))
+         (url (cl-git-tree/loc:<location>-url-git location))
          (target (merge-pathnames (format nil "~A.git" repo-name)
-                 (uiop:ensure-directory-pathname url))))
+                                  (uiop:ensure-directory-pathname url))))
     (cond
       ;; если уже существует — пропускаем
       ((probe-file target)
@@ -28,23 +19,27 @@
       (t
        (ensure-directories-exist target)
        (multiple-value-bind (out err code)
-           (git-run repo-dir "clone" "--bare" "." (namestring target))
+           (cl-git-tree/git-utils:git-run repo-dir "clone" "--bare" "." (namestring target))
          (declare (ignore out))
          (if (zerop code)
              (format t "✔ ~A → ~A~%" repo-name target)
              (format t "❌ ~A: clone failed~%~A~%" repo-name err)))))))
 
-(defun run (&optional location-name)
+(defun cmd-clone (&optional location-name)
+  "CLI-команда: клонировать все локальные репозитории в указанные локации.
+Если LOCATION-NAME задано, используется только эта локация."
   (let ((locations (if location-name
-                       (let ((loc (find-location location-name)))
-                         (if loc (list loc) nil))
-                       (remove-if-not #'location-local-p (all-locations)))))
+                       (let ((loc (cl-git-tree/loc:find-location location-name)))
+                         (when loc (list loc)))
+                       (remove-if-not #'cl-git-tree/loc:location-local-p
+                                      (cl-git-tree/loc:all-locations)))))
     (if (null locations)
         (format t "⚠ Нет подходящих локаций для клонирования.~%")
-        (with-each-repo-simple
+        (cl-git-tree/fs:with-each-repo-simple
           (lambda (repo-dir)
             (dolist (loc locations)
               (clone-repo repo-dir loc)))))))
 
-(push (cons "clone" #'run) cl-git-tree:*commands*)
-
+(eval-when (:load-toplevel :execute)
+  (cl-git-tree/dispatch:register-command
+   "clone" #'cmd-clone "Клонировать все локальные репозитории"))

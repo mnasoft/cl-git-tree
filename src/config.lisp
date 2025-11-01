@@ -2,9 +2,20 @@
 
 (defparameter *config-path*
   (merge-pathnames #p".git-tree/locations.configure"
-                   (user-homedir-pathname)))
+                   (user-homedir-pathname))
+  "Путь к файлу конфигурации локаций git-tree.
 
-(defparameter *commands* nil)
+Файл хранится в домашнем каталоге пользователя, в подкаталоге
+\".git-tree/locations.configure\". В нём описываются все доступные
+локации (ключи, базовые URL и прочие параметры), которые затем
+используются подсистемами LOC и FS.
+
+Примеры:
+  *CONFIG-PATH*
+  ;; => #P\"/home/user/.git-tree/locations.configure\"
+
+  (probe-file *config-path*)
+  ;; => #P\"/home/user/.git-tree/locations.configure\" или NIL, если файл отсутствует.")
 
 (defparameter *config-example*
 "

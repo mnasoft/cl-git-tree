@@ -2,27 +2,20 @@
 
 (defpackage :cl-git-tree/commands/remote-readd
   (:use :cl)
-  (:import-from cl-git-tree
-                *locations*
-                location-url-git)
-  (:import-from cl-git-tree/fs
-                repo-name
-                with-each-repo)
-  (:import-from cl-git-tree/commands/remote-add
-                add-remote-to-repo)
-  (:import-from cl-git-tree/commands/remote-remove
-                remove-remote-from-repo)
-  (:export :run))
+  (:export cmd-remote-readd))
 
 (in-package :cl-git-tree/commands/remote-readd)
 
 (defun readd-remote-to-repo (repo-dir loc-key base-url)
-  "Удаляет и заново добавляет remote <loc-key> в один репозиторий."
-  (remove-remote-from-repo repo-dir loc-key base-url)
-  (add-remote-to-repo repo-dir loc-key base-url))
+  "Удаляет и заново добавляет remote LOC-KEY в один репозиторий."
+  (cl-git-tree/commands/remote-remove:remove-remote-from-repo repo-dir loc-key base-url)
+  (cl-git-tree/commands/remote-add:add-remote-to-repo repo-dir loc-key base-url))
 
-(defun run (loc-key &rest _args)
-  "Находит все git-репозитории и вызывает readd-remote-to-repo для каждого."
-  (with-each-repo loc-key #'readd-remote-to-repo))
+(defun cmd-remote-readd (loc-key &rest _args)
+  "CLI-команда: найти все git-репозитории и заново добавить remote LOC-KEY."
+  (declare (ignore _args))
+  (cl-git-tree/fs:with-each-repo loc-key #'readd-remote-to-repo))
 
-(push (cons "remote-readd" #'run) cl-git-tree:*commands*)
+(eval-when (:load-toplevel :execute)
+  (cl-git-tree/dispatch:register-command
+   "remote-readd" #'cmd-remote-readd "Удалить и заново добавить remote во все репозитории"))

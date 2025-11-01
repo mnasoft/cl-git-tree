@@ -1,23 +1,24 @@
 ;;;; ./src/commands/aliases.lisp
+
 (defpackage :cl-git-tree/commands/aliases
   (:use :cl)
-  (:import-from cl-git-tree/git-utils
-                git-run)
-  (:export run))
+  (:export cmd-aliases))
 
 (in-package :cl-git-tree/commands/aliases)
 
 (defun git-global-config (&rest opts)
-  (apply #'git-run "." "config" "--global" opts))
+  (apply #'cl-git-tree/git-utils:git-run "." "config" "--global" opts))
 
-(defun run (&rest args)
-  "Если аргумент = list → показать текущие алиасы.
-   Иначе — установить стандартный набор."
+(defun cmd-aliases (&rest args)
+  "CLI-команда: управлять глобальными git-алиасами.
+Если первый аргумент = \"list\" → показать текущие алиасы.
+Иначе — установить стандартный набор."
   (cond
     ;; режим просмотра
     ((and args (string= (first args) "list"))
      (multiple-value-bind (out err code)
-         (git-run "." "config" "--global" "--get-regexp" "^alias\\.")
+         (cl-git-tree/git-utils:git-run
+          "." "config" "--global" "--get-regexp" "^alias\\.")
        (if (zerop code)
            (format t "~A~%" out)
            (format t "⚠ Не удалось получить список алиасов: ~A~%" err))))
@@ -33,4 +34,7 @@
      (git-global-config "core.editor" "emacs")
      (format t "✔ Git aliases configured globally~%"))))
 
-(push (cons "aliases" #'run) cl-git-tree:*commands*)
+;; регистрация команды при загрузке
+(eval-when (:load-toplevel :execute)
+  (cl-git-tree/dispatch:register-command
+   "aliases" #'cmd-aliases "Управление глобальными git-алиасами"))

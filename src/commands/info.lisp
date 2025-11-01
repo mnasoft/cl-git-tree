@@ -1,27 +1,24 @@
+;;;; ./src/commands/info.lisp
+
 (defpackage :cl-git-tree/commands/info
   (:use :cl)
-  (:import-from
-   :cl-git-tree
-   :*locations*
-   :location-name
-   :location-url-git
-   :location-url-xz
-                :location-tar)
-  (:export :run))
+  (:export cmd-info))
 
 (in-package :cl-git-tree/commands/info)
 
-(defun run (&rest _args)
-  "Выводит список всех доступных локаций."
+(defun cmd-info (&rest _args)
+  "CLI-команда: вывести список всех доступных локаций."
+  (declare (ignore _args))
   (format t "~%=== Список локаций ===~%")
   (maphash (lambda (key loc)
              (format t "~A: ~A~%   Git: ~A~%   TAR: ~A~%   XZ: ~A~%~%"
                      key
-                     (location-name loc)
-                     (location-url-git loc)
-                     (location-tar loc)
-                     (location-url-xz loc)))
-           *locations*))
+                     (cl-git-tree/loc:<location>-name loc)
+                     (cl-git-tree/loc:<location>-url-git loc)
+                     (cl-git-tree/loc:<location>-tar loc)
+                     (cl-git-tree/loc:<location>-url-xz loc)))
+           cl-git-tree/loc:*locations*))
 
-(push (cons "info" #'run) cl-git-tree:*commands*)
-
+(eval-when (:load-toplevel :execute)
+  (cl-git-tree/dispatch:register-command
+   "info" #'cmd-info "Показать список всех доступных локаций"))
