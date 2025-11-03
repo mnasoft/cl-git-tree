@@ -6,8 +6,9 @@
 
 (in-package :cl-git-tree/commands/push)
 
-(defun push-repo (repo-dir)
+(defun push-repo (repo-dir args)
   "Делает git push для всех remotes текущей ветки и печатает статус."
+  (declare (ignore args))
   (let ((branch (cl-git-tree/git-utils:current-branch repo-dir))
         (remotes (cl-git-tree/git-utils:repo-remotes repo-dir)))
     (dolist (remote remotes)
@@ -19,10 +20,15 @@
             (format t "❌ ~A: push ~A/~A завершился с кодом ~A:~%~A"
                     repo-dir remote branch code err))))))
 
-(defun cmd-push (&rest _args)
-  "CLI-команда: найти все git-репозитории и выполнить push для каждого."
-  (declare (ignore _args))
-  (cl-git-tree/fs:with-each-repo-simple #'push-repo))
+(defun cmd-push (&rest args)
+  "CLI-команда: выполнить git push для всех remotes текущей ветки во всех репозиториях."
+  (cond
+    ((member "--help" args :test #'string=)
+     (format t "Выполняет git push для всех remotes текущей ветки во всех git-репозиториях.~%~%")
+     (format t "Использование:~%  git-tree push~%")
+     (format t "Пример:~%  git-tree push~%"))
+    (t
+     (cl-git-tree/fs:with-repo #'push-repo args))))
 
 (eval-when (:load-toplevel :execute)
   (cl-git-tree/dispatch:register-command
