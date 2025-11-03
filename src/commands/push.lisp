@@ -2,7 +2,8 @@
 
 (defpackage :cl-git-tree/commands/push
   (:use :cl)
-  (:export cmd-push))
+  (:export cmd-push
+           push-repo))
 
 (in-package :cl-git-tree/commands/push)
 

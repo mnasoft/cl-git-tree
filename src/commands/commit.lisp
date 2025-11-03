@@ -2,7 +2,8 @@
 
 (defpackage :cl-git-tree/commands/commit
   (:use :cl)
-  (:export cmd-commit))
+  (:export cmd-commit
+           commit-repo))
 
 (in-package :cl-git-tree/commands/commit)
 

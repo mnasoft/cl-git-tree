@@ -2,7 +2,8 @@
 
 (defpackage :cl-git-tree/commands/add
   (:use :cl)
-  (:export cmd-add))
+  (:export cmd-add
+           add-repo))
 
 (in-package :cl-git-tree/commands/add)
 
@@ -29,8 +30,9 @@
     (remove-if #'uiop:emptyp
                (uiop:split-string cwd :separator '(#\Newline)))))
 
-(defun add-repo (repo-dir)
+(defun add-repo (repo-dir args)
   "Добавляет отслеживаемые файлы в git-индекс."
+  (declare (ignore args))
   (let ((files (find-tracked-files repo-dir)))
     (format t "✔ ~A: найдено ~D файл(ов)~%" repo-dir (length files))
     (multiple-value-bind (_out err code)
@@ -40,10 +42,16 @@
           (format t "✔ ~A: файлы добавлены~%" repo-dir)
           (format t "❌ ~A: ошибка при git add:~%~A" repo-dir err)))))
 
+(defun cmd-add (&rest args)
+  "CLI-команда: добавить отслеживаемые файлы во все git-репозитории."
+  (cond
+    ((member "--help" args :test #'string=)
+     (format t "Добавляет все отслеживаемые изменения во всех git-репозиториях.~%~%")
+     (format t "Использование:~%  git-tree add~%")
+     (format t "Пример:~%  git-tree add~%"))
+    (t
+     (cl-git-tree/fs:with-repo #'add-repo args))))
 
-(defun cmd-add (&rest _args)
-  "Команда CLI: добавить отслеживаемые файлы во все репозитории."
-  (cl-git-tree/fs:with-each-repo-simple #'add-repo))
 
 ;; регистрация команды при загрузке
 (eval-when (:load-toplevel :execute)

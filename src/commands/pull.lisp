@@ -2,7 +2,8 @@
 
 (defpackage :cl-git-tree/commands/pull
   (:use :cl)
-  (:export cmd-pull))
+  (:export cmd-pull
+           pull-repo))
 
 (in-package :cl-git-tree/commands/pull)
 
