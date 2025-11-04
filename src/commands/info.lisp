@@ -13,10 +13,10 @@
   (maphash (lambda (key loc)
              (format t "~A: ~A~%   Git: ~A~%   TAR: ~A~%   XZ: ~A~%~%"
                      key
-                     (cl-git-tree/loc:<location>-name loc)
+                     (cl-git-tree/loc:<location>-id      loc)
                      (cl-git-tree/loc:<location>-url-git loc)
-                     (cl-git-tree/loc:<location>-tar loc)
-                     (cl-git-tree/loc:<location>-url-xz loc)))
+                     (cl-git-tree/loc:<location>-tar     loc)
+                     (cl-git-tree/loc:<location>-url-xz  loc)))
            cl-git-tree/loc:*locations*))
 
 (eval-when (:load-toplevel :execute)

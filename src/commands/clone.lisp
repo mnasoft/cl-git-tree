@@ -31,12 +31,11 @@
 но только если LOCATION уже прописана как remote в этом репозитории."
   (let* ((location  (cl-git-tree/loc:find-location (first args)))
          (repo-name (cl-git-tree/fs:repo-name repo-dir))
-         (loc-name  (cl-git-tree/loc:<location>-name location))
+         (loc-id    (cl-git-tree/loc:<location>-id location))
          (remotes   (cl-git-tree/git-utils:repo-remotes repo-dir)))
-    (warn "002: loc-name: ~S remotes ~S" loc-name remotes)
-    (if (not (member loc-name remotes :test #'string=))
+    (if (not (member loc-id remotes :test #'string=))
         (format t "⚠ ~A: локация ~A не добавлена как remote, пропускаем~%"
-                repo-name loc-name)
+                repo-name loc-id)
         (let* ((url (cl-git-tree/loc:<location>-url-git location))
                (target (merge-pathnames (format nil "~A.git" repo-name)
                                         (uiop:ensure-directory-pathname url))))
@@ -72,9 +71,7 @@
        (if (null loc)
            (format t "⚠ Локация ~A не найдена в конфиге.~%" location-name)
            ;; запуск по дереву
-           (progn 
-             (warn "001: ~S" args)
-             (cl-git-tree/fs:with-repo #'clone-repo args)))))))
+           (cl-git-tree/fs:with-repo #'clone-repo args))))))
 
 (eval-when (:load-toplevel :execute)
   (cl-git-tree/dispatch:register-command

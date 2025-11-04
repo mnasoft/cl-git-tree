@@ -7,11 +7,12 @@
    <location>
    
    ;; аксессоры
-   <location>-name
+   <location>-id
    <location>-url-git
    <location>-url-xz
    <location>-tar
    <location>-local
+   <location>-description
 
    ;; глобальная таблица
    *locations* 
@@ -47,3 +48,4 @@
   и обхода всех доступных локаций."))
 
 (in-package :cl-git-tree/loc)
+
