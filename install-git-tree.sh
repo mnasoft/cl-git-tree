@@ -2,8 +2,8 @@
 # Установочный скрипт для git-tree
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TARGET="$PROJECT_DIR/git-tree.lisp"
-LINK="/usr/local/bin/git-tree.lisp"
+TARGET="$PROJECT_DIR/git-tree"
+LINK="/usr/local/bin/git-tree"
 
 install_link() {
   if [ "$EUID" -ne 0 ]; then

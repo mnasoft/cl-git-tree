@@ -1,0 +1,50 @@
+#+TITLE: cl-git-tree
+#+AUTHOR: Mykola Matvyeyev
+#+LANGUAGE: ru
+
+* [ ] ToDo
+1. [ ] Реализовать новую структуру приекта
+      cl-git-tree/
+      ├── cl-git-tree.asd          ; описание системы для ASDF
+      ├── git-tree.lisp            ; точка входа (main)
+      ├── local.configure.lisp     ; локальная конфигурация локаций (pp, pz, gh, gl)
+      ├── src/
+      │   ├── cli.lisp             ; общий CLI-интерфейс
+      │   ├── commands/            ; отдельные команды CLI
+      │   │   ├── clone.lisp
+      │   │   ├── unclone.lisp
+      │   │   ├── publish.lisp
+      │   │   ├── status.lisp
+      │   │   ├── commit.lisp
+      │   │   ├── config.lisp      ; работа с глобальными настройками
+      │   │   └── ...              ; остальные команды
+      │   ├── dispatch/
+      │   │   ├── dispatcher.lisp
+      │   │   └── package.lisp
+      │   ├── fs/
+      │   │   ├── fs.lisp          ; обход дерева каталогов, утилиты
+      │   │   └── package.lisp
+      │   ├── git-utils/
+      │   │   ├── git-utils.lisp   ; обёртки над вызовами git
+      │   │   └── package.lisp
+      │   ├── loc/
+      │   │   ├── location.lisp    ; класс <location>, *locations*, register/find
+      │   │   ├── provider.lisp    ; абстрактный <provider>, generic-функции
+      │   │   ├── providers-local.lisp
+      │   │   ├── providers-github.lisp
+      │   │   ├── providers-gitlab.lisp
+      │   │   └── package.lisp
+      │   ├── workspace/
+      │   │   ├── workspace.lisp   ; класс <workspace>, локальные операции
+      │   │   └── package.lisp
+      │   ├── global/
+      │   │   ├── git-global.lisp  ; класс <git-global>, работа с git config --global
+      │   │   └── package.lisp
+      │   └── package.lisp         ; корневой пакет src
+      └── tests/
+          ├── test-commands.lisp
+          ├── test-fs.lisp
+          ├── test-git-utils.lisp
+          ├── test-location.lisp
+          ├── test-workspace.lisp
+          └── test-global.lisp

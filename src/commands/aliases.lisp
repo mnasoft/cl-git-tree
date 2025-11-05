@@ -30,7 +30,7 @@
      (git-global-config "alias.ci" "commit")
      (git-global-config "alias.st" "status")
      (git-global-config "alias.visual" "!gitk")
-     (git-global-config "alias.tree" "!git-tree.lisp")
+     (git-global-config "alias.tree" "!git-tree")
      (git-global-config "core.editor" "emacs")
      (format t "✔ Git aliases configured globally~%"))))
 

@@ -8,21 +8,6 @@
 
 (defun unclone-repo (repo-dir args)
   "Удаляет bare-клон репозитория REPO-DIR из указанной LOCATION,
-если он существует."
-  (let* ((location  (cl-git-tree/loc:find-location (first args)))
-         (repo-name (cl-git-tree/fs:repo-name repo-dir))
-         (url (cl-git-tree/loc:<location>-url-git location))
-         (target (merge-pathnames (format nil "~A.git/" repo-name)
-                                  (uiop:ensure-directory-pathname url))))
-    (cond
-      ((uiop:directory-exists-p target)
-       (uiop:delete-directory-tree target :validate t :if-does-not-exist :ignore)
-       (format t "🗑 ~A: удалён клон ~A~%" repo-name target))
-      (t
-       (format t "⚠ ~A: клон в ~A не найден~%" repo-name target)))))
-
-(defun unclone-repo (repo-dir args)
-  "Удаляет bare-клон репозитория REPO-DIR из указанной LOCATION,
 только если LOCATION прописана как remote."
   (let* ((location  (cl-git-tree/loc:find-location (first args)))
          (repo-name (cl-git-tree/fs:repo-name repo-dir))

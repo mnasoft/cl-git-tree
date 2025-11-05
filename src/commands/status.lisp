@@ -9,6 +9,7 @@
 
 (defun status-repo (repo-dir args)
   "Выводит git status для одного репозитория REPO-DIR."
+  (declare (ignore args))
   (multiple-value-bind (out err code)
       (cl-git-tree/git-utils:git-run repo-dir "status" "--short")
     (if (zerop code)
