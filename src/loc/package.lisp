@@ -11,13 +11,27 @@
    <location>-url-git
    <location>-url-xz
    <location>-tar
-   <location>-local
+   <location>-provider
    <location>-description
+
+   ;; класс
+   <provider>
+   <local>
+   <github>
+   <gitlab>
+
+   ;; обобщенные функции
+   clone
+   repo-create
+   repo-push
+   repo-pull
+   repo-delete
 
    ;; глобальная таблица
    *locations* 
 
    ;; функции
+   register-location
    add-location
    find-location
    location-exists-p
@@ -28,6 +42,24 @@
    infer-local-p
    location-local-p
    match-location-keys)
+
+  (:export
+   ;; класс
+   <workspace>
+   ;; аксессоры
+   <workspace>-path
+   <workspace>-description 
+   
+   ;; generic-функции
+   git-init
+   git-initialized-p
+   git-root
+   repo-name
+   repo-status
+   repo-commit
+   repo-branches
+   ;; конструктор
+   make-workspace)
   (:documentation
    "Пакет CL-GIT-TREE/LOC инкапсулирует подсистему управления локациями.
 
@@ -48,4 +80,3 @@
   и обхода всех доступных локаций."))
 
 (in-package :cl-git-tree/loc)
-

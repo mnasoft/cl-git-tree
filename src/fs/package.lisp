@@ -5,8 +5,9 @@
    repo-name
    git-repo-p
    with-repo
-   with-each-repo
-   with-each-repo-simple)
+   ;; with-each-repo
+   ;; with-each-repo-simple
+   )
   (:documentation
    "Подсистема работы с файловой системой для cl-git-tree.
 

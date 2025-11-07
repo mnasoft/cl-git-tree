@@ -70,6 +70,7 @@ ARGUMENTS:
                results)))
     (scan root)))
 
+#+nil 
 (defun with-each-repo (loc-key fn)
   "Находит все git‑репозитории для локации LOC-KEY и вызывает функцию FN для каждого.
 
@@ -106,7 +107,7 @@ ARGUMENTS:
         (dolist (repo-dir (find-git-repos))
           (funcall fn repo-dir loc-key base-url)))))
 
-
+#+nil 
 (defun with-each-repo-simple (fn)
   "Вызывает функцию FN для каждого найденного git‑репозитория.
 

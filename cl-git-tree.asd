@@ -56,7 +56,10 @@
 
 (defsystem "cl-git-tree/fs"
   :description "Файловая подсистема для поиска и обхода git-репозиториев."
-  :depends-on (:uiop :cl-git-tree/loc)
+  :depends-on (:uiop
+               :cl-fad
+               ;; :cl-git-tree/loc
+               )
   :serial t
   :components
   ((:module "src/fs"
@@ -65,14 +68,32 @@
      (:file "fs")))))
 
 (defsystem "cl-git-tree/loc"
-  :description "Подсистема для работы с location-шаблонами (хранилище, поиск, фильтрация)."
-  :depends-on (:uiop :cl-ppcre)
+  :description "Подсистема для описания локаций и провайдеров (local, github, gitlab) и связанных операций."
+  :depends-on ("uiop"
+               "cl-ppcre"
+               "cl-git-tree/fs"
+               "cl-git-tree/git-utils"
+               "cl-git-tree/shell-utils")
   :serial t
   :components
   ((:module "src/loc"
     :components
     ((:file "package")
-     (:file "location")))))
+     (:file "defgeneric")   ; объявления generic-функций
+     (:file "defclass")     ; базовые классы <location>, <provider>
+     (:file "provider")     ; специализированные <local>, <github>, <gitlab>
+     (:file "location")     ; вспомогательные функции для работы с локациями
+     (:file "workspace") 
+     (:module "methods"     ; реализация методов по generic
+      :components
+      ((:file "clone")
+       (:file "initialize-instance")
+       (:file "print-object")
+       (:file "repo-create")
+       (:file "repo-delete")
+       (:file "repo-push")
+       (:file "repo-pull")
+       (:file "repo")))))))
 
 (defsystem "cl-git-tree/dispatch"
   :description "Подсистема диспетчера CLI-команд для cl-git-tree"
@@ -88,9 +109,18 @@
   :description "Подсистема для работы с глобальной конфигурацией Git (git config --global)."
   :depends-on (:cl-git-tree/git-utils   ; используем git-run
                :split-sequence)    ; для парсинга вывода config --list
-  :serial t
   :components
   ((:module "src/global"
-    :components ((:file "package")
-                 (:file "git-global")))))
+    :serial t
+    :components
+    ((:file "package")
+     (:file "git-global")))))
 
+(defsystem "cl-git-tree/shell-utils"
+  :description "Утилиты для запуска произвольных CLI-команд из Common Lisp"
+  :depends-on (:uiop)
+  :components
+  ((:module "src/shell-utils"
+    :components
+    ((:file "package")
+     (:file "core")))))

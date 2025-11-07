@@ -8,15 +8,23 @@
                :fiveam)
   :perform (test-op (o s)
 		    (uiop:symbol-call :cl-git-tree/tests :run-tests))
+  :serial t
   :components
   ((:module "tests"
-    :serial t
     :components
     ((:file "package")
      (:file "all")
      (:file "test-global")
-     ;; (:file "test-workspace")
-     ;; (:file "test-location")
+     (:file "test-location")
+     (:module "workspace"
+      :serial t
+      :components
+      ((:file "workspace")
+       (:file "make-instance")
+       (:file "make-workspace")))
+
+
+  
      ;; (:file "test-commands")
      ;; (:file "test-fs")
      ;; (:file "test-git-utils")
