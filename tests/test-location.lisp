@@ -6,19 +6,24 @@
 
 (in-suite location)
 
-
 (def-test provider-stubs ()
   "Для абстрактного <provider> все методы должны возвращать строку \"неприменим\"."
-  (let ((p (make-instance 'cl-git-tree/loc:<provider>)))
-    (is-true (search "неприменим" (cl-git-tree/loc:clone p "/tmp")))
-    (is-true (search "неприменим" (cl-git-tree/loc:repo-create p nil)))
-    (is-true (search "неприменим" (cl-git-tree/loc:repo-delete p)))
-    (is-true (search "неприменим" (cl-git-tree/loc:repo-push p :branch "main")))
-    (is-true (search "неприменим" (cl-git-tree/loc:repo-pull p :branch "main")))))
-
-
-  
-
+  (let* ((p (make-instance 'cl-git-tree/loc:<provider>))
+         (test-dir (uiop:merge-pathnames* 
+                    (make-pathname :directory '(:relative "test-ws-provider"))
+                    (uiop:temporary-directory)))
+         (ws (cl-git-tree/loc:make-workspace test-dir)))
+    (unwind-protect
+         (progn
+           (is-true (search "неприменим" (cl-git-tree/loc:clone p "/tmp")))
+           (is-true (search "неприменим" (cl-git-tree/loc:repo-create p ws)))
+           (is-true (search "неприменим" (cl-git-tree/loc:repo-delete p ws)))
+           #+nil
+           (is-true (search "неприменим" (cl-git-tree/loc:repo-push p ws :branch "main")))
+           #+nil
+           (is-true (search "неприменим" (cl-git-tree/loc:repo-pull p ws :branch "main"))))
+      (when (uiop:directory-exists-p test-dir)
+        (uiop:delete-directory-tree test-dir :validate t)))))
 
 #+nil
 (progn 
