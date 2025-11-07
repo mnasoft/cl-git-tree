@@ -1,7 +1,7 @@
 (in-package :cl-git-tree/loc)
 
 (defmethod repo-pull ((provider <provider>) (ws <workspace>)
-                      &key (remote (<location>-id ws)) branch rebase ff-only &allow-other-keys)
+                      &key (remote (<location>-id provider)) branch rebase ff-only &allow-other-keys)
   "Выполнить git pull из указанного remote."
   (let* ((root (git-root ws))
          (args '()))
@@ -11,7 +11,6 @@
     (when rebase   (push  "--rebase" args))
     (push "pull" args)
     (push "git"  args)
-    (setf args (nreverse args))
     ;; запуск
     (multiple-value-bind (stdout stderr code)
         (apply #'cl-git-tree/shell-utils:shell-run root args)
