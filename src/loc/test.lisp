@@ -9,7 +9,10 @@
 
 (repo-create *gh* *ws*)
 
-(repo-add *gh* *ws*)
+(repo-add *ws* :files "*.lisp")
+
+(repo-commit *ws* "`date`")
+
 (repo-push *gh* *ws*)
 (repo-pull *gh* *ws* :branch "master")
 (repo-delete *gh* *ws*)
