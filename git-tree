@@ -1,5 +1,4 @@
-#!/usr/local/bin/sbcl.exe --script
-;; #!/bin/sbcl --script
+#!/bin/sbcl --script
 
 (load (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname)))
 
