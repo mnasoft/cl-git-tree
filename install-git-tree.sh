@@ -6,7 +6,7 @@ TARGET="$PROJECT_DIR/git-tree"
 LINK="/usr/local/bin/git-tree"
 
 install_link() {
-  if [ "$EUID" -ne 1068437 ]; then
+  if [ "$EUID" -ne 0 ]; then
     echo "⚠️  Нужен sudo для записи в /usr/local/bin"
     exec sudo "$0" "$@"
   fi
