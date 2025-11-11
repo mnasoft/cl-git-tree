@@ -13,21 +13,9 @@
   (cl-git-tree/dispatch:show-version)
   (format t "Usage: git-tree <command> [args...]~%~%")
   (format t "Доступные команды:~%")
-  (format t "  add <files...>                - добавить файлы в индекс~%")
-  (format t "  commit [msg]                  - создать коммит~%")
-  (format t "  pull                          - выполнить git pull во всех репозиториях~%")
-  (format t "  push                          - выполнить git push во всех репозиториях~%")
-  (format t "  all                           - выполнить pull → add → commit → push~%")
-  (format t "  clone [loc]                   - клонировать репозитории по локации~%")
-  (format t "  unclone [loc]                 - удалить локальные bare‑клоны~%")
-  (format t "  remote-add <loc>              - добавить git remote~%")
-  (format t "  remote-remove <loc>           - удалить git remote~%")
-  (format t "  remote-readd <loc>            - пересоздать git remote~%")
-  (format t "  remake-xz <loc>               - пересоздать архив .xz для локации~%")
-  (format t "  info                          - показать список локаций~%")
-  (format t "  aliases [list]                - показать или настроить алиасы~%")
-  (format t "  version                       - показать версию~%")
-  (format t "  help                          - эта справка~%"))
+  (loop :for (cmd-name cmd-func cmd-desc) :in cl-git-tree/dispatch:*commands*
+        :do
+           (format t "  ~15A - ~A~%" cmd-name cmd-desc)))
 
 (defun main (argv)
   "CLI‑точка входа. ARGV — список аргументов командной строки."

@@ -38,8 +38,8 @@
        (:file "remote-remove")
        (:file "remote-readd")
        (:file "remake-xz")
+       (:file "status")       
        (:file "info")
-       (:file "status")
        (:file "aliases")))
      (:file "cli")))))
 

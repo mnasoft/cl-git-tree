@@ -5,7 +5,7 @@
   (:export cmd-status
            status-repo))
 
-(in-package :cl-git-tree/commands/all)
+(in-package :cl-git-tree/commands/status)
 
 (defun status-repo (repo-dir args)
   "Выводит git status для одного репозитория REPO-DIR."
