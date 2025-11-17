@@ -51,26 +51,6 @@
 
 #+nil
 (defmethod git-init ((ws <workspace>))
-  (let* ((path (<workspace>-path ws))
-         (git-dir (merge-pathnames #P".git/" path)))
-    (handler-case
-        (progn
-          (ensure-directories-exist path)
-          (if (probe-file git-dir)
-              (format t "⚠️ Git-репозиторий уже инициализирован: ~A~%" path)
-              (multiple-value-bind (stdout stderr code)
-                  (cl-git-tree/git-utils:git-run path "init")
-                (declare (ignore stdout stderr))
-                (if (zerop code)
-                    (format t "✅ Git-репозиторий инициализирован: ~A~%" path)
-                    (format t "❌ Ошибка при инициализации git в ~A (код ~A)~%"
-                            path code))))
-          ws)
-      (error (c)
-        (format t "❌ Не удалось создать каталог ~A: ~A~%" path c)
-        ws))))
-
-(defmethod git-init ((ws cl-git-tree/loc::<workspace>))
   "Инициализировать git-репозиторий в рабочем пространстве.
    Если репозиторий уже существует (в текущем или родительском каталоге),
    ничего не делает и сообщает пользователю."
@@ -94,6 +74,43 @@
                   (t
                    (format t "❌ Ошибка при инициализации git в ~A (код ~A)~%"
                            path code)))))
+          ws)
+      (error (c)
+        (format t "❌ Не удалось создать каталог ~A: ~A~%" path c)
+        ws))))
+
+(defmethod git-init ((ws <workspace>)
+                     &key bare initial-branch separate-git-dir quiet template shared
+                     &allow-other-keys)
+  "Инициализировать git-репозиторий с дополнительными опциями."
+  (let ((path (cl-git-tree/loc::<workspace>-path ws)))
+    (handler-case
+        (progn
+          (unless (uiop:directory-exists-p path)
+            (uiop:ensure-all-directories-exist path))
+          (if (git-root ws)
+              (format t "⚠️ Git-репозиторий уже существует (корень: ~A)~%" (git-root ws))
+              (let ((args (list "git" "init")))
+                (when bare (push "--bare" args))
+                (when quiet (push "--quiet" args))
+                (when initial-branch
+                  (setf args (append args (list "--initial-branch" initial-branch))))
+                (when separate-git-dir
+                  (setf args (append args (list "--separate-git-dir" separate-git-dir))))
+                (when template
+                  (setf args (append args (list "--template" template))))
+                (when shared
+                  (setf args (append args (list "--shared" shared))))
+                (push path args)
+                (setf args (nreverse args))
+                (multiple-value-bind (stdout stderr code)
+                    (apply #'cl-git-tree/shell-utils:shell-run path args)
+                  (declare (ignore stdout stderr))
+                  (cond
+                    ((zerop code)
+                     (format t "✅ Git-репозиторий инициализирован: ~A~%" path))
+                    (t
+                     (format t "❌ Ошибка при инициализации git в ~A (код ~A)~%" path code))))))
           ws)
       (error (c)
         (format t "❌ Не удалось создать каталог ~A: ~A~%" path c)

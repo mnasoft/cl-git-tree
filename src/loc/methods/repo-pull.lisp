@@ -1,6 +1,6 @@
 (in-package :cl-git-tree/loc)
 
-(defmethod repo-pull ((provider <provider>) (ws <workspace>)
+(defmethod repo-pull ((ws <workspace>) (provider <provider>)
                       &key (remote (<location>-id provider)) branch rebase ff-only &allow-other-keys)
   "Выполнить git pull из указанного remote."
   (let* ((root (git-root ws))

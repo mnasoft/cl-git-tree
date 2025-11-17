@@ -1,6 +1,6 @@
 (in-package :cl-git-tree/loc)
 
-(defmethod repo-push ((provider <provider>) (ws <workspace>)
+(defmethod repo-push ((ws <workspace>) (provider <provider>) 
                       &key (remote (<location>-id provider)) branch force tags set-upstream
                       &allow-other-keys)
   "Выполнить git push на GitHub."

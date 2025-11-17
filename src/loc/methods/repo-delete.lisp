@@ -1,6 +1,6 @@
 (in-package :cl-git-tree/loc)
 
-(defmethod repo-delete ((provider <provider>) (ws <workspace>)  &key &allow-other-keys)
+(defmethod repo-delete ((ws <workspace>) (provider <provider>)  &key &allow-other-keys)
   (format nil "Метод REPO-DELETE неприменим для провайдера ~A."
           (class-name (class-of provider))))
 
@@ -27,7 +27,7 @@
                  code stdout))))
     ws))
 
-(defmethod repo-delete ((provider <gitlab>) (ws <workspace>)
+(defmethod repo-delete ((ws <workspace>) (provider <gitlab>)
                         &key (yes t) remote-only &allow-other-keys)
   "Удалить репозиторий на GitLab через CLI glab."
   (let* ((repo (repo-name ws))

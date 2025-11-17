@@ -9,19 +9,13 @@
    "Получить копию репозитория из источника PROVIDER в каталог TARGET-PATH.
     Для <local> это копирование каталога, для удалённых провайдеров не применяется."))
 
-#+nil
-(defgeneric repo-create (provider workspace)
-  (:documentation
-   "Создать удалённый репозиторий для WORKSPACE на сервисе PROVIDER.
-    Аналог gh/glab repo create."))
-
-(defgeneric repo-create (provider workspace &key &allow-other-keys)
+(defgeneric repo-create (workspace provider &key &allow-other-keys)
   (:documentation
    "Создать новый репозиторий на удалённом провайдере.
     Дополнительные ключи можно передавать свободно благодаря &allow-other-keys."))
 
 
-(defgeneric repo-push (provider workspace &key &allow-other-keys)
+(defgeneric repo-push (workspace provider &key &allow-other-keys)
   (:documentation
    "Выполнить git push для указанного WORKSPACE.
     Ключи:
@@ -31,7 +25,7 @@
       :tags          → T → отправить все теги
       :set-upstream  → T → добавить --set-upstream"))
 
-(defgeneric repo-pull (provider workspace &key &allow-other-keys)
+(defgeneric repo-pull (workspace provider &key &allow-other-keys)
   (:documentation
    "Выполнить git pull для указанного WORKSPACE.
     PROVIDER используется для определения имени remote.
@@ -41,7 +35,7 @@
       :rebase  → T → использовать --rebase
       :ff-only → T → использовать --ff-only"))
 
-(defgeneric repo-delete (provider workspace &key &allow-other-keys)
+(defgeneric repo-delete (workspace provider &key &allow-other-keys)
   (:documentation
    "Удалить репозиторий на удалённом провайдере.
     PROVIDER — объект провайдера (например, <github>).
@@ -50,7 +44,7 @@
       :yes         → не задавать вопросов (по умолчанию T)
       :remote-only → удалить только удалённый репозиторий, не трогая локальный."))
 
-(defgeneric repo-status (workspace)
+(defgeneric repo-status (workspace provider &key &allow-other-keys)
   (:documentation
    "Вернуть статус git‑репозитория в рабочем пространстве."))
 
@@ -62,9 +56,16 @@
   (:documentation
    "Вернуть список веток git‑репозитория в рабочем пространстве."))
 
-(defgeneric git-init (workspace)
+(defgeneric git-init (workspace &key &allow-other-keys)
   (:documentation
-   "Инициализировать git-репозиторий для рабочего пространства WS."))
+   "Инициализировать git-репозиторий в рабочем пространстве.
+    Ключи:
+      :bare             → создать bare-репозиторий
+      :initial-branch   → имя начальной ветки
+      :separate-git-dir → путь к внешнему .git
+      :quiet            → подавить вывод
+      :template         → шаблонный каталог
+      :shared           → режим совместного доступа"))
 
 (defgeneric git-initialized-p (workspace)
   (:documentation
@@ -81,7 +82,7 @@
 
 (defgeneric repo-add (workspace &key &allow-other-keys)
   (:documentation
-   "Добавить файлы в git индекс для указанного WORKSPACE.
+   "Добавить файлы в git индекс для указанного WORKSPACE и PROVIDER (значение игнорироуется).
     Ключи:
       :files        → список файлов/паттернов для добавления (строка или список строк)
       :all          → T → добавить все изменения (git add --all)

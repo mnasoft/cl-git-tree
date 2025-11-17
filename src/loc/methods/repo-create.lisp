@@ -1,17 +1,17 @@
 (in-package :cl-git-tree/loc)
 
-(defmethod repo-create ((provider <provider>) (ws <workspace>) &key &allow-other-keys)
+(defmethod repo-create ((ws <workspace>) (provider <provider>)  &key &allow-other-keys)
   (format nil "Метод REPO-CREATE неприменим для провайдера ~A."
           (class-name (class-of provider))))
 
-(defmethod repo-create ((provider <gitlab>) (ws <workspace>) &key &allow-other-keys)
+(defmethod repo-create ((ws <workspace>) (provider <gitlab>)  &key &allow-other-keys)
   (cl-git-tree/git-utils:git-run (<workspace>-path ws)
                                  "remote" "add" (<location>-id provider)
                                  (<location>-url-git provider))
   (cl-git-tree/git-utils:git-run (<workspace>-path ws)
                                  "push" (<location>-id provider) "HEAD"))
 
-(defmethod repo-create ((provider <github>) (ws <workspace>) &key &allow-other-keys)
+(defmethod repo-create ((ws <workspace>) (provider <github>) &key &allow-other-keys)
   (cl-git-tree/git-utils:git-run (<workspace>-path ws)
                                  "remote" "add" (<location>-id provider)
                                  (<location>-url-git provider))
@@ -20,7 +20,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod repo-create ((provider <github>) (ws <workspace>)
+(defmethod repo-create ((ws <workspace>) (provider <github>) 
                         &key private &allow-other-keys)
   "Создать новый репозиторий на GitHub через CLI gh."
   (let* ((repo (repo-name ws))
@@ -43,7 +43,7 @@
                  code stdout))))
     ws))
 
-(defmethod repo-create ((provider <gitlab>) (ws <workspace>)
+(defmethod repo-create ((ws <workspace>) (provider <gitlab>) 
                         &key private &allow-other-keys)
   "Создать новый репозиторий на GitHub через CLI gh."
   (let* ((repo (repo-name ws))
