@@ -1,7 +1,7 @@
 (in-package :cl-git-tree/loc)
 
 
-(defmethod repo-status ((ws <workspace>) provider &key &allow-other-keys))
+(defmethod repo-status ((ws <workspace>) provider &key &allow-other-keys)
   "Вернуть статус git‑репозитория в рабочем пространстве."
   (multiple-value-bind (out err code)
       (cl-git-tree/git-utils:git-run (<workspace>-path ws) "status" "--short")
@@ -14,10 +14,10 @@
   "Выполнить коммит в рабочем пространстве с сообщением MESSAGE."
   (multiple-value-bind (out err code)
       (cl-git-tree/git-utils:git-run (<workspace>-path ws) "commit" "-m" message)
-    (declare (ignore err))
+    ;;(declare (ignore err))
     (if (= code 0)
         out
-        (format nil "Ошибка git commit (код ~A)" code))))
+        (format nil "Ошибка git commit (код ~A)~%~A" code err))))
 
 (defmethod repo-branches ((ws <workspace>))
   "Вернуть список веток git‑репозитория в рабочем пространстве."
@@ -50,7 +50,7 @@
     (when update   (push "--update" args))
     (when all      (push "--all" args))
     (push "add" args)
-    (break "args: ~A" args)
+    ;;(break "args: ~A" args)
     ;; Запускаем git add
     (multiple-value-bind (stdout stderr code)
         (apply #'cl-git-tree/git-utils:git-run root args)
