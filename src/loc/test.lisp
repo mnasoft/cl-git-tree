@@ -9,8 +9,10 @@
 
 (repo-create *gh* *ws*)
 
-(repo-add *ws* :files "*.lisp")
+(repo-add *ws* :all t)
 
+(repo-commit *ws* "date")
+;;;
 (repo-commit *ws* "`date`")
 
 (repo-push *gh* *ws*)
