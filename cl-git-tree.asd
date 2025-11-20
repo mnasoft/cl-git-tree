@@ -93,6 +93,7 @@
        (:file "repo-delete")
        (:file "repo-push")
        (:file "repo-pull")
+       (:file "repo-add")
        (:file "repo")))))))
 
 (defsystem "cl-git-tree/dispatch"
