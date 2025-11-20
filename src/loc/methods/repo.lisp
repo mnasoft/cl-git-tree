@@ -1,7 +1,7 @@
 (in-package :cl-git-tree/loc)
 
 
-(defmethod repo-status ((ws <workspace>) provider &key &allow-other-keys))
+(defmethod repo-status ((ws <workspace>) provider &key &allow-other-keys)
   "Вернуть статус git‑репозитория в рабочем пространстве."
   (multiple-value-bind (out err code)
       (cl-git-tree/git-utils:git-run (<workspace>-path ws) "status" "--short")
