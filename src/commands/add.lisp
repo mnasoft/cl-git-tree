@@ -11,22 +11,26 @@
   '("*.lisp" "*.org" "*.asd" "*.c*" "*.h*" "*.tcl*" ".gitignore")
   "Список шаблонов файлов, которые автоматически добавляются в индекс.")
 
-(defun find-tracked-files (repo-dir &optional (patterns *tracked-patterns*))
-  "Ищет файлы по шаблонам PATTERNS внутри REPO-DIR, исключая .git."
-  (let* ((args (append
-                '("find" "." "-type" "f"
-                  "(" "-path" "./.git" "-prune" "-o")
-                (reduce (lambda (acc pat)
-                          (append acc (list "-name" pat "-o")))
-                        (butlast patterns)
-                        :initial-value '())
-                (list "-name" (car (last patterns)) ")")))
-         (cwd (uiop:with-current-directory (repo-dir)
-                (nth-value 0
-                           (uiop:run-program args
-                                             :output :string
-                                             :error-output :string
-                                             :ignore-error-status t)))))
+(defparameter *excludes-patterns*
+  '("./.git" "./build")
+  "Список шаблонов файлов, которые автоматически добавляются в индекс.")
+
+(defun find-tracked-files (repo-dir
+                           &key
+                             (patterns *tracked-patterns*)
+                             (excludes *excludes-patterns*))
+  "Ищет файлы по шаблонам PATTERNS внутри REPO-DIR, исключая .git.
+   Команда формируется как строка."
+  (let ((cwd
+          (uiop:with-current-directory (repo-dir)
+            (nth-value
+             0
+             (uiop:run-program
+              (format nil "find . \\( ~{-path ~S ~^-o ~}\\) -prune -o -type f \\(~{ -name ~S ~^-o ~}\\)  -print" excludes patterns)
+              :output :string
+              :error-output :string
+              :ignore-error-status t
+              :force-shell t)))))
     (remove-if #'uiop:emptyp
                (uiop:split-string cwd :separator '(#\Newline)))))
 
