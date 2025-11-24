@@ -10,6 +10,7 @@
    - [ ] откорректировать сигнатуру вызова для метода repo-add
      [[./src/loc/methods/repo-add.lisp]] чтоб гармонизировать ее с
      командой add.
+   - [ ] для команды git tree commit ключи использовать аналогичные git commit
      
 * [ ] DoNe
 1. [X] Исключить команду all [[./src/commands/all.lisp]]
