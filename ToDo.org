@@ -3,19 +3,19 @@
 #+LANGUAGE: ru
 
 * [ ] ToDo
-1. [ ] [[./src/commands/add.lisp]]
-   - [ ] cmd-add -- сделать разбор аргументов при помощи
-     cl-git-tree/shell-utils:split-args-by-keys для ключа :EXCLUDE.
-   - [ ] cmd-add -- обновить помощь.
-   - [ ] откорректировать сигнатуру вызова для метода repo-add
-     [[./src/loc/methods/repo-add.lisp]] чтоб гармонизировать ее с
-     командой add.
-   - [ ] для команды git tree commit ключи использовать аналогичные git commit
-   - [ ] сделать аналог команды git-timecapsule
+2. [ ] для команды git tree commit ключи использовать аналогичные git commit
+3. [ ] сделать аналог команды git-timecapsule
      
 * [ ] DoNe
-1. [X] Исключить команду all [[./src/commands/all.lisp]]
-2. [X] Реализовать новую структуру приекта
+1. [X] [[./src/commands/add.lisp]]
+   - [X] cmd-add -- сделать разбор аргументов при помощи
+     cl-git-tree/shell-utils:split-args-by-keys для ключа :EXCLUDE.
+   - [X] cmd-add -- обновить помощь.
+   - [X] откорректировать сигнатуру вызова для метода repo-add
+     [[./src/loc/methods/repo-add.lisp]] чтоб гармонизировать ее с
+     командой add.
+2. [X] Исключить команду all [[./src/commands/all.lisp]]
+3. [X] Реализовать новую структуру приекта
       cl-git-tree/
       ├── cl-git-tree.asd          ; описание системы для ASDF
       ├── git-tree.lisp            ; точка входа (main)

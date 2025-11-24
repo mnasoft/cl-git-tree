@@ -63,9 +63,15 @@
        (format t "Использование:~%")
        (format t "  git-tree add [--exclude DIR ...] -- [PATTERNS...]~%")
        (format t "  git-tree add [PATTERNS...]~%~%")
-       (format t "Примеры:~%")
+       (format t "Аргументы:~%")
+       (format t "  :EXCLUDE  → каталоги для исключения.~%")
+       (format t "              По умолчанию: ~{~A ~}~%" *excludes-patterns*)
+       (format t "  :ARGS     → шаблоны файлов для включения.~%")
+       (format t "              По умолчанию: ~{~A ~}~%" *tracked-patterns*)
+       (format t "~%Примеры:~%")
        (format t "  git-tree add --exclude ./tests ./build -- *.lisp *.asd~%")
-       (format t "  git-tree add *.lisp *.asd~%"))
+       (format t "  git-tree add *.lisp *.asd~%")
+       (format t "  git-tree add --   ;; использовать значения по умолчанию~%"))
       ;; иначе запускаем add-repo для каждого репозитория
       (t
        (cl-git-tree/fs:with-repo #'add-repo args)))))
