@@ -94,7 +94,10 @@
        (:file "repo-push")
        (:file "repo-pull")
        (:file "repo-add")
-       (:file "repo")))))))
+       (:file "repo-branches")
+       (:file "repo-status")
+       (:file "repo-commit")
+       (:file "repo-name")))))))
 
 (defsystem "cl-git-tree/dispatch"
   :description "Подсистема диспетчера CLI-команд для cl-git-tree"

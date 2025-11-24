@@ -31,3 +31,4 @@
          (format t "❌ Ошибка при добавлении файлов в ~A: ~A~%"
                  (repo-name ws) (or stderr stdout)))))
     ws))
+

@@ -19,17 +19,17 @@
               (error "Путь ~A существует, но не является каталогом." truename))
             (let ((desc (or description
                             (car (last (pathname-directory truename))))))
-              (make-instance 'cl-git-tree/loc::<workspace>
+              (make-instance '<workspace>
                              :path truename
                              :description desc))))
       (file-error (e)
         (error "Не удалось создать или получить доступ к каталогу ~A: ~A"
                path e)))))
 
-(defmethod git-initialized-p ((ws cl-git-tree/loc::<workspace>))
+(defmethod git-initialized-p ((ws <workspace>))
   "Проверить, инициализирован ли git в рабочем пространстве.
    Использует git-run с командой rev-parse --show-toplevel, чтобы учесть родительские каталоги."
-  (let ((path (cl-git-tree/loc::<workspace>-path ws)))
+  (let ((path (<workspace>-path ws)))
     (multiple-value-bind (stdout stderr code)
         (cl-git-tree/git-utils:git-run path "rev-parse" "--show-toplevel")
       (declare (ignore stderr))
@@ -37,53 +37,23 @@
            (stringp stdout)
            (> (length (string-trim '(#\Space #\Newline) stdout)) 0)))))
 
-(defmethod git-root ((ws cl-git-tree/loc::<workspace>))
+(defmethod git-root ((ws <workspace>))
   "Вернуть корень git-репозитория для рабочего пространства.
    Использует git-run с командой rev-parse --show-toplevel."
-  (let ((path (cl-git-tree/loc::<workspace>-path ws)))
-    (multiple-value-bind (stdout stderr code)
-        (cl-git-tree/git-utils:git-run path "rev-parse" "--show-toplevel")
-      (declare (ignore stderr))
-      (if (zerop code)
-          (uiop:ensure-directory-pathname
-           (string-trim '(#\Space #\Newline) stdout))
-          nil))))
-
-#+nil
-(defmethod git-init ((ws <workspace>))
-  "Инициализировать git-репозиторий в рабочем пространстве.
-   Если репозиторий уже существует (в текущем или родительском каталоге),
-   ничего не делает и сообщает пользователю."
-  (let ((path (cl-git-tree/loc::<workspace>-path ws)))
-    (handler-case
-        (progn
-          ;; Проверяем, существует ли каталог
-          (unless (uiop:directory-exists-p path)
-            (uiop:ensure-all-directories-exist path))
-          ;; Проверяем состояние git через git-root
-          (if (git-root ws)
-              (format t "⚠️ Git-репозиторий уже существует (корень: ~A)~%"
-                      (git-root ws))
-              ;; Инициализация нового репозитория
-              (multiple-value-bind (stdout stderr code)
-                  (cl-git-tree/git-utils:git-run path "init")
-                (declare (ignore stdout stderr))
-                (cond
-                  ((zerop code)
-                   (format t "✅ Git-репозиторий инициализирован: ~A~%" path))
-                  (t
-                   (format t "❌ Ошибка при инициализации git в ~A (код ~A)~%"
-                           path code)))))
-          ws)
-      (error (c)
-        (format t "❌ Не удалось создать каталог ~A: ~A~%" path c)
-        ws))))
+  (let ((g-path 
+          (cl-git-tree/shell-utils:shell-run
+           "." "git" "-C" (namestring (<workspace>-path ws)) "rev-parse" "--show-toplevel")))
+    (uiop/pathname:ensure-directory-pathname 
+     (cond
+       ((string= "Msys" (cl-git-tree/shell-utils:shell-run "." "uname" "-o"))
+        (cl-git-tree/shell-utils:shell-run "." "cygpath" "-m" g-path))
+       (t g-path)))))
 
 (defmethod git-init ((ws <workspace>)
                      &key bare initial-branch separate-git-dir quiet template shared
                      &allow-other-keys)
   "Инициализировать git-репозиторий с дополнительными опциями."
-  (let ((path (cl-git-tree/loc::<workspace>-path ws)))
+  (let ((path (<workspace>-path ws)))
     (handler-case
         (progn
           (unless (uiop:directory-exists-p path)

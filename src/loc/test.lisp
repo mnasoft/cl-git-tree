@@ -23,7 +23,3 @@
 (<location>-id *gh*)
 
 "~/quicklisp/local-projects/clisp/cl-git-tree"
-
-
-
-456
