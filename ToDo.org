@@ -11,6 +11,7 @@
      [[./src/loc/methods/repo-add.lisp]] чтоб гармонизировать ее с
      командой add.
    - [ ] для команды git tree commit ключи использовать аналогичные git commit
+   - [ ] сделать аналог команды git-timecapsule
      
 * [ ] DoNe
 1. [X] Исключить команду all [[./src/commands/all.lisp]]
