@@ -35,34 +35,40 @@
                (uiop:split-string cwd :separator '(#\Newline)))))
 
 (defun add-repo (repo-dir args)
-  "Добавляет отслеживаемые файлы в git-индекс."   
+  "Добавляет отслеживаемые файлы в git-индекс через метод repo-add."
   (let* ((wk (make-instance 'cl-git-tree/loc:<workspace> :path repo-dir))
          (alist    (cl-git-tree/shell-utils:split-args-by-keys args))
-         (patterns (cdr (assoc :PREAMBLE alist)))
-         (dirs     (cdr (assoc :EXCLUDE  alist))))
+         (patterns (or (cdr (assoc :ARGS alist))
+                       (cdr (assoc :PREAMBLE alist))))
+         (dirs     (cdr (assoc :EXCLUDE alist))))
+    ;; если паттерны не заданы явно, используем дефолтные
     (unless patterns (setf patterns *tracked-patterns*))
-    (unless dirs     (setf dirs     *excludes-patterns*))
-    (let ((files (find-tracked-files
-             (cl-git-tree/loc:git-root wk)
-             :patterns patterns
-             :excludes dirs)))
+    ;; если исключения не заданы явно, используем дефолтные
+    (unless dirs     (setf dirs *excludes-patterns*))
+    ;; ищем файлы
+    (let ((files (find-tracked-files (cl-git-tree/loc:git-root wk)
+                                     :patterns patterns
+                                     :excludes dirs)))
       (format t "✔ ~A: найдено ~D файл(ов)~%" repo-dir (length files))
-      (multiple-value-bind (_out err code)
-          (apply #'cl-git-tree/git-utils:git-run repo-dir "add" files)
-        (declare (ignore _out))
-        (if (zerop code)
-            (format t "✔ ~A: файлы добавлены~%" repo-dir)
-            (format t "❌ ~A: ошибка при git add:~%~A" repo-dir err))))))
+      ;; вызываем метод repo-add
+      (cl-git-tree/loc:repo-add wk :files files))))
 
 (defun cmd-add (&rest args)
   "CLI-команда: добавить отслеживаемые файлы во все git-репозитории."
-  (cond
-    ((member "--help" args :test #'string=)
-     (format t "Добавляет все отслеживаемые изменения во всех git-репозиториях.~%~%")
-     (format t "Использование:~%  git-tree add~%")
-     (format t "Пример:~%  git-tree add~%"))
-    (t
-     (cl-git-tree/fs:with-repo #'add-repo args))))
+  (let ((alist (cl-git-tree/shell-utils:split-args-by-keys args)))
+    (cond
+      ;; если указан ключ --help
+      ((assoc :HELP alist)
+       (format t "Добавляет все отслеживаемые изменения во всех git-репозиториях.~%~%")
+       (format t "Использование:~%")
+       (format t "  git-tree add [--exclude DIR ...] -- [PATTERNS...]~%")
+       (format t "  git-tree add [PATTERNS...]~%~%")
+       (format t "Примеры:~%")
+       (format t "  git-tree add --exclude ./tests ./build -- *.lisp *.asd~%")
+       (format t "  git-tree add *.lisp *.asd~%"))
+      ;; иначе запускаем add-repo для каждого репозитория
+      (t
+       (cl-git-tree/fs:with-repo #'add-repo args)))))
 
 ;; регистрация команды при загрузке
 (eval-when (:load-toplevel :execute)
