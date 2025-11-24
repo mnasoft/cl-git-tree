@@ -10,9 +10,9 @@
    - [ ] откорректировать сигнатуру вызова для метода repo-add
      [[./src/loc/methods/repo-add.lisp]] чтоб гармонизировать ее с
      командой add.
-2. [ ] Исключить команду all [[./src/commands/all.lisp]]
 * [ ] DoNe
-1. [ ] Реализовать новую структуру приекта
+1. [X] Исключить команду all [[./src/commands/all.lisp]]
+2. [X] Реализовать новую структуру приекта
       cl-git-tree/
       ├── cl-git-tree.asd          ; описание системы для ASDF
       ├── git-tree.lisp            ; точка входа (main)

@@ -6,26 +6,6 @@
 
 (in-package :cl-git-tree/commands/clone)
 
-#+nil
-(defun clone-repo (repo-dir location)
-  "Клонирует репозиторий REPO-DIR в указанную LOCATION как bare-репозиторий."
-  (let* ((repo-name (cl-git-tree/fs:repo-name repo-dir))
-         (url (cl-git-tree/loc:<location>-url-git location))
-         (target (merge-pathnames (format nil "~A.git" repo-name)
-                                  (uiop:ensure-directory-pathname url))))
-    (cond
-      ;; если уже существует — пропускаем
-      ((probe-file target)
-       (format t "⚠ ~A: уже существует ~A~%" repo-name target))
-      (t
-       (ensure-directories-exist target)
-       (multiple-value-bind (out err code)
-           (cl-git-tree/git-utils:git-run repo-dir "clone" "--bare" "." (namestring target))
-         (declare (ignore out))
-         (if (zerop code)
-             (format t "✔ ~A → ~A~%" repo-name target)
-             (format t "❌ ~A: clone failed~%~A~%" repo-name err)))))))
-
 (defun clone-repo (repo-dir args)
   "Клонирует репозиторий REPO-DIR в указанную LOCATION как bare-репозиторий,
 но только если LOCATION уже прописана как remote в этом репозитории."
