@@ -22,6 +22,7 @@
 
    ;; обобщенные функции
    clone
+   repo-add
    repo-create
    repo-push
    repo-pull

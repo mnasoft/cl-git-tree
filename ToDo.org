@@ -3,6 +3,15 @@
 #+LANGUAGE: ru
 
 * [ ] ToDo
+1. [ ] [[./src/commands/add.lisp]]
+   - [ ] cmd-add -- сделать разбор аргументов при помощи
+     cl-git-tree/shell-utils:split-args-by-keys для ключа :EXCLUDE.
+   - [ ] cmd-add -- обновить помощь.
+   - [ ] откорректировать сигнатуру вызова для метода repo-add
+     [[./src/loc/methods/repo-add.lisp]] чтоб гармонизировать ее с
+     командой add.
+2. [ ] Исключить команду all [[./src/commands/all.lisp]]
+* [ ] DoNe
 1. [ ] Реализовать новую структуру приекта
       cl-git-tree/
       ├── cl-git-tree.asd          ; описание системы для ASDF

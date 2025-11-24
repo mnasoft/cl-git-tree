@@ -34,75 +34,25 @@
     (remove-if #'uiop:emptyp
                (uiop:split-string cwd :separator '(#\Newline)))))
 
-#+nil
 (defun add-repo (repo-dir args)
-  "Добавляет отслеживаемые файлы в git-индекс." 
-  (declare (ignore args))
-  (let ((files (find-tracked-files repo-dir)))
-    (format t "✔ ~A: найдено ~D файл(ов)~%" repo-dir (length files))
-    (multiple-value-bind (_out err code)
-        (apply #'cl-git-tree/git-utils:git-run repo-dir "add" files)
-      (declare (ignore _out))
-      (if (zerop code)
-          (format t "✔ ~A: файлы добавлены~%" repo-dir)
-          (format t "❌ ~A: ошибка при git add:~%~A" repo-dir err)))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun split-args-by-keys (args)
-  "Разделяет сптск аргументов на alist вида ((:key (values ...)) ...).
-  Ключи должны начинаться с \"--\"."
-  (let ((result '())
-        (current-key "--preamble")
-        (current-values '()))
-    (labels ((flush ()
-               (when current-key
-                 (push (cons
-                        (intern
-                         (string-upcase (subseq current-key 2)) :keyword)
-                             (nreverse current-values))
-                       result))
-               (setf current-values '())))
-      (dolist (arg args)
-        (if (and (>= (length arg) 2)
-                 (string= (subseq arg 0 2) "--"))
-            (progn
-              (flush)
-              (setf current-key arg))
-            (push arg current-values)))
-      (flush))
-    (nreverse result)))
-
-(defun add-repo (repo-dir args)
-  (let ((wk (make-instance 'cl-git-tree/loc:<workspace> :path repo-dir))
-        (alist (split-args-by-keys args)))
-    (format t "~S~%" alist)
-    (format t "~S~%" (cdr (assoc :PREAMBLE alist)))
-    #+nil
-    (find-tracked-files (cl-git-tree/loc:git-root wk) 
-         :patterns args)
-    ))
-
-#+nil
-(format t "~S"
-        (find-tracked-files
-         (cl-git-tree/loc:git-root wk)
-         :patterns args))
-
-#+nil
-(split-args-by-keys '("assa" "--files" "*.lisp" "*.asd" "--dirs" "./.git"))
-
-#+nil 
-(
-  (let ((files (find-tracked-files repo-dir)))
-    (format t "✔ ~A: найдено ~D файл(ов)~%" repo-dir (length files))
-    (multiple-value-bind (_out err code)
-        (apply #'cl-git-tree/git-utils:git-run repo-dir "add" files)
-      (declare (ignore _out))
-      (if (zerop code)
-          (format t "✔ ~A: файлы добавлены~%" repo-dir)
-          (format t "❌ ~A: ошибка при git add:~%~A" repo-dir err)))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  "Добавляет отслеживаемые файлы в git-индекс."   
+  (let* ((wk (make-instance 'cl-git-tree/loc:<workspace> :path repo-dir))
+         (alist    (cl-git-tree/shell-utils:split-args-by-keys args))
+         (patterns (cdr (assoc :PREAMBLE alist)))
+         (dirs     (cdr (assoc :EXCLUDE  alist))))
+    (unless patterns (setf patterns *tracked-patterns*))
+    (unless dirs     (setf dirs     *excludes-patterns*))
+    (let ((files (find-tracked-files
+             (cl-git-tree/loc:git-root wk)
+             :patterns patterns
+             :excludes dirs)))
+      (format t "✔ ~A: найдено ~D файл(ов)~%" repo-dir (length files))
+      (multiple-value-bind (_out err code)
+          (apply #'cl-git-tree/git-utils:git-run repo-dir "add" files)
+        (declare (ignore _out))
+        (if (zerop code)
+            (format t "✔ ~A: файлы добавлены~%" repo-dir)
+            (format t "❌ ~A: ошибка при git add:~%~A" repo-dir err))))))
 
 (defun cmd-add (&rest args)
   "CLI-команда: добавить отслеживаемые файлы во все git-репозитории."
