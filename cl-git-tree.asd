@@ -2,7 +2,7 @@
   :description "Git location manager and sync tool in Common Lisp"
   :long-description #.(uiop:read-file-string
                        (uiop:subpathname *load-truename* "README.org"))
-  :version "0.2.5"
+  :version "0.2.6"
   :author "Mykola Matvyeyev <mnasoft@gmail.com>"
   :license "GPL-3.0-or-later"
   :depends-on (
@@ -16,6 +16,7 @@
                "cl-git-tree/fs"
                "cl-git-tree/dispatch"
                "cl-git-tree/global"
+               "cl-git-tree/config"
                )
   :serial t
   :in-order-to ((test-op (test-op "cl-git-tree-tests")))
@@ -65,6 +66,16 @@
     :components
     ((:file "package")
      (:file "fs")))))
+
+(defsystem "cl-git-tree/config"
+  :description "Подсистема конфигурации: дефолтные паттерны включения и исключения."
+  :depends-on (:uiop)
+  :serial t
+  :components
+  ((:module "src/config"
+    :components
+    ((:file "package")
+     (:file "defaults")))))
 
 (defsystem "cl-git-tree/loc"
   :description "Подсистема для описания локаций и провайдеров (local, github, gitlab) и связанных операций."
