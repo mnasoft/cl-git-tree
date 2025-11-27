@@ -1,19 +1,12 @@
 ;;;; ./src/commands/add.lisp
 
 (defpackage :cl-git-tree/commands/add
-  (:use :cl)
+  (:use :cl
+        :cl-git-tree/config)
   (:export cmd-add
            add-repo))
 
 (in-package :cl-git-tree/commands/add)
-
-(defparameter *tracked-patterns*
-  '("*.lisp" "*.org" "*.asd" "*.c*" "*.h*" "*.tcl*" ".gitignore")
-  "Список шаблонов файлов, которые автоматически добавляются в индекс.")
-
-(defparameter *excludes-patterns*
-  '("./.git" "./build")
-  "Список шаблонов файлов, которые автоматически добавляются в индекс.")
 
 (defun find-tracked-files (repo-dir
                            &key

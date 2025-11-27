@@ -48,7 +48,7 @@
   (:documentation
    "Вернуть статус git‑репозитория в рабочем пространстве."))
 
-(defgeneric repo-commit (workspace message)
+(defgeneric repo-commit (workspace &key &allow-other-keys)
   (:documentation
    "Выполнить коммит в рабочем пространстве с сообщением MESSAGE."))
 
