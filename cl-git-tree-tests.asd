@@ -22,6 +22,7 @@
       ((:file "workspace")
        (:file "make-instance")
        (:file "make-workspace")))
+     ;; (:file "test-cmd-commit-tree")
 
 
   

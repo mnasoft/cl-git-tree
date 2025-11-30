@@ -39,15 +39,19 @@
 
 (defmethod git-root ((ws <workspace>))
   "Вернуть корень git-репозитория для рабочего пространства.
-   Использует git-run с командой rev-parse --show-toplevel."
-  (let ((g-path 
-          (cl-git-tree/shell-utils:shell-run
-           "." "git" "-C" (namestring (<workspace>-path ws)) "rev-parse" "--show-toplevel")))
-    (uiop/pathname:ensure-directory-pathname 
-     (cond
-       ((string= "Msys" (cl-git-tree/shell-utils:shell-run "." "uname" "-o"))
-        (cl-git-tree/shell-utils:shell-run "." "cygpath" "-m" g-path))
-       (t g-path)))))
+   Использует git-run с командой rev-parse --show-toplevel.
+   Возвращает NIL если git не инициализирован."
+  (when (git-initialized-p ws)
+    (let ((g-path 
+            (cl-git-tree/shell-utils:shell-run
+             "." "git" "-C" (namestring (<workspace>-path ws)) "rev-parse" "--show-toplevel")))
+      (let ((path-str (string-trim '(#\Space #\Newline) g-path)))
+        (when (> (length path-str) 0)
+          (uiop/pathname:ensure-directory-pathname 
+           (cond
+             ((string= "Msys" (cl-git-tree/shell-utils:shell-run "." "uname" "-o"))
+              (cl-git-tree/shell-utils:shell-run "." "cygpath" "-m" path-str))
+             (t path-str))))))))
 
 (defmethod git-init ((ws <workspace>)
                      &key bare initial-branch separate-git-dir quiet template shared
@@ -58,9 +62,9 @@
         (progn
           (unless (uiop:directory-exists-p path)
             (uiop:ensure-all-directories-exist path))
-          (if (git-root ws)
-              (format t "⚠️ Git-репозиторий уже существует (корень: ~A)~%" (git-root ws))
-              (let ((args (list "git" "init")))
+          (if (git-initialized-p ws)
+              (format t "⚠️ Git-репозиторий уже существует~%")
+              (let ((args (list "init")))
                 (when bare (push "--bare" args))
                 (when quiet (push "--quiet" args))
                 (when initial-branch
@@ -71,10 +75,9 @@
                   (setf args (append args (list "--template" template))))
                 (when shared
                   (setf args (append args (list "--shared" shared))))
-                (push path args)
                 (setf args (nreverse args))
                 (multiple-value-bind (stdout stderr code)
-                    (apply #'cl-git-tree/shell-utils:shell-run path args)
+                    (apply #'cl-git-tree/git-utils:git-run path args)
                   (declare (ignore stdout stderr))
                   (cond
                     ((zerop code)

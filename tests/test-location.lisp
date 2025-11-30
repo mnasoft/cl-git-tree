@@ -16,12 +16,12 @@
     (unwind-protect
          (progn
            (is-true (search "неприменим" (cl-git-tree/loc:clone p "/tmp")))
-           (is-true (search "неприменим" (cl-git-tree/loc:repo-create p ws)))
-           (is-true (search "неприменим" (cl-git-tree/loc:repo-delete p ws)))
+           (is-true (search "неприменим" (cl-git-tree/loc:repo-create ws p)))
+           (is-true (search "неприменим" (cl-git-tree/loc:repo-delete ws p)))
            #+nil
-           (is-true (search "неприменим" (cl-git-tree/loc:repo-push p ws :branch "main")))
+           (is-true (search "неприменим" (cl-git-tree/loc:repo-push ws p :branch "main")))
            #+nil
-           (is-true (search "неприменим" (cl-git-tree/loc:repo-pull p ws :branch "main"))))
+           (is-true (search "неприменим" (cl-git-tree/loc:repo-pull ws p :branch "main"))))
       (when (uiop:directory-exists-p test-dir)
         (uiop:delete-directory-tree test-dir :validate t)))))
 
