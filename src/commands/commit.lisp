@@ -40,9 +40,11 @@
 
     ;; Вызов метода repo-commit
     (format t "→ ~A: git commit~@[ -a~]~@[ --amend~] -m ~S~%"
-            repo-dir all amend (or message "<date/time>"))
+            repo-dir all amend (or message "`date/time`"))
     (let ((ws (make-instance 'cl-git-tree/loc:<workspace> :path repo-dir)))
-      (let ((result (cl-git-tree/loc:repo-commit ws :all all :amend amend :message message)))
+      (let ((result (if message
+                        (cl-git-tree/loc:repo-commit ws :all all :amend amend :message message)
+                        (cl-git-tree/loc:repo-commit ws :all all :amend amend))))
         (format t "✔ ~A: ~A~%" repo-dir result)))))
 
 (defun cmd-commit (&rest args)
