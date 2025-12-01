@@ -20,31 +20,39 @@
         (amend nil)
         (message nil))
     ;; Разбор аргументов
-    (loop for (arg next) on args by #'cddr do
-      (cond
-        ;; -a
-        ((string= arg "-a")
-         (setf all t))
-        ;; --amend
-        ((string= arg "--amend")
-         (setf amend t))
-        ;; -m <msg>
-        ((string= arg "-m")
-         (setf message (format nil "~{~A~^ ~}" (rest (member "-m" args :test #'string=))))
-         (return))
-        ;; -am <msg>
-        ((string= arg "-am")
-         (setf all t)
-         (setf message (format nil "~{~A~^ ~}" (rest (member "-am" args :test #'string=))))
-         (return))))
+    (loop for i from 0 below (length args) do
+      (let ((arg (nth i args)))
+        (cond
+          ;; -a
+          ((string= arg "-a")
+           (setf all t))
+          ;; --amend
+          ((string= arg "--amend")
+           (setf amend t))
+          ;; -m <msg>
+          ((string= arg "-m")
+           (when (< (+ i 1) (length args))
+             (setf message (nth (+ i 1) args)))
+           (return))
+          ;; -am <msg>
+          ((string= arg "-am")
+           (setf all t)
+           (when (< (+ i 1) (length args))
+             (setf message (nth (+ i 1) args)))
+           (return)))))
+
+    ;; Если сообщение не указано, используем текущую дату и время
+    (unless message
+      (multiple-value-bind (sec min hour day month year)
+          (decode-universal-time (get-universal-time))
+        (setf message (format nil "~4,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
+                              year month day hour min sec))))
 
     ;; Вызов метода repo-commit
     (format t "→ ~A: git commit~@[ -a~]~@[ --amend~] -m ~S~%"
-            repo-dir all amend (or message "`date/time`"))
+            repo-dir all amend message)
     (let ((ws (make-instance 'cl-git-tree/loc:<workspace> :path repo-dir)))
-      (let ((result (if message
-                        (cl-git-tree/loc:repo-commit ws :all all :amend amend :message message)
-                        (cl-git-tree/loc:repo-commit ws :all all :amend amend))))
+      (let ((result (cl-git-tree/loc:repo-commit ws :all all :amend amend :message message)))
         (format t "✔ ~A: ~A~%" repo-dir result)))))
 
 (defun cmd-commit (&rest args)
