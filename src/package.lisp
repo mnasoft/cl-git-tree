@@ -3,6 +3,7 @@
 (defpackage :cl-git-tree
   (:use :cl)
   (:export 
-           load-config))
+           load-config
+           *config-path*))
 
 (in-package :cl-git-tree)

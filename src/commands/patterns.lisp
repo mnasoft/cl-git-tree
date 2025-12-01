@@ -1,0 +1,113 @@
+;;;; ./src/commands/patterns.lisp
+;;;;
+;;;; Команда для управления паттернами файлов.
+;;;; Позволяет просматривать, добавлять, удалять паттерны.
+
+(defpackage :cl-git-tree/commands/patterns
+  (:use :cl
+        :cl-git-tree/config)
+  (:export cmd-patterns))
+
+(in-package :cl-git-tree/commands/patterns)
+
+(defun cmd-patterns (&rest args)
+  "Управление паттернами файлов.
+Команды:
+  patterns list [tracked|excluded]  — показать все или конкретные паттерны
+  patterns add-tracked <pattern>    — добавить паттерн в список включения
+  patterns add-excluded <pattern>   — добавить паттерн в список исключения
+  patterns remove-tracked <pattern> — удалить паттерн из списка включения
+  patterns remove-excluded <pattern>— удалить паттерн из списка исключения
+  patterns reset                    — сбросить на дефолты
+  patterns --help                   — справка"
+  (cond
+    ;; Справка
+    ((or (null args) (member "--help" args :test #'string=))
+     (format t "Управление паттернами файлов.~%~%")
+     (format t "Использование:~%")
+     (format t "  git-tree patterns list [tracked|excluded]~%")
+     (format t "  git-tree patterns add-tracked <pattern>~%")
+     (format t "  git-tree patterns add-excluded <pattern>~%")
+     (format t "  git-tree patterns remove-tracked <pattern>~%")
+     (format t "  git-tree patterns remove-excluded <pattern>~%")
+     (format t "  git-tree patterns reset~%~%")
+     (format t "Примеры:~%")
+     (format t "  git-tree patterns list           ;; показать все~%")
+     (format t "  git-tree patterns list tracked   ;; только включения~%")
+     (format t "  git-tree patterns add-tracked *.rs~%")
+     (format t "  git-tree patterns remove-tracked *.tcl*~%")
+     (format t "  git-tree patterns reset          ;; вернуть дефолты~%"))
+    
+    ;; Просмотр паттернов
+    ((string= (first args) "list")
+     (let ((filter (second args)))
+       (cond
+         ((null filter)
+          ;; Показываем все
+          (format t "📌 Паттерны для ВКЛЮЧЕНИЯ:~%")
+          (dolist (p (get-tracked-patterns))
+            (format t "  ✓ ~A~%" p))
+          (format t "~%🚫 Паттерны для ИСКЛЮЧЕНИЯ:~%")
+          (dolist (p (get-excluded-patterns))
+            (format t "  ✗ ~A~%" p)))
+         ((string= filter "tracked")
+          (format t "📌 Паттерны для ВКЛЮЧЕНИЯ:~%")
+          (dolist (p (get-tracked-patterns))
+            (format t "  ✓ ~A~%" p)))
+         ((string= filter "excluded")
+          (format t "🚫 Паттерны для ИСКЛЮЧЕНИЯ:~%")
+          (dolist (p (get-excluded-patterns))
+            (format t "  ✗ ~A~%" p)))
+         (t
+          (format t "❌ Неизвестный фильтр: ~A~%" filter)
+          (format t "Используйте: tracked или excluded~%")))))
+    
+    ;; Добавление паттерна в включение
+    ((string= (first args) "add-tracked")
+     (if (null (second args))
+         (format t "❌ Укажите паттерн для добавления~%")
+         (let ((pattern (second args)))
+           (if (add-tracked-pattern pattern)
+               (format t "✅ Паттерн '~A' добавлен в включение~%" pattern)
+               (format t "⚠️  Паттерн '~A' уже есть в списке включения~%" pattern)))))
+    
+    ;; Добавление паттерна в исключение
+    ((string= (first args) "add-excluded")
+     (if (null (second args))
+         (format t "❌ Укажите паттерн для добавления~%")
+         (let ((pattern (second args)))
+           (if (add-excluded-pattern pattern)
+               (format t "✅ Паттерн '~A' добавлен в исключение~%" pattern)
+               (format t "⚠️  Паттерн '~A' уже есть в списке исключения~%" pattern)))))
+    
+    ;; Удаление паттерна из включения
+    ((string= (first args) "remove-tracked")
+     (if (null (second args))
+         (format t "❌ Укажите паттерн для удаления~%")
+         (let ((pattern (second args)))
+           (if (remove-tracked-pattern pattern)
+               (format t "✅ Паттерн '~A' удалён из включения~%" pattern)
+               (format t "⚠️  Паттерн '~A' не найден в списке включения~%" pattern)))))
+    
+    ;; Удаление паттерна из исключения
+    ((string= (first args) "remove-excluded")
+     (if (null (second args))
+         (format t "❌ Укажите паттерн для удаления~%")
+         (let ((pattern (second args)))
+           (if (remove-excluded-pattern pattern)
+               (format t "✅ Паттерн '~A' удалён из исключения~%" pattern)
+               (format t "⚠️  Паттерн '~A' не найден в списке исключения~%" pattern)))))
+    
+    ;; Сброс на дефолты
+    ((string= (first args) "reset")
+     (reset-to-defaults)
+     (format t "✅ Паттерны сброшены на значения по умолчанию~%"))
+    
+    ;; Неизвестная команда
+    (t
+     (format t "❌ Неизвестная команда: ~A~%" (first args))
+     (format t "Используйте 'git-tree patterns --help' для справки~%"))))
+
+(eval-when (:load-toplevel :execute)
+  (cl-git-tree/dispatch:register-command
+   "patterns" #'cmd-patterns "Управлять паттернами файлов"))

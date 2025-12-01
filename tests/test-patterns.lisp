@@ -2,16 +2,16 @@
 
 (in-package :cl-git-tree/tests)
 
-(defsuite patterns-tests "Tests for file-patterns persistence and API")
+(def-suite patterns-tests
+  :description "Tests for file-patterns persistence and API"
+  :in all)
 
-(in-suite all)
-
-(def-test save-and-load-patterns
+(def-test save-and-load-patterns ()
   (let* ((tmp-file (merge-pathnames #p"file-patterns.lisp"
                                     (make-pathname :directory (list :relative (format nil "test-pats-~A" (get-universal-time)))
                                                    :name ""
                                                    :type "")))
-         (orig-path *file-patterns-path*))
+         (orig-path *patterns-path*))
     (unwind-protect
          (progn
            ;; redirect patterns path to temp location
