@@ -40,8 +40,9 @@
        (:file "remake-xz")
        (:file "status")       
        (:file "info")
-       (:file "patterns")
-       (:file "aliases")))
+      (:file "patterns")
+      (:file "locations")
+      (:file "aliases")))
      (:file "cli")))))
 
 
