@@ -138,29 +138,35 @@ REPO-NAME — имя репозитория (строка без расшире�
     (remhash id *locations*)
     t))
 
-(defun save-locations-config (&optional (path cl-git-tree:*config-path*))
+(defun save-locations-config (&optional path)
   "Сохраняет текущие локации в файл конфигурации PATH.
+Если PATH не указан, используется ~/.git-tree/locations.configure.
 Записывает серию форм (add-location ...) для всех локаций, кроме ключей 'pp' и 'pz'.
 Создаёт резервную копию старого файла с расширением .bak.
 Возвращает PATH." 
-  (when (probe-file path)
-    (let ((bak (merge-pathnames (concatenate 'string (pathname-name path) ".bak") (pathname-directory path))))
-      (when (probe-file path)
-        (rename-file path bak))))
-  (ensure-directories-exist (pathname-directory path))
-  (with-open-file (s path :direction :output :if-does-not-exist :create :if-exists :supersede)
-    (format s "(in-package :cl-git-tree/loc)~%~%")
-    ;; iterate keys sorted for stable output
-    (dolist (k (sort (all-location-keys) #'string< :key #'identity))
-      (when (and k (not (member k '("pp" "pz") :test #'string=)))
-        (let ((loc (find-location k)))
-          (format s "(add-location ~S~%              :url-git ~S~%              :url-xz ~S~%              :tar ~S~%              :description ~S)~%~%"
-                  k
-                  (<location>-url-git loc)
-                  (<location>-url-xz loc)
-                  (<location>-tar loc)
-                  (<location>-description loc))))
-    path))
+  (let* ((default-path (merge-pathnames #p".git-tree/locations.configure" (user-homedir-pathname)))
+         (path (or path default-path)))
+    (when (probe-file path)
+      (let* ((dir (pathname-directory path))
+             (name (pathname-name path))
+             (bak-name (concatenate 'string name ".bak"))
+             (bak (merge-pathnames (make-pathname :name bak-name :type nil :directory dir) (make-pathname :directory dir))))
+        (when (probe-file path)
+          (rename-file path bak))))
+    (ensure-directories-exist (pathname-directory path))
+    (with-open-file (s path :direction :output :if-does-not-exist :create :if-exists :supersede)
+      (format s "(in-package :cl-git-tree/loc)~%~%")
+      ;; iterate keys sorted for stable output
+      (dolist (k (sort (all-location-keys) #'string< :key #'identity))
+        (when (and k (not (member k '("pp" "pz") :test #'string=)))
+          (let ((loc (find-location k)))
+            (format s "(add-location ~S~%              :url-git ~S~%              :url-xz ~S~%              :tar ~S~%              :description ~S)~%~%"
+                    k
+                    (<location>-url-git loc)
+                    (<location>-url-xz loc)
+                    (<location>-tar loc)
+                    (<location>-description loc)))))
+      path)))
 
 (defun infer-local-p (url)
   "Определяет, можно ли считать URL локальным.
