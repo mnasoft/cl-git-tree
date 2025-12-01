@@ -153,7 +153,7 @@ REPO-NAME — имя репозитория (строка без расшире�
              (bak (merge-pathnames (make-pathname :name bak-name :type nil :directory dir) (make-pathname :directory dir))))
         (when (probe-file path)
           (rename-file path bak))))
-    (ensure-directories-exist (pathname-directory path))
+    (ensure-directories-exist (make-pathname :directory (pathname-directory path)))
     (with-open-file (s path :direction :output :if-does-not-exist :create :if-exists :supersede)
       (format s "(in-package :cl-git-tree/loc)~%~%")
       ;; iterate keys sorted for stable output
