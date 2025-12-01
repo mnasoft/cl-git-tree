@@ -15,6 +15,7 @@
     ((:file "package")
      (:file "all")
      (:file "test-global")
+      (:file "test-patterns")
      (:file "test-location")
      (:module "workspace"
       :serial t

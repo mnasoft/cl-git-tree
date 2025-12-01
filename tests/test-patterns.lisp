@@ -4,6 +4,8 @@
 
 (defsuite patterns-tests "Tests for file-patterns persistence and API")
 
+(in-suite all)
+
 (def-test save-and-load-patterns
   (let* ((tmp-file (merge-pathnames #p"file-patterns.lisp"
                                     (make-pathname :directory (list :relative (format nil "test-pats-~A" (get-universal-time)))
@@ -35,3 +37,4 @@
       (when (probe-file *patterns-path*)
         (delete-file *patterns-path*))
       (setf *patterns-path* orig-path))))
+
