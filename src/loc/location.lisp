@@ -131,6 +131,37 @@ REPO-NAME — имя репозитория (строка без расшире�
                      (<location>-url-xz loc)))
            *locations*))
 
+(defun remove-location (id)
+  "Удаляет локацию с ключом ID из глобальной таблицы *locations*.
+Возвращает T если удаление произошло, NIL если не найдено." 
+  (when (gethash id *locations*)
+    (remhash id *locations*)
+    t))
+
+(defun save-locations-config (&optional (path cl-git-tree:*config-path*))
+  "Сохраняет текущие локации в файл конфигурации PATH.
+Записывает серию форм (add-location ...) для всех локаций, кроме ключей 'pp' и 'pz'.
+Создаёт резервную копию старого файла с расширением .bak.
+Возвращает PATH." 
+  (when (probe-file path)
+    (let ((bak (merge-pathnames (concatenate 'string (pathname-name path) ".bak") (pathname-directory path))))
+      (when (probe-file path)
+        (rename-file path bak))))
+  (ensure-directories-exist (pathname-directory path))
+  (with-open-file (s path :direction :output :if-does-not-exist :create :if-exists :supersede)
+    (format s "(in-package :cl-git-tree/loc)~%~%")
+    ;; iterate keys sorted for stable output
+    (dolist (k (sort (all-location-keys) #'string< :key #'identity))
+      (when (and k (not (member k '("pp" "pz") :test #'string=)))
+        (let ((loc (find-location k)))
+          (format s "(add-location ~S~%              :url-git ~S~%              :url-xz ~S~%              :tar ~S~%              :description ~S)~%~%"
+                  k
+                  (<location>-url-git loc)
+                  (<location>-url-xz loc)
+                  (<location>-tar loc)
+                  (<location>-description loc))))
+    path))
+
 (defun infer-local-p (url)
   "Определяет, можно ли считать URL локальным.
 
