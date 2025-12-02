@@ -15,6 +15,4 @@
   "CLI-команда: найти все git-репозитории и заново добавить remote LOC-KEY."
   (cl-git-tree/fs:with-repo #'readd-remote-to-repo args))
 
-(eval-when (:load-toplevel :execute)
-  (cl-git-tree/dispatch:register-command
-   "remote-readd" #'cmd-remote-readd "Удалить и заново добавить remote во все репозитории"))
+;; Регистрация перемещена в remote.lisp (используется как подкоманда 'remote readd')

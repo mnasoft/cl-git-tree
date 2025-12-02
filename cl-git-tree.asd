@@ -37,6 +37,7 @@
        (:file "remote-add")
        (:file "remote-remove")
        (:file "remote-readd")
+       (:file "remote")
        (:file "remake-xz")
        (:file "status")       
        (:file "info")

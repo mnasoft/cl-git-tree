@@ -56,9 +56,7 @@ LOC-KEY передаётся как первый элемент ARGS."
     (t
      (cl-git-tree/fs:with-repo #'remove-remote-from-repo args))))
 
-(eval-when (:load-toplevel :execute)
-  (cl-git-tree/dispatch:register-command
-   "remote-remove" #'cmd-remote-remove "Удалить remote во всех репозиториях"))
+;; Регистрация перемещена в remote.lisp (используется как подкоманда 'remote remove')
 
 
 

@@ -43,6 +43,4 @@
     (t
      (cl-git-tree/fs:with-repo #'add-remote-to-repo args))))
 
-(eval-when (:load-toplevel :execute)
-  (cl-git-tree/dispatch:register-command
-   "remote-add" #'cmd-remote-add "Добавить remote во все репозитории"))
+;; Регистрация перемещена в remote.lisp (используется как подкоманда 'remote add')
