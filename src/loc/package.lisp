@@ -34,8 +34,8 @@
    ;; функции
    register-location
    add-location
-  remove-location
-  save-locations-config
+   remove-location
+   save-locations-config
    find-location
    location-exists-p
    all-location-keys

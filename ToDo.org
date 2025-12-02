@@ -3,60 +3,8 @@
 #+LANGUAGE: ru
 
 * [ ] ToDo
-2. [ ] для команды git tree commit ключи использовать аналогичные git commit
-3. [ ] сделать аналог команды git-timecapsule
-     
-* [ ] DoNe
-1. [X] [[./src/commands/add.lisp]]
-   - [X] cmd-add -- сделать разбор аргументов при помощи
-     cl-git-tree/shell-utils:split-args-by-keys для ключа :EXCLUDE.
-   - [X] cmd-add -- обновить помощь.
-   - [X] откорректировать сигнатуру вызова для метода repo-add
-     [[./src/loc/methods/repo-add.lisp]] чтоб гармонизировать ее с
-     командой add.
-2. [X] Исключить команду all [[./src/commands/all.lisp]]
-3. [X] Реализовать новую структуру приекта
-      cl-git-tree/
-      ├── cl-git-tree.asd          ; описание системы для ASDF
-      ├── git-tree.lisp            ; точка входа (main)
-      ├── local.configure.lisp     ; локальная конфигурация локаций (pp, pz, gh, gl)
-      ├── src/
-      │   ├── cli.lisp             ; общий CLI-интерфейс
-      │   ├── commands/            ; отдельные команды CLI
-      │   │   ├── clone.lisp
-      │   │   ├── unclone.lisp
-      │   │   ├── publish.lisp
-      │   │   ├── status.lisp
-      │   │   ├── commit.lisp
-      │   │   ├── config.lisp      ; работа с глобальными настройками
-      │   │   └── ...              ; остальные команды
-      │   ├── dispatch/
-      │   │   ├── dispatcher.lisp
-      │   │   └── package.lisp
-      │   ├── fs/
-      │   │   ├── fs.lisp          ; обход дерева каталогов, утилиты
-      │   │   └── package.lisp
-      │   ├── git-utils/
-      │   │   ├── git-utils.lisp   ; обёртки над вызовами git
-      │   │   └── package.lisp
-      │   ├── loc/
-      │   │   ├── location.lisp    ; класс <location>, *locations*, register/find
-      │   │   ├── provider.lisp    ; абстрактный <provider>, generic-функции
-      │   │   ├── providers-local.lisp
-      │   │   ├── providers-github.lisp
-      │   │   ├── providers-gitlab.lisp
-      │   │   └── package.lisp
-      │   ├── workspace/
-      │   │   ├── workspace.lisp   ; класс <workspace>, локальные операции
-      │   │   └── package.lisp
-      │   ├── global/
-      │   │   ├── git-global.lisp  ; класс <git-global>, работа с git config --global
-      │   │   └── package.lisp
-      │   └── package.lisp         ; корневой пакет src
-      └── tests/
-          ├── test-commands.lisp
-          ├── test-fs.lisp
-          ├── test-git-utils.lisp
-          ├── test-location.lisp
-          ├── test-workspace.lisp
-          └── test-global.lisp
+1. [ ] Изменить сигнатуру вызова для команд
+   - [ ] git tree remote-add -> git tree remote add
+   - [ ] git tree remote-remove -> git tree remote remove
+   - [ ] git tree remote-readd -> git tree remote readd
+2. [ ] сделать аналог команды git-timecapsule

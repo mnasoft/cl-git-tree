@@ -158,14 +158,13 @@ REPO-NAME — имя репозитория (строка без расшире�
       (format s "(in-package :cl-git-tree/loc)~%~%")
       ;; iterate keys sorted for stable output
       (dolist (k (sort (all-location-keys) #'string< :key #'identity))
-        (when (and k (not (member k '("pp" "pz") :test #'string=)))
-          (let ((loc (find-location k)))
-            (format s "(add-location ~S~%              :url-git ~S~%              :url-xz ~S~%              :tar ~S~%              :description ~S)~%~%"
+        (let ((loc (find-location k)))
+            (format s "(add-location ~S~%~VT:url-git ~S~%~VT:url-xz ~S~%~VT:tar ~S~%~VT:description ~S)~%~%"
                     k
-                    (<location>-url-git loc)
-                    (<location>-url-xz loc)
-                    (<location>-tar loc)
-                    (<location>-description loc)))))
+                    4 (<location>-url-git loc)
+                    4 (<location>-url-xz loc)
+                    4 (<location>-tar loc)
+                    4 (<location>-description loc))))
       path)))
 
 (defun infer-local-p (url)
