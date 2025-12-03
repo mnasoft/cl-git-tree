@@ -11,12 +11,14 @@
                "uiop"
                "alexandria"
                "split-sequence"
+               "cl-ppcre"
                "cl-git-tree/git-utils"
                "cl-git-tree/loc"
                "cl-git-tree/fs"
                "cl-git-tree/dispatch"
                "cl-git-tree/global"
                "cl-git-tree/config"
+               "cl-git-tree/shell-utils"
                )
   :serial t
   :in-order-to ((test-op (test-op "cl-git-tree-tests")))
@@ -34,6 +36,8 @@
        (:file "push")
        (:file "clone")
        (:file "unclone")
+       (:file "clone-remote")
+       (:file "unclone-remote")
        (:file "remote-add")
        (:file "remote-remove")
        (:file "remote-readd")
@@ -136,9 +140,10 @@
 
 (defsystem "cl-git-tree/shell-utils"
   :description "Утилиты для запуска произвольных CLI-команд из Common Lisp"
-  :depends-on (:uiop)
+  :depends-on (:uiop :cl-ppcre)
   :components
   ((:module "src/shell-utils"
     :components
     ((:file "package")
-     (:file "core")))))
+     (:file "core")
+     (:file "ssh-utils")))))
