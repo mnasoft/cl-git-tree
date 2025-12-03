@@ -4,22 +4,6 @@
   (format nil "Метод REPO-CREATE неприменим для провайдера ~A."
           (class-name (class-of provider))))
 
-(defmethod repo-create ((ws <workspace>) (provider <gitlab>)  &key &allow-other-keys)
-  (cl-git-tree/git-utils:git-run (<workspace>-path ws)
-                                 "remote" "add" (<location>-id provider)
-                                 (<location>-url-git provider))
-  (cl-git-tree/git-utils:git-run (<workspace>-path ws)
-                                 "push" (<location>-id provider) "HEAD"))
-
-(defmethod repo-create ((ws <workspace>) (provider <github>) &key &allow-other-keys)
-  (cl-git-tree/git-utils:git-run (<workspace>-path ws)
-                                 "remote" "add" (<location>-id provider)
-                                 (<location>-url-git provider))
-  (cl-git-tree/git-utils:git-run (<workspace>-path ws)
-                                 "push" (<location>-id provider) "HEAD"))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defmethod repo-create ((ws <workspace>) (provider <github>) 
                         &key private &allow-other-keys)
   "Создать новый репозиторий на GitHub через CLI gh."
@@ -66,3 +50,23 @@
          (format t "❌ Ошибка при создании репозитория на GitHub (код ~A): ~A~%"
                  code stdout))))
     ws))
+
+(defmethod repo-create ((ws <workspace>) (provider <local>) &key &allow-other-keys)
+  "Создать bare-репозиторий для WORKSPACE под локальным провайдером.
+Если цель уже существует — пропустить; иначе выполнить `git clone --bare`
+из рабочего каталога в каталог провайдера (например ~/.git-tree/git/<id>/REPO.git)."
+  (let* ((repo (repo-name ws))
+         (base (uiop:ensure-directory-pathname (<location>-url-git provider)))
+         (target (merge-pathnames (format nil "~A.git" repo) base)))
+    (cond
+      ((probe-file target)
+       (format t "⚠ ~A: уже существует: ~A~%" repo target))
+      (t
+       (ensure-directories-exist (pathname-directory target))
+       (multiple-value-bind (out err code)
+           (cl-git-tree/git-utils:git-run (<workspace>-path ws) "clone" "--bare" "." (namestring target))
+         (declare (ignore out))
+         (if (zerop code)
+             (format t "✔ ~A → ~A~%" repo target)
+             (format t "❌ ~A: clone failed: ~A~%" repo err)))))
+  ws))
