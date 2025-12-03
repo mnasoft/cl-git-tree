@@ -1,5 +1,5 @@
 ;;;; ./src/commands/commit.lisp
-
+ 
 (defpackage :cl-git-tree/commands/commit
   (:use :cl
         :cl-git-tree/config)

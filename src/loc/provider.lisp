@@ -1,6 +1,6 @@
 (in-package :cl-git-tree/loc)
 
-(defclass <local> (<provider> <location>) ()
+(defclass <local> (<provider>) ()
   (:default-initargs
     :provider :local
     :id "lc")
@@ -17,7 +17,7 @@
            (make-pathname :directory `(:relative ".git-tree" "git" ,(<location>-id loc)))
            (user-homedir-pathname)))))
 
-(defclass <github> (<provider> <location>)
+(defclass <github> (<provider>)
   ((user
     :initarg :user
     :initform nil
@@ -32,7 +32,7 @@
     По умолчанию имеет идентификатор \"gh\" и провайдера :github.
     Слот :user задаёт имя пользователя/организации."))
 
-(defclass <gitlab> (<provider> <location>)
+(defclass <gitlab> (<provider>)
   ((user
     :initarg :user
     :initform nil
