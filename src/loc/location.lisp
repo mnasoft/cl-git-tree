@@ -18,28 +18,74 @@
   (setf (gethash (<location>-id loc) *locations*) loc)
   loc)
 
-(defun add-location (id &key description url-git url-xz tar)
-  "Добавляет или обновляет запись о локации в глобальной таблице *locations*.
+(defun add-location (id &key description name url-git url-xz tar provider)
+  "Добавляет или обновляет запись о локации в глобальной хэш-таблице *locations*.
 
-KEY — строковый идентификатор локации (ключ в хэш-таблице).
-:name     — человекочитаемое имя/описание локации.
-:url-git  — базовый git-URL для группы репозиториев (обычно оканчивается на '/').
+ID — строковый идентификатор локации (ключ в хэш-таблице). Убедимся, что это строка.
+:description — человекочитаемое имя/описание локации.
+:url-git  — базовый git-URL для группы репозиториев (обычно оканчивается на '/' или ':' для SSH).
 :url-xz   — путь к архиву .tar.xz, если используется (по умолчанию NIL).
 :tar      — путь к tar-архиву, если используется (по умолчанию NIL).
+:provider — (опционально) явный символ провайдера, например :local, :github, :gitlab.
 
-Если в *locations* уже существует запись с данным KEY, она будет
+Функция выполняет простую валидацию/нормализацию:
+- гарантирует, что ID — строка;
+- нормализует `url-git`: добавляет завершающий '/' для HTTP/файловых путей и ':' для SSH-форматов;
+- если :provider не указан, пытается вывести его по `url-git` (локальный путь, github.com, gitlab.com).
+
+Если в *locations* уже существует запись с данным ID, она будет
 перезаписана, и будет выдано предупреждение через WARN.
 
 Возвращает созданный объект класса <location>."
-  (when (gethash id *locations*)
-    (warn "Перезаписываю существующую локацию с ключом ~A" id))
-  (setf (gethash id *locations*)
-        (make-instance '<location>
-                       :id          id
-                       :description description
-                       :url-git     url-git
-                       :url-xz      url-xz
-                       :tar         tar)))
+  ;; ID как строка
+    (let* ((id-str (if (stringp id) id (prin1-to-string id)))
+      (desc (or description name))
+      (url (and url-git (or (stringp url-git) (pathnamep url-git))
+          (if (pathnamep url-git) (namestring url-git) url-git)))
+      (prov provider))
+    ;; Нормализация url-git
+    (when url
+      ;; локальные пути: завершаем '/' если нужно
+      (when (infer-local-p url)
+        (unless (uiop:string-suffix-p "/" url)
+          (setf url (concatenate 'string url "/"))))
+      ;; HTTP(S) — завершаем '/'
+      (when (uiop:string-prefix-p "http" url)
+        (unless (uiop:string-suffix-p "/" url)
+          (setf url (concatenate 'string url "/"))))
+      ;; SSH scp-подобный синтаксис (есть '@') — приводим конец к одиночному '/'
+      (when (search "@" url)
+        ;; заменить любую последовательность ':' или '/' в конце на одиночный '/'
+        (setf url (cl-ppcre:regex-replace-all "[:/]+$" url "/")))
+      ;; Убедимся, что в конце нет нескольких '/' — заменим на одну
+      (setf url (cl-ppcre:regex-replace-all "/+$" url "/")))
+
+    ;; Если провайдер не указан — сделаем простую эвристику по URL
+    (unless prov
+      (cond
+        ((and url (infer-local-p url)) (setf prov :local))
+        ((and url (search "github.com" url)) (setf prov :github))
+        ((and url (search "gitlab.com" url)) (setf prov :gitlab))
+        (t (setf prov nil))))
+
+    (when (gethash id-str *locations*)
+      (warn "Перезаписываю существующую локацию с ключом ~A" id-str))
+    ;; choose class according to provider
+    (let ((class
+           (cond
+             ((eq prov :local) '<local>)
+             ((eq prov :github) '<github>)
+             ((eq prov :gitlab) '<gitlab>)
+             (t '<location))))
+      (let ((loc (make-instance class
+                                :id id-str
+                                :description desc
+                                :url-git url
+                                :url-xz url-xz
+                                :tar tar
+                                :provider prov)))
+        (register-location loc)
+        (find-location id-str)))))
 
 (defun find-location (id)
   "Возвращает объект <location> по ключу или NIL.
@@ -159,12 +205,13 @@ REPO-NAME — имя репозитория (строка без расшире�
       ;; iterate keys sorted for stable output
       (dolist (k (sort (all-location-keys) #'string< :key #'identity))
         (let ((loc (find-location k)))
-            (format s "(add-location ~S~%~VT:url-git ~S~%~VT:url-xz ~S~%~VT:tar ~S~%~VT:description ~S)~%~%"
-                    k
-                    4 (<location>-url-git loc)
-                    4 (<location>-url-xz loc)
-                    4 (<location>-tar loc)
-                    4 (<location>-description loc))))
+                (format s "(add-location ~S~%~VT:url-git ~S~%~VT:url-xz ~S~%~VT:tar ~S~%~VT:description ~S~%~VT:provider ~S)~%~%"
+                  k
+                  4 (<location>-url-git loc)
+                  4 (<location>-url-xz loc)
+                  4 (<location>-tar loc)
+                  4 (<location>-description loc)
+                  4 (<location>-provider loc))))
       path)))
 
 (defun infer-local-p (url)
