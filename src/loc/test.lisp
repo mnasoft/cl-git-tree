@@ -8,23 +8,6 @@
 (defparameter *gh* (make-instance '<github>))
 
 
-
-
-(repo-add *ws* :all t)
-
-(repo-commit *ws* "date")
-;;;
-(repo-commit *ws* "`date`")
-
-(repo-push *gh* *ws*)
-(repo-pull *gh* *ws* :branch "master")
-(remote-delete *ws* *gh*)
-(repo-status *ws*)
-
-(<location>-id *gh*)
-
-"~/quicklisp/local-projects/clisp/cl-git-tree"
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defparameter *ws* (make-workspace #P"."))
 (truename ".")
