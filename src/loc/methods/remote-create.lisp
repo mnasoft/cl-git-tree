@@ -8,47 +8,48 @@
                         &key private &allow-other-keys)
   "Создать новый репозиторий на GitHub через CLI gh."
   (let* ((repo (repo-name ws))
-         ;;(desc (or (<workspace>-description ws) repo))
          (root (git-root ws))
          (privacy-flag (if private "--private" "--public")))
     (multiple-value-bind (stdout stderr code)
-        (cl-git-tree/shell-utils:shell-run-single
-         root "gh" "repo" "create" repo
-         privacy-flag
-         "--source" (namestring root)
-         "--remote" (<location>-id provider))
-      (declare (ignore stderr))
+        (uiop:run-program (list "gh" "repo" "create" repo
+                                privacy-flag
+                                "--source" (namestring root)
+                                "--remote" (<location>-id provider))
+                          :directory root
+                          :output :string
+                          :error-output :string
+                          :ignore-error-status t)
       (cond
         ((zerop code)
          (format t "✅ [~A] Репозиторий ~A создан на GitHub (~A)~%"
                  (<location>-id provider) repo (if private "private" "public")))
         (t
          (format t "❌ [~A] Ошибка при создании репозитория на GitHub (код ~A): ~A~%"
-                 (<location>-id provider) code stdout))))
+                 (<location>-id provider) code (or stderr stdout)))))
     ws))
 
 (defmethod remote-create ((ws <workspace>) (provider <gitlab>) 
                         &key private &allow-other-keys)
   "Создать новый репозиторий на GitLab через CLI glab."
   (let* ((repo (repo-name ws))
-         ;;(desc (or (<workspace>-description ws) repo))
          (root (git-root ws))
          (privacy-flag (if private "--private" "--public")))
     (multiple-value-bind (stdout stderr code)
-        (cl-git-tree/shell-utils:shell-run-single
-         root
-         "gh" "repo" "create" repo
-         privacy-flag
-         "--source" (namestring root)
-         "--remote" (<location>-id provider))
-      (declare (ignore stderr))
+        (uiop:run-program (list "glab" "repo" "create" repo
+                                privacy-flag
+                                "--source" (namestring root)
+                                "--remote" (<location>-id provider))
+                          :directory root
+                          :output :string
+                          :error-output :string
+                          :ignore-error-status t)
       (cond
         ((zerop code)
          (format t "✅ [~A] Репозиторий ~A создан на GitLab (~A)~%"
                  (<location>-id provider) repo (if private "private" "public")))
         (t
          (format t "❌ [~A] Ошибка при создании репозитория на GitLab (код ~A): ~A~%"
-                 (<location>-id provider) code stdout))))
+                 (<location>-id provider) code (or stderr stdout)))))
     ws))
 
 (defmethod remote-create ((ws <workspace>) (provider <local>) &key &allow-other-keys)
