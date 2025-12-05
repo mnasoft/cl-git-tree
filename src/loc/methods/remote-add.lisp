@@ -2,11 +2,6 @@
 
 (in-package :cl-git-tree/loc)
 
-(defmethod remote-url ((ws <workspace>) (provider <provider>) &key &allow-other-keys)
-  (let* ((repo-name (repo-name ws))
-         (base-url (cl-git-tree/loc:<location>-url-git provider)))
-    (format nil "~A~A.git" base-url repo-name)))
-
 (defmethod remote-add ((ws <workspace>) (provider <provider>) &key &allow-other-keys)
   "Добавить отдаленный репозиторий для рабочего пространства WORKSPACE,
 связанный с провайдером PROVIDER."

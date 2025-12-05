@@ -1,10 +1,10 @@
 (in-package :cl-git-tree/loc)
 
-(defmethod repo-create ((ws <workspace>) (provider <provider>)  &key &allow-other-keys)
-  (format nil "Метод REPO-CREATE неприменим для провайдера ~A."
+(defmethod remote-create ((ws <workspace>) (provider <provider>)  &key &allow-other-keys)
+  (format nil "Метод REMOTE-CREATE неприменим для провайдера ~A."
           (class-name (class-of provider))))
 
-(defmethod repo-create ((ws <workspace>) (provider <github>) 
+(defmethod remote-create ((ws <workspace>) (provider <github>) 
                         &key private &allow-other-keys)
   "Создать новый репозиторий на GitHub через CLI gh."
   (let* ((repo (repo-name ws))
@@ -27,9 +27,9 @@
                  code stdout))))
     ws))
 
-(defmethod repo-create ((ws <workspace>) (provider <gitlab>) 
+(defmethod remote-create ((ws <workspace>) (provider <gitlab>) 
                         &key private &allow-other-keys)
-  "Создать новый репозиторий на GitHub через CLI gh."
+  "Создать новый репозиторий на GitLab через CLI glab."
   (let* ((repo (repo-name ws))
          ;;(desc (or (<workspace>-description ws) repo))
          (root (git-root ws))
@@ -51,7 +51,7 @@
                  code stdout))))
     ws))
 
-(defmethod repo-create ((ws <workspace>) (provider <local>) &key &allow-other-keys)
+(defmethod remote-create ((ws <workspace>) (provider <local>) &key &allow-other-keys)
   "Создать bare-репозиторий для WORKSPACE под локальным провайдером.
 Если цель уже существует — пропустить; иначе выполнить `git clone --bare`
 из рабочего каталога в каталог провайдера (например ~/.git-tree/git/<id>/REPO.git)."

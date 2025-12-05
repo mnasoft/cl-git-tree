@@ -18,7 +18,7 @@
 
 (repo-push *gh* *ws*)
 (repo-pull *gh* *ws* :branch "master")
-(repo-delete *gh* *ws*)
+(remote-delete *ws* *gh*)
 (repo-status *ws*)
 
 (<location>-id *gh*)

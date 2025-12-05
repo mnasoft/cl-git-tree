@@ -7,7 +7,7 @@
 (defun remote-create-for-workspace (repo-dir args)
   "Вспомогательная функция, вызываемая with-repo для каждого каталога.
 ARGS — исходные аргументы команды (первый элемент — ключ локации).
-Создаёт workspace и вызывает `repo-create` для найденной в реестре локации."
+Создаёт workspace и вызывает `remote-create` для найденной в реестре локации."
   (let* ((loc-key (first args))
          (loc (cl-git-tree/loc:find-location loc-key)))
     (unless loc
@@ -16,8 +16,8 @@ ARGS — исходные аргументы команды (первый эле
     (let* ((ws (cl-git-tree/loc:make-workspace repo-dir))
            (private (member "--private" args :test #'string=)))
       (if private
-          (cl-git-tree/loc:repo-create ws loc :private t)
-          (cl-git-tree/loc:repo-create ws loc)))))
+          (cl-git-tree/loc:remote-create ws loc :private t)
+          (cl-git-tree/loc:remote-create ws loc)))))
 
 (defun cmd-remote-create (&rest args)
   "Создать репозитории для всех локальных git-каталогов по провайдеру.

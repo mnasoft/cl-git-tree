@@ -1,10 +1,10 @@
 (in-package :cl-git-tree/loc)
 
-(defmethod repo-delete ((ws <workspace>) (provider <provider>)  &key &allow-other-keys)
-  (format nil "Метод REPO-DELETE неприменим для провайдера ~A."
+(defmethod remote-delete ((ws <workspace>) (provider <provider>)  &key &allow-other-keys)
+  (format nil "Метод REMOTE-DELETE неприменим для провайдера ~A."
           (class-name (class-of provider))))
 
-(defmethod repo-delete ((provider <github>) (ws <workspace>)
+(defmethod remote-delete ((ws <workspace>) (provider <github>)
                         &key (yes t) remote-only &allow-other-keys)
   "Удалить репозиторий на GitHub через CLI gh."
   (let* ((repo (repo-name ws))
@@ -27,7 +27,7 @@
                  code stdout))))
     ws))
 
-(defmethod repo-delete ((ws <workspace>) (provider <gitlab>)
+(defmethod remote-delete ((ws <workspace>) (provider <gitlab>)
                         &key (yes t) remote-only &allow-other-keys)
   "Удалить репозиторий на GitLab через CLI glab."
   (let* ((repo (repo-name ws))

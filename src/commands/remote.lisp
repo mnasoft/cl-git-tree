@@ -7,7 +7,7 @@
 (in-package :cl-git-tree/commands/remote)
 
 (defun cmd-remote (&rest args)
-  "Главный обработчик команды 'remote' с подкомандами: add, remove, readd, create, list.
+  "Главный обработчик команды 'remote' с подкомандами: add, remove, readd, create, delete, list.
 
 Использование:
   git-tree remote add LOC-KEY
@@ -27,6 +27,7 @@
     (format t "  git-tree remote remove LOC-KEY   - Удалить remote из всех репозиториев~%")
     (format t "  git-tree remote readd LOC-KEY    - Заново добавить remote во все репозитории~%")
     (format t "  git-tree remote create LOC-KEY [--private] - Создать репозиторий на провайдере для каждого локального git~%")
+    (format t "  git-tree remote delete LOC-KEY   - Удалить репозиторий на провайдере для каждого локального git~%")
      (format t "~%Пример:~%  git-tree remote add gh~%"))
     
     ;; Подкоманда 'list'
@@ -45,6 +46,10 @@
     ((string= (first args) "readd")
      (apply #'cl-git-tree/commands/remote-readd:cmd-remote-readd (rest args)))
 
+    ;; Подкоманда 'delete' — обёртка над remote-delete
+    ((string= (first args) "delete")
+     (apply #'cl-git-tree/commands/remote-delete:cmd-remote-delete (rest args)))
+
     ;; Подкоманда 'create' — обёртка над remote-create
     ((string= (first args) "create")
      (apply #'cl-git-tree/commands/remote-create:cmd-remote-create (rest args)))
@@ -56,4 +61,4 @@
 
 (eval-when (:load-toplevel :execute)
   (cl-git-tree/dispatch:register-command
-   "remote" #'cmd-remote "Управление remote в репозиториях (list/add/remove/readd)"))
+   "remote" #'cmd-remote "Управление remote в репозиториях (list/add/remove/readd/create/delete)"))

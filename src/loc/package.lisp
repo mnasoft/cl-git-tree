@@ -23,10 +23,10 @@
    ;; обобщенные функции
    clone
    repo-add
-   repo-create
+   remote-create
    repo-push
    repo-pull
-   repo-delete
+   remote-delete
    remote-add
    remote-remove
    remote-readd

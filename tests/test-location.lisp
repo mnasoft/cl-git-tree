@@ -16,8 +16,8 @@
     (unwind-protect
          (progn
            (is-true (search "неприменим" (cl-git-tree/loc:clone p "/tmp")))
-           (is-true (search "неприменим" (cl-git-tree/loc:repo-create ws p)))
-           (is-true (search "неприменим" (cl-git-tree/loc:repo-delete ws p)))
+           (is-true (search "неприменим" (cl-git-tree/loc:remote-create ws p)))
+           (is-true (search "неприменим" (cl-git-tree/loc:remote-delete ws p)))
            #+nil
            (is-true (search "неприменим" (cl-git-tree/loc:repo-push ws p :branch "main")))
            #+nil
@@ -44,24 +44,24 @@
     (is-true (search "не требуется" (cl-git-tree/loc:repo-pull loc :branch "main")))))
 
 (def-test github-methods ()
-  "Для <github> методы repo-create, repo-push, repo-pull и repo-delete должны возвращать строку команды git."
+  "Для <github> методы remote-create, repo-push, repo-pull и remote-delete должны возвращать строку команды git."
   (let ((gh (make-instance 'cl-git-tree/loc:<github>
               :id "origin"
               :url-git "git@github.com:user/repo.git")))
-    (is-true (stringp (cl-git-tree/loc:repo-create gh nil)))
+    (is-true (stringp (cl-git-tree/loc:remote-create gh nil)))
     (is-true (stringp (cl-git-tree/loc:repo-push gh :branch "main")))
     (is-true (stringp (cl-git-tree/loc:repo-pull gh :branch "main")))
-    (is-true (stringp (cl-git-tree/loc:repo-delete gh)))))
+    (is-true (stringp (cl-git-tree/loc:remote-delete gh nil)))))
 
 (def-test gitlab-methods ()
-  "Для <gitlab> методы repo-create, repo-push, repo-pull и repo-delete должны возвращать строку команды git."
+  "Для <gitlab> методы remote-create, repo-push, repo-pull и remote-delete должны возвращать строку команды git."
   (let ((gl (make-instance 'cl-git-tree/loc:<gitlab>
               :id "origin"
               :url-git "git@gitlab.com:user/repo.git")))
-    (is-true (stringp (cl-git-tree/loc:repo-create gl nil)))
+    (is-true (stringp (cl-git-tree/loc:remote-create gl nil)))
     (is-true (stringp (cl-git-tree/loc:repo-push gl :branch "main")))
     (is-true (stringp (cl-git-tree/loc:repo-pull gl :branch "main")))
-    (is-true (stringp (cl-git-tree/loc:repo-delete gl)))))
+    (is-true (stringp (cl-git-tree/loc:remote-delete gl nil)))))
 
 ;;; ----------------------------------------------------------------------
 ;;; Регистрация и поиск локации

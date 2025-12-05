@@ -18,6 +18,7 @@
      (:file "test-patterns")
      (:file "test-location")
      (:file "test-dispatch")
+     (:file "test-all-commands")
      (:file "test-shell-utils")
      (:module "workspace"
       :serial t

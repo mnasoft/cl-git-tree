@@ -10,7 +10,7 @@
 провайдером PROVIDER.
 "))
 
-(defgeneric repo-create (workspace provider &key &allow-other-keys)
+(defgeneric remote-create (workspace provider &key &allow-other-keys)
   (:documentation
    "Создать новый репозиторий на удалённом провайдере.
     Дополнительные ключи можно передавать свободно благодаря &allow-other-keys."))
@@ -36,7 +36,7 @@
       :rebase  → T → использовать --rebase
       :ff-only → T → использовать --ff-only"))
 
-(defgeneric repo-delete (workspace provider &key &allow-other-keys)
+(defgeneric remote-delete (workspace provider &key &allow-other-keys)
   (:documentation
    "Удалить репозиторий на удалённом провайдере.
     PROVIDER — объект провайдера (например, <github>).
@@ -105,5 +105,10 @@
   (:documentation
    "Удалить и снова добавить отдаленный репозиторий для рабочего
 пространства WORKSPACE, связанный с провайдером PROVIDER."))
+
+(defgeneric remote-url (workspace provider &key &allow-other-keys)
+  (:documentation
+   "Построить URL удалённого репозитория для WORKSPACE на провайдере PROVIDER.
+    Возвращает строку с полным git-URL репозитория."))
 
 
