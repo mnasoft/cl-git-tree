@@ -10,14 +10,21 @@
 (defmethod remote-add ((ws <workspace>) (provider <provider>) &key &allow-other-keys)
   "Добавить отдаленный репозиторий для рабочего пространства WORKSPACE,
 связанный с провайдером PROVIDER."
-  (let* ((repo-dir (<workspace>-path ws))
+  (let* ((root (git-root ws))
          (loc-key (<location>-id provider))
          (remote-url (remote-url ws provider)))
-    (if (member
-         loc-key
-         (cl-git-tree/shell-utils:shell-run repo-dir "git" "remote")
-         :test #'string=)
-        (format t "⚠️  В ~A remote ~A уже существует~%" repo-dir loc-key)
-        (progn
-          (format t "→ ~A: git remote add ~A ~A~%" repo-dir loc-key remote-url)
-          (cl-git-tree/shell-utils:shell-run repo-dir "git" "remote" "add" loc-key remote-url)))))
+    (multiple-value-bind (stdout stderr code)
+        (cl-git-tree/git-utils:git-run root "remote")
+      (declare (ignore stderr code))
+      (if (search loc-key stdout :test #'string=)
+          (format t "⚠️  Репозиторий ~A: remote '~A' уже существует~%" (repo-name ws) loc-key)
+          (multiple-value-bind (out err code)
+              (cl-git-tree/git-utils:git-run root "remote" "add" loc-key remote-url)
+            (cond
+              ((zerop code)
+               (format t "✅ Репозиторий ~A: remote '~A' добавлен → ~A~%"
+                       (repo-name ws) loc-key remote-url))
+              (t
+               (format t "❌ Ошибка при добавлении remote '~A' в ~A: ~A~%"
+                       loc-key (repo-name ws) (or err out)))))))
+    ws))

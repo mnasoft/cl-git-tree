@@ -8,8 +8,12 @@
 
 (defun readd-remote-to-repo (repo-dir args)
   "Удаляет и заново добавляет remote LOC-KEY в один репозиторий."
-  (cl-git-tree/commands/remote-remove:remove-remote-from-repo repo-dir args)
-  (cl-git-tree/commands/remote-add:add-remote-to-repo         repo-dir args))
+  (let* ((loc-key (first args))
+         (provider (cl-git-tree/loc:find-location loc-key)))
+    (if provider
+        (let ((ws (cl-git-tree/loc:make-workspace repo-dir)))
+          (cl-git-tree/loc:remote-readd ws provider))
+        (format t "⚠️  Локация '~A' не найдена в *locations*~%" loc-key))))
 
 (defun cmd-remote-readd (&rest args)
   "CLI-команда: найти все git-репозитории и заново добавить remote LOC-KEY."

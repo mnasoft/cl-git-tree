@@ -24,15 +24,12 @@
   "Удаляет remote LOC-KEY из одного репозитория REPO-DIR.
 
 LOC-KEY передаётся как первый элемент ARGS."
-  (let ((loc-key (first args)))
-    (multiple-value-bind (out _err _code)
-        (cl-git-tree/git-utils:git-run repo-dir "remote")
-      (declare (ignore _err _code))
-      (if (search loc-key out :test #'string=)
-          (progn
-            (format t "→ ~A: git remote remove ~A~%" repo-dir loc-key)
-            (cl-git-tree/git-utils:git-run repo-dir "remote" "remove" loc-key))
-          (format t "⚠️  В ~A remote ~A не найден~%" repo-dir loc-key)))))
+  (let* ((loc-key (first args))
+         (provider (cl-git-tree/loc:find-location loc-key)))
+    (if provider
+        (let ((ws (cl-git-tree/loc:make-workspace repo-dir)))
+          (cl-git-tree/loc:remote-remove ws provider))
+        (format t "⚠️  Локация '~A' не найдена в *locations*~%" loc-key))))
 
 #+nil
 (defun cmd-remote-remove (loc-key &rest _args)

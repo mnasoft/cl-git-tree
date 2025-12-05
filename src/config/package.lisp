@@ -6,6 +6,8 @@
            *excludes-patterns*
            *file-patterns*
            *patterns-path*
+           tracked-patterns
+           excluded-patterns
            load-patterns
            save-patterns
            get-tracked-patterns

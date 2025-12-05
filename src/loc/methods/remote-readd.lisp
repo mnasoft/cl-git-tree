@@ -2,6 +2,9 @@
 
 (in-package :cl-git-tree/loc)
 
-(defmethod remote-readd ((ws <workspace>) (provider <gitlab>) &key &allow-other-keys)
-   "Удалить и снова добавить отдаленный репозиторий для рабочего
-пространства WORKSPACE, связанный с провайдером PROVIDER.")
+(defmethod remote-readd ((ws <workspace>) (provider <provider>) &key &allow-other-keys)
+  "Удалить и снова добавить отдаленный репозиторий для рабочего
+пространства WORKSPACE, связанный с провайдером PROVIDER."
+  (remote-remove ws provider)
+  (remote-add ws provider)
+  ws)

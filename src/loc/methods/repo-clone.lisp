@@ -2,7 +2,7 @@
 
 (in-package :cl-git-tree/loc)
 
-(defmethod repo-clone ((ws <workspace>)(provider <provider>))
+(defmethod repo-clone ((ws <workspace>) (provider <provider>) &key &allow-other-keys)
   "Клонировать локальный репозиторий как bare в TARGET-PATH."
   (let* ((repo-dir (<workspace>-path ws))
          (repo-name (cl-git-tree/loc:repo-name  ws))

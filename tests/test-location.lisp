@@ -98,6 +98,69 @@
       (is-true (string= (cl-git-tree/loc:<location>-description found) "Вторая версия"))
       (is-true (equal (cl-git-tree/loc:<location>-url-git found) #P"/tmp/two/")))))
 
+;;; ----------------------------------------------------------------------
+;;; add-location: нормализация URL, инференция провайдера
+;;; ----------------------------------------------------------------------
+
+(def-test add-location-normalizes-trailing-slashes ()
+  "Проверяем, что дублирующиеся завершающие слеши убираются."
+  (cl-git-tree/loc:add-location "test-slash"
+    :description "Test"
+    :url-git "/tmp/repos//")
+  (let ((loc (cl-git-tree/loc:find-location "test-slash")))
+    (is-true (string= (cl-git-tree/loc:<location>-url-git loc) "/tmp/repos/"))))
+
+(def-test add-location-normalizes-ssh-url ()
+  "Проверяем, что SSH URL вида user@host:: нормализуется в user@host:/."
+  (cl-git-tree/loc:add-location "test-ssh"
+    :description "SSH"
+    :url-git "git@github.com:user::")
+  (let ((loc (cl-git-tree/loc:find-location "test-ssh")))
+    (is-true (string= (cl-git-tree/loc:<location>-url-git loc) "git@github.com:user/"))))
+
+(def-test add-location-accepts-name-as-description ()
+  "Проверяем, что :name работает как алиас для :description."
+  (cl-git-tree/loc:add-location "test-name"
+    :name "My Name"
+    :url-git "/tmp/test")
+  (let ((loc (cl-git-tree/loc:find-location "test-name")))
+    (is-true (string= (cl-git-tree/loc:<location>-description loc) "My Name"))))
+
+(def-test add-location-infers-local-provider ()
+  "Проверяем, что локальный путь автоматически определяется как :local."
+  (cl-git-tree/loc:add-location "test-infer-local"
+    :description "Local"
+    :url-git "/home/user/repos")
+  (let ((loc (cl-git-tree/loc:find-location "test-infer-local")))
+    (is-true (eq (cl-git-tree/loc:<location>-provider loc) :local))
+    (is-true (typep loc 'cl-git-tree/loc:<local>))))
+
+(def-test add-location-infers-github-provider ()
+  "Проверяем, что URL с github.com автоматически определяется как :github."
+  (cl-git-tree/loc:add-location "test-infer-gh"
+    :description "GitHub"
+    :url-git "git@github.com:user/")
+  (let ((loc (cl-git-tree/loc:find-location "test-infer-gh")))
+    (is-true (eq (cl-git-tree/loc:<location>-provider loc) :github))
+    (is-true (typep loc 'cl-git-tree/loc:<github>))))
+
+(def-test add-location-infers-gitlab-provider ()
+  "Проверяем, что URL с gitlab.com автоматически определяется как :gitlab."
+  (cl-git-tree/loc:add-location "test-infer-gl"
+    :description "GitLab"
+    :url-git "git@gitlab.com:user/")
+  (let ((loc (cl-git-tree/loc:find-location "test-infer-gl")))
+    (is-true (eq (cl-git-tree/loc:<location>-provider loc) :gitlab))
+    (is-true (typep loc 'cl-git-tree/loc:<gitlab>))))
+
+(def-test add-location-registers-in-global-table ()
+  "Проверяем, что add-location добавляет локацию в *locations*."
+  (cl-git-tree/loc:add-location "test-register"
+    :description "Test Registration"
+    :url-git "/tmp/test")
+  (is-true (cl-git-tree/loc:location-exists-p "test-register"))
+  (is-true (member "test-register" (cl-git-tree/loc:all-location-keys) :test #'string=)))
+
 
 (def-test all-locations-returns-list ()
   "Проверяем, что all-locations возвращает список зарегистрированных локаций."

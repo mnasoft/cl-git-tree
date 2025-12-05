@@ -152,7 +152,22 @@ sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree) (cl-git-tree
 sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree-tests) (uiop:symbol-call :cl-git-tree/tests :run-tests))" --quit
 #+end_src
 
-Ожидаемый результат: =Did 41 checks. Pass: 41 (100%). Skip: 0. Fail: 0.=
+Ожидаемый результат: =Did 62 checks. Pass: 62 (100%). Skip: 0. Fail: 0.=
+
+** Покрытие тестами
+
+Система включает тесты для всех основных компонентов:
+
+| Модуль | Файл теста | Описание |
+|--------|-----------|---------|
+| Locations | =test-location.lisp= | API локаций: добавление, нормализация URL, определение провайдеров |
+| Dispatcher | =test-dispatch.lisp= | Регистрация команд, диспетчеризация, обработка ошибок |
+| Shell Utils | =test-shell-utils.lisp= | Парсинг SSH URL, разбор аргументов командной строки |
+| FS | =test-fs.lisp= | Поиск git-репозиториев, проверка структуры |
+| Git Utils | =test-git-utils.lisp= | Обёртки для git-команд |
+| Config | =test-global.lisp=, =test-patterns.lisp= | Загрузка конфигурации, управление шаблонами файлов |
+| Commands | =test-commands.lisp= | CLI-команды |
+| Workspace | =workspace/*.lisp= | Создание и управление workspace-объектами |
 
 * Разработка
 

@@ -15,8 +15,10 @@
     ((:file "package")
      (:file "all")
      (:file "test-global")
-      (:file "test-patterns")
+     (:file "test-patterns")
      (:file "test-location")
+     (:file "test-dispatch")
+     (:file "test-shell-utils")
      (:module "workspace"
       :serial t
       :components
@@ -24,9 +26,6 @@
        (:file "make-instance")
        (:file "make-workspace")))
      ;; (:file "test-cmd-commit-tree")
-
-
-  
      ;; (:file "test-commands")
      ;; (:file "test-fs")
      ;; (:file "test-git-utils")
