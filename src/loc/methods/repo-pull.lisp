@@ -13,7 +13,7 @@
     (push "git"  args)
     ;; запуск
     (multiple-value-bind (stdout stderr code)
-        (apply #'cl-git-tree/shell-utils:shell-run root args)
+        (apply #'cl-git-tree/shell-utils:shell-run-single root args)
       (declare (ignore stderr))
       (cond
         ((zerop code)

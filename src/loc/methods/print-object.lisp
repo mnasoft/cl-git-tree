@@ -1,15 +1,14 @@
 (in-package :cl-git-tree/loc)
 
-(defmethod print-object ((ws cl-git-tree/loc::<workspace>) stream)
+(defmethod print-object ((ws <workspace>) stream)
   "Красивый вывод объекта <workspace> в REPL.
    Показывает path, description, git-root и repo-name."
   (print-unreadable-object (ws stream :type t :identity t)
-    (format stream "path: ~S git-root: ~S repo-name: ~S desc: ~S"
+    (format stream "path: ~S~%git-root: ~S~%repo-name: ~S~%desc: ~S"
             (<workspace>-path ws)
             (git-root ws)
             (repo-name ws)
             (<workspace>-description ws))))
-
 
 (defmethod print-object ((loc <location>) stream)
   (print-unreadable-object (loc stream :type t :identity t)

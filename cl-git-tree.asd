@@ -115,7 +115,12 @@
        (:file "repo-branches")
        (:file "repo-status")
        (:file "repo-commit")
-       (:file "repo-name")))))))
+       (:file "repo-name")
+       (:file "remote-add")
+       (:file "remote-readd")
+       (:file "remote-remove")
+       (:file "repo-clone")
+       ))))))
 
 (defsystem "cl-git-tree/dispatch"
   :description "Подсистема диспетчера CLI-команд для cl-git-tree"

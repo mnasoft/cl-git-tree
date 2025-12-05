@@ -12,7 +12,7 @@
          (root (git-root ws))
          (privacy-flag (if private "--private" "--public")))
     (multiple-value-bind (stdout stderr code)
-        (cl-git-tree/shell-utils:shell-run
+        (cl-git-tree/shell-utils:shell-run-single
          root "gh" "repo" "create" repo
          privacy-flag
          "--source" (namestring root)
@@ -35,7 +35,7 @@
          (root (git-root ws))
          (privacy-flag (if private "--private" "--public")))
     (multiple-value-bind (stdout stderr code)
-        (cl-git-tree/shell-utils:shell-run
+        (cl-git-tree/shell-utils:shell-run-single
          root
          "gh" "repo" "create" repo
          privacy-flag

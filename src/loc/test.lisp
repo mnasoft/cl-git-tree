@@ -7,7 +7,8 @@
 (defparameter *lc* (make-instance '<local>))
 (defparameter *gh* (make-instance '<github>))
 
-(repo-create *gh* *ws*)
+
+
 
 (repo-add *ws* :all t)
 
@@ -23,3 +24,20 @@
 (<location>-id *gh*)
 
 "~/quicklisp/local-projects/clisp/cl-git-tree"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defparameter *ws* (make-workspace #P"."))
+(truename ".")
+
+(cl-git-tree:load-config)
+cl-git-tree:*config-path*  ; => #P"D:/home/_namatv/PRG/msys64/home/namatv/.git-tree/locations.configure"
+*locations* 
+(alexandria:hash-table-values *locations*)
+
+(progn 
+  (defparameter *ws* (make-workspace #P"~/quicklisp/local-projects/clisp/cl-git-tree/./"))
+  *ws*)
+
+(repo-name *ws*)
+#P"D:/home/_namatv/PRG/msys64/home/namatv/./"
+

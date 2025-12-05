@@ -3,8 +3,15 @@
 #+LANGUAGE: ru
 
 * [ ] ToDo
-1. [ ] Изменить сигнатуру вызова для команд
-   - [ ] git tree remote-add -> git tree remote add
-   - [ ] git tree remote-remove -> git tree remote remove
-   - [ ] git tree remote-readd -> git tree remote readd
-2. [ ] сделать аналог команды git-timecapsule
+1. [X] Ошибку в repo-clone, с связанную с преобразованием путей под
+   cygpath.
+2. [ ] repo-create repo-clone на данный момент эти две функции делают
+   одно и то же самое. Имя repo-create более информативно. 
+3. [ ] сделать аналог команды git-timecapsule
+* [2/2] DoNe
+1. [X] Изменить сигнатуру вызова для команд
+   - [X] git tree remote-add -> git tree remote add
+   - [X] git tree remote-remove -> git tree remote remove
+   - [X] git tree remote-readd -> git tree remote readd
+2. [X] Переопределить команду clone через repo-clone
+   

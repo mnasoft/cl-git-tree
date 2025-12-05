@@ -27,6 +27,10 @@
    repo-push
    repo-pull
    repo-delete
+   remote-add
+   remote-remove
+   remote-readd
+   repo-clone
 
    ;; глобальная таблица
    *locations* 
