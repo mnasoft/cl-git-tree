@@ -11,7 +11,7 @@
          (root (git-root ws))
          (yes-flag (when yes "--yes")))
     (multiple-value-bind (stdout stderr code)
-        (cl-git-tree/shell-utils:shell-run root
+        (cl-git-tree/shell-utils:shell-run-single root
                                            "gh" "repo" "delete" repo
                                            yes-flag)
       (declare (ignore stderr))
@@ -20,7 +20,7 @@
          (format t "🗑️ Репозиторий ~A удалён на GitHub~%" repo)
          (unless remote-only
            ;; можно подчистить локальный remote
-           (cl-git-tree/shell-utils:shell-run
+           (cl-git-tree/shell-utils:shell-run-single
             root "git" "remote" "remove" (<location>-id provider))))
         (t
          (format t "❌ Ошибка при удалении репозитория (код ~A): ~A~%"
@@ -34,7 +34,7 @@
          (root (git-root ws))
          (yes-flag (when yes "--yes")))
     (multiple-value-bind (stdout stderr code)
-        (cl-git-tree/shell-utils:shell-run root
+        (cl-git-tree/shell-utils:shell-run-single root
                                            "glab" "repo" "delete" repo
                                            yes-flag)
       (declare (ignore stderr))
@@ -43,7 +43,7 @@
          (format t "🗑️ Репозиторий ~A удалён на GitLab~%" repo)
          (unless remote-only
            ;; можно подчистить локальный remote
-           (cl-git-tree/shell-utils:shell-run
+           (cl-git-tree/shell-utils:shell-run-single
             root "git" "remote" "remove" (<location>-id provider))))
         (t
          (format t "❌ Ошибка при удалении репозитория (код ~A): ~A~%"

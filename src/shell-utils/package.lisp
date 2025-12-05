@@ -4,6 +4,7 @@
   (:use :cl :uiop)
   (:export split-args-by-keys
            shell-run
+           shell-run-single
            parse-ssh-url
            ssh-run
            ssh-cmd))

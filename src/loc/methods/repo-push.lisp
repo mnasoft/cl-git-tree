@@ -14,7 +14,7 @@
     (push "push"  args)
     (push "git"   args)
     (multiple-value-bind (stdout stderr code)
-        (apply #'cl-git-tree/shell-utils:shell-run root args)
+        (apply #'cl-git-tree/shell-utils:shell-run-single root args)
       (cond
         ((zerop code)
          (format t "🚀 Репозиторий ~A успешно отправлен на ~A~%"

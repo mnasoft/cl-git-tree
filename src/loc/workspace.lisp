@@ -43,14 +43,14 @@
    Возвращает NIL если git не инициализирован."
   (when (git-initialized-p ws)
     (let ((g-path 
-            (cl-git-tree/shell-utils:shell-run
+            (cl-git-tree/shell-utils:shell-run-single
              "." "git" "-C" (namestring (<workspace>-path ws)) "rev-parse" "--show-toplevel")))
       (let ((path-str (string-trim '(#\Space #\Newline) g-path)))
         (when (> (length path-str) 0)
           (uiop/pathname:ensure-directory-pathname 
            (cond
-             ((string= "Msys" (cl-git-tree/shell-utils:shell-run "." "uname" "-o"))
-              (cl-git-tree/shell-utils:shell-run "." "cygpath" "-m" path-str))
+             ((string= "Msys" (cl-git-tree/shell-utils:shell-run-single "." "uname" "-o"))
+              (cl-git-tree/shell-utils:shell-run-single "." "cygpath" "-m" path-str))
              (t path-str))))))))
 
 (defmethod git-init ((ws <workspace>)

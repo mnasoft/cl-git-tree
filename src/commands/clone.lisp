@@ -6,6 +6,7 @@
 
 (in-package :cl-git-tree/commands/clone)
 
+#+nil
 (defun clone-repo (repo-dir args)
   "Клонирует репозиторий REPO-DIR в указанную LOCATION как bare-репозиторий,
 но только если LOCATION уже прописана как remote в этом репозитории."
@@ -31,6 +32,30 @@
                (if (zerop code)
                    (format t "✔ ~A → ~A~%" repo-name target)
                    (format t "❌ ~A: clone failed~%~A~%" repo-name err)))))))))
+
+(defun clone-repo (repo-dir args)
+  "Клонирует репозиторий REPO-DIR в указанную LOCATION как bare-репозиторий,
+но только если LOCATION уже прописана как remote в этом репозитории."
+  (let* ((loc-key (first args))
+         (pr (cl-git-tree/loc:find-location loc-key))
+         (ws (cl-git-tree/loc:make-workspace repo-dir)))
+    (cl-git-tree/loc:repo-clone ws pr)))
+
+(defun cmd-remote-add (&rest args)
+  "CLI-команда: добавить remote LOC-KEY во все git-репозитории.
+
+Пример использования:
+  git-tree remote-add gh"
+  (cond
+    ;; Показать справку
+    ((or (null args)
+         (member "--help" args :test #'string=))
+     (format t "Добавляет remote во все git-репозитории.~%~%")
+     (format t "Использование:~%  git-tree remote-add LOC-KEY~%")
+     (format t "Пример:~%  git-tree remote-add gh~%"))
+    ;; Запуск по дереву
+    (t
+     (cl-git-tree/fs:with-repo #'add-remote-to-repo args))))
 
 (defun cmd-clone (&rest args)
   "CLI-команда: клонировать все локальные репозитории в указанную локацию.

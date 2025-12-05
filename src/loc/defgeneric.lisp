@@ -4,10 +4,11 @@
 ;;; Обобщённые функции для провайдеров
 ;;; ----------------------------------------------------------------------
 
-(defgeneric clone (provider target-path)
+(defgeneric repo-clone (workspace provider &key &allow-other-keys)
   (:documentation
-   "Получить копию репозитория из источника PROVIDER в каталог TARGET-PATH.
-    Для <local> это копирование каталога, для удалённых провайдеров не применяется."))
+   "Клонировать чистый репозиторий для WORKSPACE в каталог, определяемый
+провайдером PROVIDER.
+"))
 
 (defgeneric repo-create (workspace provider &key &allow-other-keys)
   (:documentation
@@ -89,3 +90,20 @@
       :update       → T → обновить только отслеживаемые файлы (git add --update)
       :force        → T → принудительно добавить (git add --force)
       :dry-run      → T → только показать, что будет добавлено (git add --dry-run)"))
+
+(defgeneric remote-add (workspace provider &key &allow-other-keys)
+    (:documentation
+   "Добавить отдаленный репозиторий для рабочего пространства WORKSPACE,
+связанный с провайдером PROVIDER."))
+
+(defgeneric remote-remove (workspace provider &key &allow-other-keys)
+  (:documentation
+   "Удалить отдаленный репозиторий для рабочего пространства WORKSPACE,
+связанный с провайдером PROVIDER."))
+
+(defgeneric remote-readd (workspace provider &key &allow-other-keys)
+  (:documentation
+   "Удалить и снова добавить отдаленный репозиторий для рабочего
+пространства WORKSPACE, связанный с провайдером PROVIDER."))
+
+
