@@ -62,7 +62,7 @@
       ((probe-file target)
        (format t "⚠ ~A: уже существует: ~A~%" repo target))
       (t
-       (ensure-directories-exist (pathname-directory target))
+       (ensure-directories-exist target)
        (multiple-value-bind (out err code)
            (cl-git-tree/git-utils:git-run (<workspace>-path ws) "clone" "--bare" "." (namestring target))
          (declare (ignore out))
