@@ -29,7 +29,7 @@
                 (cl-git-tree/git-utils:git-run repo-dir "pull" remote branch)
               (declare (ignore _out))
               (if (zerop code)
-                  (format t "✔ ~A: pull ~A/~A успешно~%" repo-dir remote branch)
+                  (format t "✅ ~A: pull ~A/~A успешно~%" repo-dir remote branch)
                   (format t "❌ ~A: pull ~A/~A завершился с кодом ~A:~%~A"
                           repo-dir remote branch code err))))))))
 
