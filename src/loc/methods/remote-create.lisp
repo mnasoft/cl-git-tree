@@ -20,11 +20,11 @@
       (declare (ignore stderr))
       (cond
         ((zerop code)
-         (format t "✅ Репозиторий ~A создан на GitHub (~A) и привязан к workspace ~A~%"
-                 repo (if private "private" "public") root))
+         (format t "✅ [~A] Репозиторий ~A создан на GitHub (~A)~%"
+                 (<location>-id provider) repo (if private "private" "public")))
         (t
-         (format t "❌ Ошибка при создании репозитория на GitHub (код ~A): ~A~%"
-                 code stdout))))
+         (format t "❌ [~A] Ошибка при создании репозитория на GitHub (код ~A): ~A~%"
+                 (<location>-id provider) code stdout))))
     ws))
 
 (defmethod remote-create ((ws <workspace>) (provider <gitlab>) 
@@ -44,11 +44,11 @@
       (declare (ignore stderr))
       (cond
         ((zerop code)
-         (format t "✅ Репозиторий ~A создан на GitLab (~A) и привязан к workspace ~A~%"
-                 repo (if private "private" "public") root))
+         (format t "✅ [~A] Репозиторий ~A создан на GitLab (~A)~%"
+                 (<location>-id provider) repo (if private "private" "public")))
         (t
-         (format t "❌ Ошибка при создании репозитория на GitHub (код ~A): ~A~%"
-                 code stdout))))
+         (format t "❌ [~A] Ошибка при создании репозитория на GitLab (код ~A): ~A~%"
+                 (<location>-id provider) code stdout))))
     ws))
 
 (defmethod remote-create ((ws <workspace>) (provider <local>) &key &allow-other-keys)
@@ -60,13 +60,16 @@
          (target (merge-pathnames (format nil "~A.git" repo) base)))
     (cond
       ((probe-file target)
-       (format t "⚠ ~A: уже существует: ~A~%" repo target))
+       (format t "⚠️  [~A] Репозиторий ~A уже существует: ~A~%" 
+               (<location>-id provider) repo target))
       (t
        (ensure-directories-exist target)
        (multiple-value-bind (out err code)
            (cl-git-tree/git-utils:git-run (<workspace>-path ws) "clone" "--bare" "." (namestring target))
          (declare (ignore out))
          (if (zerop code)
-             (format t "✔ ~A → ~A~%" repo target)
-             (format t "❌ ~A: clone failed: ~A~%" repo err)))))
+             (format t "✅ [~A] Bare-репозиторий ~A создан: ~A~%" 
+                     (<location>-id provider) repo target)
+             (format t "❌ [~A] Ошибка создания ~A: ~A~%" 
+                     (<location>-id provider) repo err)))))
   ws))
