@@ -9,22 +9,25 @@
   "Удалить репозиторий на GitHub через CLI gh."
   (let* ((repo (repo-name ws))
          (root (git-root ws))
-         (yes-flag (when yes "--yes")))
+         (args (list "gh" "repo" "delete" repo)))
+    (when yes (setf args (append args (list "--yes"))))
+    
     (multiple-value-bind (stdout stderr code)
-        (cl-git-tree/shell-utils:shell-run-single root
-                                           "gh" "repo" "delete" repo
-                                           yes-flag)
-      (declare (ignore stderr))
+        (uiop:run-program args
+                          :directory root
+                          :output :string
+                          :error-output :string
+                          :ignore-error-status t)
       (cond
         ((zerop code)
-         (format t "🗑️ Репозиторий ~A удалён на GitHub~%" repo)
+         (format t "✅ [~A] Репозиторий ~A удалён на GitHub~%" 
+                 (<location>-id provider) repo)
          (unless remote-only
-           ;; можно подчистить локальный remote
-           (cl-git-tree/shell-utils:shell-run-single
-            root "git" "remote" "remove" (<location>-id provider))))
+           (cl-git-tree/git-utils:git-run root "git" "remote" "remove" 
+                                          (<location>-id provider))))
         (t
-         (format t "❌ Ошибка при удалении репозитория (код ~A): ~A~%"
-                 code stdout))))
+         (format t "❌ [~A] Ошибка при удалении ~A (код ~A): ~A~%"
+                 (<location>-id provider) repo code (or stderr stdout)))))
     ws))
 
 (defmethod remote-delete ((ws <workspace>) (provider <gitlab>)
@@ -32,22 +35,25 @@
   "Удалить репозиторий на GitLab через CLI glab."
   (let* ((repo (repo-name ws))
          (root (git-root ws))
-         (yes-flag (when yes "--yes")))
+         (args (list "glab" "repo" "delete" repo)))
+    (when yes (setf args (append args (list "--yes"))))
+    
     (multiple-value-bind (stdout stderr code)
-        (cl-git-tree/shell-utils:shell-run-single root
-                                           "glab" "repo" "delete" repo
-                                           yes-flag)
-      (declare (ignore stderr))
+        (uiop:run-program args
+                          :directory root
+                          :output :string
+                          :error-output :string
+                          :ignore-error-status t)
       (cond
         ((zerop code)
-         (format t "🗑️ Репозиторий ~A удалён на GitLab~%" repo)
+         (format t "✅ [~A] Репозиторий ~A удалён на GitLab~%" 
+                 (<location>-id provider) repo)
          (unless remote-only
-           ;; можно подчистить локальный remote
-           (cl-git-tree/shell-utils:shell-run-single
-            root "git" "remote" "remove" (<location>-id provider))))
+           (cl-git-tree/git-utils:git-run root "git" "remote" "remove" 
+                                          (<location>-id provider))))
         (t
-         (format t "❌ Ошибка при удалении репозитория (код ~A): ~A~%"
-                 code stdout))))
+         (format t "❌ [~A] Ошибка при удалении ~A (код ~A): ~A~%"
+                 (<location>-id provider) repo code (or stderr stdout)))))
     ws))
 
 (defmethod remote-delete ((ws <workspace>) (provider <local>)
