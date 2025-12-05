@@ -3,22 +3,23 @@
 (defmethod repo-push ((ws <workspace>) (provider <provider>) 
                       &key (remote (<location>-id provider)) branch force tags set-upstream
                       &allow-other-keys)
-  "Выполнить git push на GitHub."
+  "Выполнить git push."
   (let ((root (git-root ws))
-        (args '()))
-    (when branch       (push branch           args))
+        (args (list "push" remote)))
+    ;; Добавляем опции только если они заданы
+    (when set-upstream (push "--set-upstream" args))
     (when force        (push "--force"        args))
     (when tags         (push "--tags"         args))
-    (when set-upstream (push "--set-upstream" args))
-    (push remote  args)
-    (push "push"  args)
-    (push "git"   args)
+    (when branch       (setf args (append args (list branch))))
+    
     (multiple-value-bind (stdout stderr code)
-        (apply #'cl-git-tree/shell-utils:shell-run-single root args)
+        (apply #'cl-git-tree/git-utils:git-run root args)
       (cond
         ((zerop code)
-         (format t "🚀 Репозиторий ~A успешно отправлен на ~A~%"
-                 (repo-name ws) remote))
+         (format t "✅ [~A] Push ~A~A успешно~%"
+                 remote (repo-name ws) (if branch (format nil "/~A" branch) "")))
         (t
-         (format t "❌ Ошибка при push на ~A: ~A ~A~%" remote stdout stderr))))
+         (format t "❌ [~A] Ошибка push ~A: ~A~%" 
+                 remote (repo-name ws) 
+                 (or stderr stdout "неизвестная ошибка")))))
     ws))
