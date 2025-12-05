@@ -30,7 +30,7 @@
 (truename ".")
 
 (cl-git-tree:load-config)
-cl-git-tree:*config-path*  ; => #P"D:/home/_namatv/PRG/msys64/home/namatv/.git-tree/locations.configure"
+cl-git-tree:*config-path*  ; => #P"D:/home/_namatv/PRG/msys64/home/namatv/.git-tree/locations.lisp"
 *locations* 
 (alexandria:hash-table-values *locations*)
 

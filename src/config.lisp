@@ -1,25 +1,12 @@
 (in-package :cl-git-tree)
 
 (defparameter *config-path*
-  (merge-pathnames #p".git-tree/locations.configure"
+  (merge-pathnames #p".git-tree/locations.lisp"
                    (user-homedir-pathname))
-  "Путь к файлу конфигурации локаций git-tree.
-
-Файл хранится в домашнем каталоге пользователя, в подкаталоге
-\".git-tree/locations.configure\". В нём описываются все доступные
-локации (ключи, базовые URL и прочие параметры), которые затем
-используются подсистемами LOC и FS.
-
-Примеры:
-  *CONFIG-PATH*
-  ;; => #P\"/home/user/.git-tree/locations.configure\"
-
-  (probe-file *config-path*)
-  ;; => #P\"/home/user/.git-tree/locations.configure\" или NIL, если файл отсутствует.")
+  "Путь к файлу конфигурации локаций (~/.git-tree/locations.lisp).")
 
 (defparameter *config-example*
-"
-;; #!/bin/sbcl --script
+"\n;; #!/bin/sbcl --script
 ;; Подключаем Quicklisp
 ;; (load (merge-pathnames \"quicklisp/setup.lisp\" (user-homedir-pathname)))
 ;; (ql:quickload :cl-git-tree)
@@ -55,7 +42,7 @@
 )
 
 (defun load-config ()
-  "Загружает конфигурацию из locations.conf или создаёт шаблон, если файл отсутствует."
+  "Загружает конфигурацию из locations.lisp или создаёт шаблон, если файл отсутствует."
   (unless (probe-file *config-path*)
     (ensure-directories-exist (path:dirname *config-path*))
     (with-open-file (s *config-path*

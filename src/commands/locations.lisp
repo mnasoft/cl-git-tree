@@ -27,7 +27,7 @@
   locations add <key> :url-git <url> [:url-xz <xz>] [:tar <tar>] [:description <desc>] — добавить
   locations edit <key> [same args as add] — редактировать
   locations remove <key>       — удалить (не разрешено для 'pp' и 'pz')
-  locations save                — принудительно сохранить locations.configure
+  locations save                — принудительно сохранить locations.lisp
   locations --help             — показать справку
 "
   (cond

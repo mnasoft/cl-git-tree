@@ -186,11 +186,11 @@ REPO-NAME — имя репозитория (строка без расшире�
 
 (defun save-locations-config (&optional path)
   "Сохраняет текущие локации в файл конфигурации PATH.
-Если PATH не указан, используется ~/.git-tree/locations.configure.
+Если PATH не указан, используется ~/.git-tree/locations.lisp.
 Записывает серию форм (add-location ...) для всех локаций, кроме ключей 'pp' и 'pz'.
 Создаёт резервную копию старого файла с расширением .bak.
 Возвращает PATH." 
-  (let* ((default-path (merge-pathnames #p".git-tree/locations.configure" (user-homedir-pathname)))
+  (let* ((default-path (merge-pathnames #p".git-tree/locations.lisp" (user-homedir-pathname)))
          (path (or path default-path)))
     (when (probe-file path)
       (let* ((dir (pathname-directory path))
