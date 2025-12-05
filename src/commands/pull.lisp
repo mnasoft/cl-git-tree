@@ -23,7 +23,7 @@
                   ;; repo-pull implementations may print their own status
                   )
               (error (e)
-                (format t "❌ ~A: repo-pull for provider ~A failed: ~A~%" repo-dir remote e)))
+                (format t "❌ [~A] Ошибка: ~A~%" remote e)))
             ;; Otherwise fall back to raw git pull
             (multiple-value-bind (_out err code)
                 (cl-git-tree/git-utils:git-run repo-dir "pull" remote branch)

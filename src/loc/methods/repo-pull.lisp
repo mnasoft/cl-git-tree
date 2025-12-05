@@ -4,21 +4,21 @@
                       &key (remote (<location>-id provider)) branch rebase ff-only &allow-other-keys)
   "Выполнить git pull из указанного remote."
   (let* ((root (git-root ws))
-         (args '()))
-    (when branch   (push  branch args))
-    (push remote args)
-    (when ff-only  (push  "--ff-only" args))
-    (when rebase   (push  "--rebase" args))
-    (push "pull" args)
-    (push "git"  args)
-    ;; запуск
+         (args (list "pull")))
+    ;; Добавляем опции только если они заданы
+    (when rebase   (push "--rebase" args))
+    (when ff-only  (push "--ff-only" args))
+    (setf args (append args (list remote)))
+    (when branch   (setf args (append args (list branch))))
+    
     (multiple-value-bind (stdout stderr code)
-        (apply #'cl-git-tree/shell-utils:shell-run-single root args)
-      (declare (ignore stderr))
+        (apply #'cl-git-tree/git-utils:git-run root args)
       (cond
         ((zerop code)
-         (format t "📥 Репозиторий ~A успешно обновлён из ~A~%"
-                 (repo-name ws) remote))
+         (format t "✅ [~A] Pull ~A~A успешно~%"
+                 remote (repo-name ws) (if branch (format nil "/~A" branch) "")))
         (t
-         (format t "❌ Ошибка при pull из ~A: ~A~%" remote stdout))))
+         (format t "❌ [~A] Ошибка pull ~A: ~A~%" 
+                 remote (repo-name ws)
+                 (or stderr stdout "неизвестная ошибка")))))
     ws))
