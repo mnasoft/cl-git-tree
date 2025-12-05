@@ -5,41 +5,243 @@
 * Описание
 cl-git-tree — инструмент для управления git‑локациями и синхронизации репозиториев,
 написанный на Common Lisp.  
-Он позволяет регистрировать шаблоны локаций, строить URL для репозиториев,
-автоматизировать операции clone/unclone и управлять удалёнными репозиториями.
+Он позволяет регистрировать шаблоны локаций (локальные пути, GitHub, GitLab),
+строить URL для репозиториев, автоматизировать операции clone/unclone и управлять
+удалёнными репозиториями через CLI или Lisp API.
 
 * Возможности
-- Регистрация и хранение локаций в глобальной таблице *locations*.
-- Построение git‑URL на основе шаблонов.
-- Поддержка локальных путей, UNC и архивов (.tar, .xz).
-- Набор команд для работы с репозиториями:
-  - clone / unclone
-  - pull / push / commit / add
-  - remote‑add / remote‑remove / remote‑readd
-  - remake‑xz, info, aliases
+
+** Управление локациями
+- Регистрация и хранение локаций в глобальной таблице =*locations*=.
+- Поддержка трёх типов провайдеров:
+  - =:local= — локальные пути для git‑репозиториев.
+  - =:github= — публичные репозитории на GitHub (шаблон =git@github.com:username/=).
+  - =:gitlab= — публичные репозитории на GitLab (шаблон =git@gitlab.com:username/=).
+- Нормализация и валидация URL при добавлении локаций.
+- Сохранение/загрузка конфигурации из файла =~/.git-tree/locations.configure=.
+
+** Синхронизация репозиториев
+- Локальное клонирование репозиториев из известных локаций (=clone= / =unclone=).
+- Синхронизация с удалёнными хостами (=clone-remote= / =unclone-remote=).
+- Создание bare‑репозиториев на локальных хостах или удалённых серверах (=create-repo=).
+
+** Git-операции
+- Управление файлами в репозиториях: =add=, =commit=.
+- Синхронизация ветвей: =pull=, =push=.
+- Управление remotes: =remote-add=, =remote-remove=, =remote-readd=.
+- Просмотр статуса репозиториев: =status=.
+
+** Конфигурация и вспомогательные команды
+- Управление локациями: =locations list/show/add/edit/remove/save=.
+- Управление шаблонами файлов для отслеживания: =patterns=.
+- Показать информацию о системе: =info=.
+- Просмотр команд и их алиасов: =aliases=.
+- Универсальное применение операций ко всем репозиториям: =all=.
 
 * Архитектура
-- =cl-git-tree= — основная система, объединяющая подсистемы и команды.
-- =cl-git-tree/loc= — подсистема для работы с локациями (<location>, *locations*, API).
-- =cl-git-tree/git-utils= — вспомогательные функции для работы с git.
-- =src/commands/= — набор CLI‑команд.
-- =src/fs/= — подсистема для работы с файловой системой.
+
+** Основные компоненты
+
+| Модуль | Описание |
+|--------|---------|
+| =cl-git-tree= | Основная система, координирующая подсистемы. |
+| =cl-git-tree/loc= | Управление локациями: классы =<location>=, =<provider>=, =<local>=, =<github>=, =<gitlab>= и API (=add-location=, =find-location=, =repo-url= и т.д.). Глобальный реестр =*locations*=. |
+| =cl-git-tree/dispatch= | Диспетчер CLI-команд, реестр =*commands*= и функция =dispatch-command=. |
+| =cl-git-tree/cli= | Точка входа (функция =main=), вывод справки. |
+| =cl-git-tree/fs= | Утилиты для работы с файловой системой: поиск git‑репозиториев (=find-git-repos=), проверка репозиториев (=git-repo-p=). |
+| =cl-git-tree/git-utils= | Обёртки для git-команд: =git-run=, =current-branch=, =repo-remotes=. |
+| =cl-git-tree/shell-utils= | Утилиты для вызова shell-команд и работы с SSH. |
+| =cl-git-tree/commands/*= | Набор из 20+ CLI-команд, регистрируемых автоматически при загрузке. |
+
+** Данные и конфигурация
+
+- Глобальная таблица *locations* (hash-table) — хранит все зарегистрированные локации.
+- Файл конфигурации: =~/.git-tree/locations.configure= — содержит формы =(add-location ...)= для загрузки при старте.
+- Файл шаблонов: =~/.git-tree/file-patterns.lisp= — регулярные выражения для фильтрации файлов при синхронизации.
+
+** Паттерны проектирования
+
+- *Полиморфизм через провайдеры*: методы =repo-create=, =repo-add= и т.д. диспетчируются по типу провайдера (=<local>=, =<github>=, =<gitlab>=).
+- *Реестры команд*: CLI-команды регистрируются в =*commands*= при загрузке модулей.
+- *Глобальное состояние*: =*locations*= и =*commands*= позволяют модулям регистрировать себя и друг друга без явной передачи параметров.
 
 * Установка
+
+** Через Quicklisp
 #+begin_src lisp
 (ql:quickload "cl-git-tree")
 #+end_src
 
-* Использование
-Пример регистрации локации и клонирования репозитория:
+** Из локального исходника
+#+begin_src bash
+# Убедитесь, что проект находится в ~/quicklisp/local-projects/clisp/cl-git-tree/
+cd ~/quicklisp/local-projects/clisp/cl-git-tree
+sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree))"
+#+end_src
 
+* Использование
+
+** Примеры в Lisp API
+
+Регистрация локаций и построение URL:
 #+begin_src lisp
 (cl-git-tree/loc:add-location "gh"
-  :name "GitHub"
-  :url-git "https://github.com/")
+  :description "GitHub — шаблон для публичных проектов"
+  :url-git "git@github.com:username/"
+  :provider :github)
 
+(cl-git-tree/loc:add-location "lc"
+  :description "Local mirror"
+  :url-git "/home/user/.git-tree/git/lc/"
+  :provider :local)
+
+;; Построение URL репозитория
 (cl-git-tree/loc:repo-url "gh" "cl-git-tree")
-;; => "https://github.com/cl-git-tree.git"
+;; => "git@github.com:username/cl-git-tree.git"
+
+;; Получение объекта локации
+(cl-git-tree/loc:find-location "lc")
+;; => #<CL-GIT-TREE/LOC:<LOCAL> id="lc" ...>
+
+;; Список всех локаций
+(cl-git-tree/loc:all-location-keys)
+;; => ("gh" "lc")
+#+end_src
+
+** Примеры в CLI
+
+Использование из командной строки через SBCL:
+#+begin_src bash
+# Показать справку
+sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree) (cl-git-tree/cli:main '(\"prog\" \"--help\")))" --quit
+
+# Показать список локаций
+sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree) (cl-git-tree/cli:main '(\"prog\" \"locations\" \"list\")))" --quit
+
+# Добавить локацию
+sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree) (cl-git-tree/cli:main '(\"prog\" \"locations\" \"add\" \"myrepo\" \":url-git\" \"/tmp/repos\")))" --quit
+
+# Клонировать репозиторий из локации
+sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree) (cl-git-tree/cli:main '(\"prog\" \"clone\" \"gh\" \"cl-git-tree\")))" --quit
+#+end_src
+
+** Конфигурация
+
+Автоматическая загрузка локаций при старте:
+- Создайте файл =~/.git-tree/locations.configure= содержащий формы =(add-location ...)=:
+#+begin_src lisp
+(in-package :cl-git-tree/loc)
+
+(add-location "gh"
+  :description "GitHub"
+  :url-git "git@github.com:mnasoft/"
+  :provider :github)
+
+(add-location "lc"
+  :description "Local mirror"
+  :url-git #p"/home/mna/.git-tree/git/lc/"
+  :provider :local)
+#+end_src
+
+- Функция =cl-git-tree:load-config= автоматически загружает этот файл при старте системы.
+
+* Тестирование
+
+Запуск набора тестов:
+#+begin_src bash
+sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree-tests) (uiop:symbol-call :cl-git-tree/tests :run-tests))" --quit
+#+end_src
+
+Ожидаемый результат: =Did 41 checks. Pass: 41 (100%). Skip: 0. Fail: 0.=
+
+* Разработка
+
+** Структура проекта
+#+begin_src
+cl-git-tree/
+├── src/
+│   ├── cli.lisp                          # CLI точка входа
+│   ├── config.lisp                       # Загрузка конфигурации
+│   ├── package.lisp                      # Основной пакет
+│   ├── commands/                         # 20+ CLI-команд
+│   │   ├── clone.lisp, unclone.lisp      # Локальное клонирование
+│   │   ├── clone-remote.lisp             # Удалённое клонирование
+│   │   ├── create-repo.lisp              # Создание bare-репозиториев
+│   │   ├── add.lisp, commit.lisp         # Git файловые операции
+│   │   ├── pull.lisp, push.lisp          # Синхронизация
+│   │   ├── remote-*.lisp                 # Управление remotes
+│   │   ├── locations.lisp                # Управление локациями
+│   │   ├── patterns.lisp                 # Управление шаблонами
+│   │   ├── status.lisp, info.lisp        # Просмотр информации
+│   │   └── aliases.lisp, all.lisp        # Утилиты
+│   ├── dispatch/
+│   │   └── dispatcher.lisp               # Реестр и диспетчер команд
+│   ├── loc/
+│   │   ├── defclass.lisp                 # Классы <location>, <workspace>
+│   │   ├── provider.lisp                 # Классы провайдеров
+│   │   ├── location.lisp                 # API для работы с локациями
+│   │   ├── methods/                      # Методы для провайдеров
+│   │   │   ├── repo-create.lisp
+│   │   │   └── ...
+│   │   └── package.lisp
+│   ├── fs/
+│   │   ├── fs.lisp                       # Утилиты файловой системы
+│   │   └── package.lisp
+│   ├── git-utils/
+│   │   ├── git-utils.lisp                # Обёртки для git
+│   │   └── package.lisp
+│   ├── shell-utils/
+│   │   ├── core.lisp, ssh-utils.lisp     # Shell-операции
+│   │   └── package.lisp
+│   ├── config/                           # Управление конфигурацией
+│   │   ├── defaults.lisp
+│   │   ├── file-patterns.lisp
+│   │   └── package.lisp
+│   └── global/
+│       └── git-global.lisp               # Глобальные переменные git
+├── tests/
+│   ├── test-location.lisp                # Тесты для локаций
+│   ├── test-global.lisp                  # Тесты конфигурации
+│   ├── workspace/                        # Тесты для workspace
+│   ├── test-*.lisp                       # Специализированные тесты
+│   └── run.lisp                          # Запуск всех тестов
+├── cl-git-tree.asd                       # Определение системы ASDF
+├── cl-git-tree-tests.asd                 # Система тестов
+└── README.org                            # Этот файл
+#+end_src
+
+** Добавление новой команды
+
+1. Создайте файл в =src/commands/your-command.lisp=:
+#+begin_src lisp
+(defpackage :cl-git-tree/commands/your-command
+  (:use :cl :cl-git-tree/loc :cl-git-tree/dispatch)
+  (:export cmd-your-command))
+
+(in-package :cl-git-tree/commands/your-command)
+
+(defun cmd-your-command (&rest args)
+  "Описание вашей команды."
+  (format t "Выполнение команды your-command с аргументами: ~A~%" args))
+
+;; Регистрируем команду в диспетчере
+(eval-when (:load-toplevel :execute)
+  (register-command "your-command" #'cmd-your-command "Описание команды"))
+#+end_src
+
+2. Добавьте загрузку модуля в =cl-git-tree.asd=:
+#+begin_src lisp
+(:file "commands/your-command")
+#+end_src
+
+3. Команда будет автоматически доступна при загрузке системы.
+
+** Запуск тестов с покрытием
+
+Для проверки кода перед коммитом:
+#+begin_src bash
+cd /home/mna/quicklisp/local-projects/clisp/cl-git-tree
+sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree-tests) (uiop:symbol-call :cl-git-tree/tests :run-tests))" --quit
 #+end_src
 
 * Лицензия
