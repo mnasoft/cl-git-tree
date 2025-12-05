@@ -23,9 +23,9 @@
     ;; показать справку
     ((or (null args)
          (string= (first args) "--help"))
-     (format t "Удаляет репозитории для всех локальных git-каталогов из указанной локации.~%~%")
-     (format t "Использование:~%  git-tree unclone LOCATION-NAME~%")
-     (format t "Пример:~%  git-tree unclone gh~%"))
+     (format t "Удаляет репозитории на провайдере для всех локальных git-каталогов.~%~%")
+     (format t "Использование:~%  git-tree remote delete LOCATION-NAME~%")
+     (format t "Пример:~%  git-tree remote delete gh~%"))
 
     ;; проверка существования локации
     (t
