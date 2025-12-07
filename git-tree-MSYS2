@@ -1,9 +1,39 @@
-#!/usr/local/bin/sbcl.exe --script
+#!/bin/bash
+# Wrapper для запуска cl-git-tree в MSYS2
 
-(load (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname)))
+# Получить путь к этому файлу
+SCRIPT_FILE="${BASH_SOURCE[0]}"
 
-;; Тихая загрузка системы
-(let ((*standard-output* (make-broadcast-stream)))
-  (ql:quickload :cl-git-tree :silent t))
+# Если это симлинк, разрешить его
+if [ -L "$SCRIPT_FILE" ]; then
+  SCRIPT_FILE="$(ls -l "$SCRIPT_FILE" | sed 's/.*-> //')"
+  # Если относительный путь, сделать его абсолютным
+  if [[ "$SCRIPT_FILE" != /* ]]; then
+    SCRIPT_FILE="$(dirname "${BASH_SOURCE[0]}")/$SCRIPT_FILE"
+  fi
+fi
 
-(cl-git-tree/cli:main sb-ext:*posix-argv*)
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_FILE")" && pwd)"
+CLI_SCRIPT_LOCAL="$SCRIPT_DIR/cli-script.lisp"
+CLI_SCRIPT_INSTALLED="/usr/local/lib/git-tree/cli-script.lisp"
+
+# Определить, какой cli-скрипт использовать: рядом с бинарём или установленный
+if [ -f "$CLI_SCRIPT_LOCAL" ]; then
+  CLI_SCRIPT="$CLI_SCRIPT_LOCAL"
+elif [ -f "$CLI_SCRIPT_INSTALLED" ]; then
+  CLI_SCRIPT="$CLI_SCRIPT_INSTALLED"
+else
+  echo "❌ Ошибка: cli-скрипт не найден ни в $CLI_SCRIPT_LOCAL, ни в $CLI_SCRIPT_INSTALLED"
+  exit 1
+fi
+
+# Найти SBCL в PATH
+SBCL=$(command -v sbcl 2>/dev/null)
+
+if [ -z "$SBCL" ]; then
+  echo "❌ Ошибка: SBCL не найден в PATH"
+  echo "💡 Установите: pacman -S mingw-w64-ucrt64-sbcl"
+  exit 1
+fi
+
+"$SBCL" --script "$CLI_SCRIPT" "$@"
