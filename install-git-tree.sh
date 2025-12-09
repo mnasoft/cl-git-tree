@@ -1,21 +1,41 @@
 #!/bin/bash
-# Установочный скрипт для git-tree (Linux)
+# Универсальный установочный скрипт для git-tree (Linux / MSYS2)
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TARGET="$PROJECT_DIR/git-tree"
 LINK_DIR="/usr/local/bin"
 LINK="$LINK_DIR/git-tree"
 CLI_SRC="$PROJECT_DIR/cli-script.lisp"
 CLI_DEST_DIR="/usr/local/lib/git-tree"
 CLI_DEST="$CLI_DEST_DIR/cli-script.lisp"
 
-# Функция проверки sudo
+# Определение системы и выбор исполняемого файла
+detect_system() {
+  if [ -n "$MSYSTEM" ] || uname -o | grep -iq "msys\|mingw\|cygwin"; then
+    # MSYS2 / MinGW / Cygwin
+    echo "msys2"
+  else
+    # Linux или другие Unix-системы
+    echo "linux"
+  fi
+}
+
+SYSTEM=$(detect_system)
+
+if [ "$SYSTEM" = "msys2" ]; then
+  TARGET="$PROJECT_DIR/git-tree-MSYS2"
+  echo "🪟 Обнаружена система: MSYS2/MinGW"
+else
+  TARGET="$PROJECT_DIR/git-tree"
+  echo "🐧 Обнаружена система: Linux"
+fi
+
+# Функция проверки sudo (только для Linux)
 ensure_sudo() {
-  if [ "$EUID" -ne 0 ]; then
+  if [ "$SYSTEM" = "linux" ] && [ "$EUID" -ne 0 ]; then
     echo "⚠️  Нужен sudo для записи в /usr/local/"
     # Используем bash явно если доступен, иначе sh
     if command -v bash >/dev/null 2>&1; then
-      exec bash "$0" "$@"
+      exec sudo bash "$0" "$@"
     else
       exec sudo "$0" "$@"
     fi
@@ -23,7 +43,10 @@ ensure_sudo() {
 }
 
 install_link() {
-  ensure_sudo "$@"
+  # Проверить sudo только для Linux
+  if [ "$SYSTEM" = "linux" ]; then
+    ensure_sudo "$@"
+  fi
   
   # Проверить существование исполняемого файла
   if [ ! -f "$TARGET" ]; then
@@ -63,6 +86,7 @@ install_link() {
   if [ $? -eq 0 ]; then
     chmod +x "$TARGET"
     echo "✅ Установка завершена!"
+    echo "   Система: $SYSTEM"
     echo "   Симлинк: $LINK → $TARGET"
     echo "   CLI-скрипт: $CLI_DEST"
     echo "   Используйте: git-tree --help"
@@ -73,7 +97,10 @@ install_link() {
 }
 
 uninstall_link() {
-  ensure_sudo "$@"
+  # Проверить sudo только для Linux
+  if [ "$SYSTEM" = "linux" ]; then
+    ensure_sudo "$@"
+  fi
   
   # Удалить симлинк
   if [ -L "$LINK" ] || [ -f "$LINK" ]; then
@@ -96,19 +123,22 @@ uninstall_link() {
   fi
 }
 
-echo "$0" "$1" "$2" 
-
 case "$1" in
   --help|-h)
+    echo "Универсальный установщик git-tree (Linux / MSYS2)"
+    echo ""
     echo "Использование: $0 [--install|--uninstall|--help]"
     echo "  --install    установить git-tree в систему (по умолчанию)"
     echo "  --uninstall  удалить git-tree из системы"
     echo "  --help       показать эту справку"
+    echo ""
+    echo "Текущая система: $SYSTEM"
+    echo "Целевой файл: $TARGET"
     ;;
   --uninstall)
     uninstall_link "$@"
     ;;
-  --install)
+  --install|"")
     install_link "$@"
     ;;
   *)
