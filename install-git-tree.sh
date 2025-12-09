@@ -96,6 +96,8 @@ uninstall_link() {
   fi
 }
 
+echo "$0" "$1" "$2" 
+
 case "$1" in
   --help|-h)
     echo "Использование: $0 [--install|--uninstall|--help]"
