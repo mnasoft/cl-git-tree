@@ -13,7 +13,12 @@ CLI_DEST="$CLI_DEST_DIR/cli-script.lisp"
 ensure_sudo() {
   if [ "$EUID" -ne 0 ]; then
     echo "⚠️  Нужен sudo для записи в /usr/local/"
-    exec sudo "$0" "$@"
+    # Используем bash явно если доступен, иначе sh
+    if command -v bash >/dev/null 2>&1; then
+      exec bash "$0" "$@"
+    else
+      exec sudo "$0" "$@"
+    fi
   fi
 }
 
