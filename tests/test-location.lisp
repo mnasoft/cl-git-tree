@@ -15,7 +15,6 @@
          (ws (cl-git-tree/loc:make-workspace test-dir)))
     (unwind-protect
          (progn
-           (is-true (search "неприменим" (cl-git-tree/loc:clone p "/tmp")))
            (is-true (search "неприменим" (cl-git-tree/loc:remote-create ws p)))
            (is-true (search "неприменим" (cl-git-tree/loc:remote-delete ws p)))
            #+nil

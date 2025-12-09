@@ -34,7 +34,6 @@
        (:file "commit")
        (:file "pull")
        (:file "push")
-       (:file "clone")
        (:file "remote-delete")
        (:file "remote-add")
        (:file "remote-remove")
@@ -119,7 +118,6 @@
        (:file "remote-add")
        (:file "remote-readd")
        (:file "remote-remove")
-       (:file "repo-clone")
        ))))))
 
 (defsystem "cl-git-tree/dispatch"

@@ -30,7 +30,6 @@
    remote-add
    remote-remove
    remote-readd
-   repo-clone
 
    ;; глобальная таблица
    *locations* 

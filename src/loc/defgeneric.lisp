@@ -4,12 +4,6 @@
 ;;; Обобщённые функции для провайдеров
 ;;; ----------------------------------------------------------------------
 
-(defgeneric repo-clone (workspace provider &key &allow-other-keys)
-  (:documentation
-   "Клонировать чистый репозиторий для WORKSPACE в каталог, определяемый
-провайдером PROVIDER.
-"))
-
 (defgeneric remote-create (workspace provider &key &allow-other-keys)
   (:documentation
    "Создать новый репозиторий на удалённом провайдере.
