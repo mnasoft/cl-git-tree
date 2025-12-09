@@ -109,9 +109,6 @@ case "$1" in
   --install)
     install_link "$@"
     ;;
-  "")
-    install_link "$@"
-    ;;
   *)
     echo "❌ Неизвестная опция: $1"
     echo "Используйте: $0 --help"
