@@ -45,6 +45,7 @@
        (:file "info")
       (:file "patterns")
       (:file "locations")
+      (:file "transport")
       (:file "aliases")))
      (:file "cli")))))
 
