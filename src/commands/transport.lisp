@@ -79,31 +79,54 @@
             (format t "❌ Ошибка при создании архива:~%~A~%" err)
             nil)))))
 
+(defun clean-tar-xz-archives (output-path)
+  "Удаляет tar.xz архивы в каталоге output-path."
+    (let* ((pattern (merge-pathnames #p"*.tar.xz" output-path))
+      (archives (directory pattern))
+         (deleted 0))
+    (if archives
+        (progn
+          (dolist (file archives)
+            (when (probe-file file)
+              (delete-file file)
+              (incf deleted)))
+          (format t "🧹 Удалено архивов: ~A (путь ~A)~%" deleted output-path))
+        (format t "Архивы не найдены в ~A~%" output-path))
+    deleted))
+
 (defun cmd-transport (&rest args)
-  "CLI-команда: архивирует чистые репозитории в tar.xz.
+  "CLI-команда: архивирует чистые репозитории в tar.xz или очищает каталоги с архивами.
   
   Опции:
     --provider PROVIDER  - фильтр по провайдеру (например, :local, :github)
-    --days N            - архивировать только репозитории, обновлённые не позднее N дней назад
-    --output PATH       - путь для сохранения архивов (по умолчанию ~/.git-tree/xz/)
-    --help              - показать эту справку"
+    --days N             - архивировать только репозитории, обновлённые не позднее N дней назад (по умолчанию 30)
+    --output PATH        - путь для архивов/очистки (по умолчанию ~/.git-tree/xz/)
+    --help               - показать эту справку"
   (cond
     ((member "--help" args :test #'string=)
-     (format t "Архивирует чистые git-репозитории в формате tar.xz.~%~%")
+     (format t "Архивирует чистые git-репозитории в формате tar.xz или очищает архивы.~%~%")
      (format t "Использование:~%")
-     (format t "  git-tree transport [--provider PROVIDER] [--days N] [--output PATH]~%~%")
+     (format t "  git-tree transport [--provider PROVIDER] [--days N] [--output PATH]~%")
+     (format t "  git-tree transport clean [--output PATH]~%~%")
      (format t "Опции:~%")
-     (format t "  --provider PROVIDER  Фильтр по провайдеру (local, github, gitlab)~%")
-     (format t "  --days N            Архивировать только репозитории с коммитами не старее N дней~%")
-    ;; Экранируем тильду, чтобы формат не считал директиву ~/ (печатаем буквально ~/)
-    (format t "  --output PATH       Путь для сохранения архивов (по умолчанию ~~/.git-tree/xz/)~%")
-     (format t "  --help              Показать эту справку~%~%")
+    (format t "  --provider PROVIDER  Фильтр по провайдеру (local, github, gitlab)~%")
+    (format t "  --days N             Архивировать только репозитории с коммитами не старее N дней (по умолчанию 30)~%")
+      (format t "  --output PATH        Путь для архивов/очистки (по умолчанию ~~/.git-tree/xz/)~%")
+     (format t "  --help               Показать эту справку~%~%")
      (format t "Примеры:~%")
      (format t "  git-tree transport --provider local --days 30~%")
-     (format t "  git-tree transport --output /tmp/archives/~%"))
+     (format t "  git-tree transport --output /tmp/archives/~%")
+     (format t "  git-tree transport clean --output /tmp/archives/~%"))
+    ((and args (string= (first args) "clean"))
+     (let ((output-path (merge-pathnames #p".git-tree/xz/" (user-homedir-pathname))))
+       (loop for (arg val) on (rest args) by #'cddr
+             do (when (string= arg "--output")
+                  (setf output-path (uiop:ensure-directory-pathname val))))
+       (format t "🧹 Очистка архива в каталоге ~A~%" output-path)
+       (clean-tar-xz-archives output-path)))
     (t
-     (let ((provider-filter nil)
-           (days-filter nil)
+         (let ((provider-filter nil)
+           (days-filter 30)
            (output-path (merge-pathnames #p".git-tree/xz/" (user-homedir-pathname)))
            (processed 0)
            (archived 0))
