@@ -61,8 +61,7 @@
   (let* ((repo-name (cl-git-tree/fs:repo-name repo-dir))
          (archive-name (format nil "~A.tar.xz" repo-name))
          ;; Раскрываем output-path в случае, если там есть тильда
-         (expanded-output-path (uiop:ensure-directory-pathname 
-                                (uiop:ensure-pathname output-path :expand-user t)))
+         (expanded-output-path (cl-git-tree/loc:expand-home output-path))
          (archive-path (merge-pathnames archive-name expanded-output-path))
          (bare-name (concatenate 'string repo-name ".git"))
          (temp-dir (uiop:ensure-directory-pathname

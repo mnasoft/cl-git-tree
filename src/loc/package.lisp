@@ -47,7 +47,8 @@
    print-locations
    infer-local-p
    location-local-p
-   match-location-keys)
+   match-location-keys
+   expand-home)
 
   (:export
    ;; класс
