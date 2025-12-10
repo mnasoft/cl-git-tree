@@ -10,6 +10,18 @@
 Используется всеми командами (clone, unclone, remote-*) для поиска и
 построения URL репозиториев.")
 
+(defun expand-home (path)
+  "Заменяет ведущий '~' на домашний каталог (Linux/MSYS2)."
+  (cond
+    ((pathnamep path)
+     (uiop:native-namestring (uiop:ensure-pathname path)))
+    ((and (stringp path) (> (length path) 0)
+          (char= (char path 0) #\~))
+     (handler-case
+         (uiop:native-namestring (uiop:ensure-pathname path :want-relative nil))
+       (error () path)))
+    (t path)))
+
 (defun register-location (loc)
   "Зарегистрировать объект LOC в глобальной таблице локаций.
 Если локация с таким id уже существует, она будет перезаписана."
@@ -41,7 +53,9 @@ ID — строковый идентификатор локации (ключ в
     (let* ((id-str (if (stringp id) id (prin1-to-string id)))
       (desc (or description name))
       (url (and url-git (or (stringp url-git) (pathnamep url-git))
-          (if (pathnamep url-git) (namestring url-git) url-git)))
+          (expand-home url-git)))
+      (url-xz* (and url-xz (expand-home url-xz)))
+      (tar* (and tar (expand-home tar)))
       (prov provider))
     ;; Нормализация url-git
     (when url
@@ -81,8 +95,8 @@ ID — строковый идентификатор локации (ключ в
                                 :id id-str
                                 :description desc
                                 :url-git url
-                                :url-xz url-xz
-                                :tar tar
+                                :url-xz url-xz*
+                                :tar tar*
                                 :provider prov)))
         (register-location loc)
         (find-location id-str)))))

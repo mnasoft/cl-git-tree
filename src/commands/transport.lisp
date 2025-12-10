@@ -54,29 +54,54 @@
   nil))
 
 (defun create-tar-xz-archive (repo-dir output-path)
-  "Создаёт tar.xz архив репозитория в указанном месте."
+  "Создаёт tar.xz архив репозитория в указанном месте.
+   Архив содержит только голый git-репозиторий (--bare, без рабочих файлов)."
   (let* ((repo-name (cl-git-tree/fs:repo-name repo-dir))
          (archive-name (format nil "~A.tar.xz" repo-name))
          (archive-path (merge-pathnames archive-name output-path))
-         (parent-dir (truename (merge-pathnames "../" repo-dir)))
-         (repo-basename (file-namestring (string-right-trim "/" (namestring repo-dir)))))
+         (bare-name (concatenate 'string repo-name ".git"))
+         (temp-dir (uiop:ensure-directory-pathname
+                     (merge-pathnames (make-pathname :directory (list :relative (format nil "tmp-git-tree-~A" (random 1000000))))
+                                      (uiop:temporary-directory)))))
     (ensure-directories-exist output-path)
     (format t "📦 Создаю архив ~A...~%" archive-path)
-    (multiple-value-bind (out err code)
+    
+    ;; Создаём голый клон в временной директории
+    (multiple-value-bind (out1 err1 code1)
         (uiop:run-program
-         (list "tar" "-C" (namestring parent-dir) 
-               "-cJf" (namestring archive-path)
-               repo-basename)
+         (list "git" "clone" "--bare" (namestring repo-dir) (namestring (merge-pathnames bare-name temp-dir)))
          :output :string
          :error-output :string
          :ignore-error-status t)
-      (declare (ignore out))
-      (if (zerop code)
+      (declare (ignore out1))
+      
+      (if (zerop code1)
           (progn
-            (format t "✔ Архив создан: ~A~%" archive-path)
-            t)
+            ;; Архивируем голый репозиторий
+            (multiple-value-bind (out err code)
+                (uiop:run-program
+                 (list "tar" "-C" (namestring temp-dir) 
+                       "-cJf" (namestring archive-path)
+                       bare-name)
+                 :output :string
+                 :error-output :string
+                 :ignore-error-status t)
+              (declare (ignore out))
+              
+              ;; Очищаем временный каталог
+              (uiop:delete-directory-tree temp-dir :validate t)
+              
+              (if (zerop code)
+                  (progn
+                    (format t "✔ Архив создан: ~A~%" archive-path)
+                    t)
+                  (progn
+                    (format t "❌ Ошибка при архивировании:~%~A~%" err)
+                    nil))))
           (progn
-            (format t "❌ Ошибка при создании архива:~%~A~%" err)
+            ;; Очищаем временный каталог при ошибке
+            (ignore-errors (uiop:delete-directory-tree temp-dir :validate t))
+            (format t "❌ Ошибка при создании голого клона:~%~A~%" err1)
             nil)))))
 
 (defun clean-tar-xz-archives (output-path)
@@ -106,19 +131,18 @@
     ((member "--help" args :test #'string=)
      (format t "Архивирует чистые git-репозитории в формате tar.xz или очищает архивы.~%~%")
      (format t "Использование:~%")
-     (format t "  git-tree transport [--provider PROVIDER] [--days N] [--output PATH]~%")
-     (format t "  git-tree transport clean [--output PATH]~%")
-     (format t "  git-tree transport dirty~%~%")
+     (format t "  git-tree transport [--days N]~%")
+     (format t "  git-tree transport clean [--output PATH]~%~%")
      (format t "Опции:~%")
-    (format t "  --provider PROVIDER  Фильтр по провайдеру (local, github, gitlab)~%")
-    (format t "  --days N             Архивировать только репозитории с коммитами не старее N дней (по умолчанию 30)~%")
-      (format t "  --output PATH        Путь для архивов/очистки (по умолчанию ~~/.git-tree/xz/)~%")
+     (format t "  --days N             Архивировать только репозитории с коммитами не старее N дней (по умолчанию 30)~%")
      (format t "  --help               Показать эту справку~%~%")
+     (format t "Примечание:~%")
+     (format t "  Архивы создаются для каждого локального провайдера в папку, указанную в :url-xz.~%")
+     (format t "  Если :url-xz = NIL, архивирование для этого провайдера пропускается.~%~%")
      (format t "Примеры:~%")
-     (format t "  git-tree transport --provider local --days 30~%")
-     (format t "  git-tree transport --output /tmp/archives/~%")
-     (format t "  git-tree transport clean --output /tmp/archives/~%")
-     (format t "  git-tree transport dirty~%"))
+     (format t "  git-tree transport --days 30~%")
+     (format t "  git-tree transport~%")
+     (format t "  git-tree transport clean --output /tmp/archives/~%"))
     ((and args (string= (first args) "clean"))
      (let ((output-path (merge-pathnames #p".git-tree/xz/" (user-homedir-pathname))))
        (loop for (arg val) on (rest args) by #'cddr
@@ -126,44 +150,24 @@
                   (setf output-path (uiop:ensure-directory-pathname val))))
        (format t "🧹 Очистка архива в каталоге ~A~%" output-path)
        (clean-tar-xz-archives output-path)))
-    ((and args (string= (first args) "dirty"))
-     (let ((dirty 0))
-       (dolist (repo-dir (cl-git-tree/fs:find-git-repos))
-         (unless (repo-is-clean-p repo-dir)
-           (incf dirty)
-           (format t "⚠️  ~A (~A) — незакоммиченные изменения~%"
-                   (cl-git-tree/fs:repo-name repo-dir)
-                   (namestring repo-dir))))
-       (if (zerop dirty)
-           (format t "Все репозитории чистые.~%")
-           (format t "~%Всего грязных репозиториев: ~A~%" dirty))))
     (t
-         (let ((provider-filter nil)
-           (days-filter 30)
-           (output-path (merge-pathnames #p".git-tree/xz/" (user-homedir-pathname)))
+         (let ((days-filter 30)
            (processed 0)
            (archived 0))
        
        ;; Парсим аргументы
        (loop for (arg val) on args by #'cddr
-             do (cond
-                  ((string= arg "--provider")
-                   (setf provider-filter (intern (string-upcase val) :keyword)))
-                  ((string= arg "--days")
-                   (setf days-filter (parse-integer val :junk-allowed t)))
-                  ((string= arg "--output")
-                   (setf output-path (uiop:ensure-directory-pathname val)))))
+             do (when (string= arg "--days")
+                  (setf days-filter (parse-integer val :junk-allowed t))))
        
        (format t "🔍 Поиск репозиториев для архивирования...~%")
-       (when provider-filter
-         (format t "   Фильтр по провайдеру: ~A~%" provider-filter))
-       (when days-filter
-         (format t "   Фильтр по дате: не старее ~A дней~%" days-filter))
-       (format t "   Путь для архивов: ~A~%~%" output-path)
+       (format t "   Фильтр по дате: не старее ~A дней~%" days-filter)
+       (format t "   Источники: локальные провайдеры с установленным :url-xz~%~%")
        
        (dolist (repo-dir (cl-git-tree/fs:find-git-repos))
          (incf processed)
          (let ((repo-name (cl-git-tree/fs:repo-name repo-dir))
+               (provider (get-repo-provider repo-dir))
                (skip nil))
            (format t "~%Репозиторий: ~A~%" repo-name)
            
@@ -186,19 +190,24 @@
                      (format t "⚠️  Пропущено: не удалось определить дату последнего коммита~%")
                      (setf skip t)))))
            
-           ;; Проверяем провайдера
-           (when (and (not skip) provider-filter)
-             (let ((provider (get-repo-provider repo-dir)))
-               (if (and provider (eq provider provider-filter))
-                   (format t "✔ Провайдер: ~A~%" provider)
+           ;; Проверяем, что провайдер локальный и имеет url-xz
+           (when (and (not skip) provider)
+             (let ((loc (cl-git-tree/loc:find-location 
+                         (loop for k in (cl-git-tree/loc:all-location-keys)
+                               when (let ((l (cl-git-tree/loc:find-location k)))
+                                      (and l (eq (cl-git-tree/loc:<location>-provider l) provider)))
+                               return k))))
+               (if (and loc (cl-git-tree/loc:<location>-url-xz loc))
                    (progn
-                     (format t "⚠️  Пропущено: провайдер ~A не соответствует фильтру ~A~%" 
-                             provider provider-filter)
-                     (setf skip t)))))
-           
-           ;; Архивируем
-           (when (and (not skip) (create-tar-xz-archive repo-dir output-path))
-             (incf archived))))
+                     (format t "✔ Провайдер: ~A (локальный с :url-xz)~%" provider)
+                     ;; Архивируем в path из url-xz локации
+                     (when (create-tar-xz-archive repo-dir 
+                                                   (uiop:ensure-directory-pathname 
+                                                    (cl-git-tree/loc:<location>-url-xz loc)))
+                       (incf archived)))
+                   (progn
+                     (format t "⚠️  Пропущено: провайдер ~A не локальный или :url-xz не установлен~%" provider)
+                     (setf skip t)))))))
        
        (format t "~%~%=== Итого ===~%")
        (format t "Обработано репозиториев: ~A~%" processed)
