@@ -174,22 +174,26 @@
     --output PATH        - путь для архивов/очистки (по умолчанию ~/.git-tree/xz/)
     --help               - показать эту справку"
   (cond
-    ((member "--help" args :test #'string=)
-     (format t "Архивирует чистые git-репозитории в формате tar.xz, импортирует или очищает архивы.~%~%")
+    ((or (null args) (member "--help" args :test #'string=))
+     (format t "Управление транспортом репозиториев через tar.xz архивы.~%~%")
      (format t "Использование:~%")
-     (format t "  git-tree transport [--days N]~%")
-     (format t "  git-tree transport apply~%")
+     (format t "  git-tree transport export [--days N]~%")
+     (format t "  git-tree transport import~%")
      (format t "  git-tree transport clean [--output PATH]~%~%")
+     (format t "Подкоманды:~%")
+     (format t "  export               Создать tar.xz архивы из чистых репозиториев~%")
+     (format t "  import               Импортировать архивы в bare-хранилища~%")
+     (format t "  clean                Удалить tar.xz архивы~%~%")
      (format t "Опции:~%")
-     (format t "  --days N             Архивировать только репозитории с коммитами не старее N дней (по умолчанию 30)~%")
+     (format t "  --days N             Для export: архивировать только репозитории с коммитами не старее N дней (по умолчанию 30)~%")
+     (format t "  --output PATH        Для clean: путь к каталогу с архивами~%")
      (format t "  --help               Показать эту справку~%~%")
      (format t "Примечание:~%")
      (format t "  Архивы создаются и импортируются для каждого локального провайдера в папки :url-xz и :url-git.~%")
-     (format t "  Если :url-xz = NIL, архивирование или импорт для этого провайдера пропускается.~%~%")
+     (format t "  Если :url-xz = NIL, операции для этого провайдера пропускаются.~%~%")
      (format t "Примеры:~%")
-     (format t "  git-tree transport --days 30~%")
-     (format t "  git-tree transport apply~%")
-     (format t "  git-tree transport~%")
+     (format t "  git-tree transport export --days 30~%")
+     (format t "  git-tree transport import~%")
      (format t "  git-tree transport clean --output /tmp/archives/~%"))
     ((and args (string= (first args) "clean"))
      (let ((output-path (merge-pathnames #p".git-tree/xz/" (user-homedir-pathname))))
@@ -198,7 +202,7 @@
                   (setf output-path (uiop:ensure-directory-pathname val))))
        (format t "🧹 Очистка архива в каталоге ~A~%" output-path)
        (clean-tar-xz-archives output-path)))
-    ((and args (string= (first args) "apply"))
+    ((and args (string= (first args) "import"))
      (let ((processed 0)
            (applied 0))
        (format t "⬇ Импорт архивов tar.xz из :url-xz в :url-git для всех локальных локаций~%~%")
@@ -221,13 +225,13 @@
        (format t "~%=== Итог импорта ===~%")
        (format t "Обработано архивов: ~A~%" processed)
        (format t "Импортировано: ~A~%" applied)))
-    (t
+    ((and args (string= (first args) "export"))
          (let ((days-filter 30)
            (processed 0)
            (archived 0))
        
        ;; Парсим аргументы
-       (loop for (arg val) on args by #'cddr
+       (loop for (arg val) on (rest args) by #'cddr
              do (when (string= arg "--days")
                   (setf days-filter (parse-integer val :junk-allowed t))))
        
@@ -288,8 +292,11 @@
        
        (format t "~%~%=== Итого ===~%")
        (format t "Обработано репозиториев: ~A~%" processed)
-       (format t "Создано архивов: ~A~%" archived)))))
+       (format t "Создано архивов: ~A~%" archived)))
+    (t
+     (format t "❌ Неизвестная подкоманда. Используйте: export, import или clean.~%")
+     (format t "Справка: git-tree transport --help~%"))))
 
 (eval-when (:load-toplevel :execute)
   (cl-git-tree/dispatch:register-command
-   "transport" #'cmd-transport "Архивировать чистые репозитории в tar.xz"))
+   "transport" #'cmd-transport "Управление транспортом репозиториев через tar.xz"))
