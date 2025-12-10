@@ -34,9 +34,10 @@
              (days (floor diff-seconds 86400)))
         days))))
 
-(defun get-repo-provider (repo-dir)
-  "Определяет провайдера репозитория по его remotes."
-  (let ((remotes (cl-git-tree/git-utils:repo-remotes repo-dir)))
+(defun get-repo-providers (repo-dir)
+  "Определяет ВСЕ провайдеров репозитория по его remotes."
+  (let ((providers nil)
+        (remotes (cl-git-tree/git-utils:repo-remotes repo-dir)))
     (dolist (remote remotes)
       (multiple-value-bind (out err code)
           (cl-git-tree/git-utils:git-run repo-dir "remote" "get-url" remote)
@@ -49,9 +50,10 @@
                 (when (and loc (cl-git-tree/loc:<location>-url-git loc))
                   (let ((base-url (cl-git-tree/loc:<location>-url-git loc)))
                     (when (search base-url url)
-                      (return-from get-repo-provider 
-                        (cl-git-tree/loc:<location>-provider loc)))))))))))
-  nil))
+                      (let ((provider (cl-git-tree/loc:<location>-provider loc)))
+                        (unless (member provider providers)
+                          (push provider providers))))))))))))
+    providers))
 
 (defun create-tar-xz-archive (repo-dir output-path)
   "Создаёт tar.xz архив репозитория в указанном месте.
@@ -166,7 +168,7 @@
        (dolist (repo-dir (cl-git-tree/fs:find-git-repos))
          (incf processed)
          (let ((repo-name (cl-git-tree/fs:repo-name repo-dir))
-               (provider (get-repo-provider repo-dir))
+               (providers (get-repo-providers repo-dir))
                (skip nil))
            (format t "~%Репозиторий: ~A~%" repo-name)
            
@@ -189,26 +191,28 @@
                      (format t "⚠️  Пропущено: не удалось определить дату последнего коммита~%")
                      (setf skip t)))))
            
-           ;; Проверяем, что провайдер локальный и имеет url-xz
+           ;; Архивируем для каждого найденного провайдера
            (if (not skip)
-               (if provider
-                   ;; Ищем ВСЕ локации с этим провайдером и url-xz
-                   (let ((matching-locs 
-                           (loop for k in (cl-git-tree/loc:all-location-keys)
-                                 for l = (cl-git-tree/loc:find-location k)
-                                 when (and l 
-                                           (eq (cl-git-tree/loc:<location>-provider l) provider)
-                                           (cl-git-tree/loc:<location>-url-xz l))
-                                 collect l)))
-                     (if matching-locs
-                         ;; Архивируем в каждую найденную локацию с url-xz
-                         (dolist (loc matching-locs)
-                           (when (create-tar-xz-archive repo-dir 
-                                                         (uiop:ensure-directory-pathname 
-                                                          (cl-git-tree/loc:<location>-url-xz loc)))
-                             (incf archived)))
-                         (format t "⚠️  Пропущено: провайдер ~A не имеет локаций с :url-xz~%" provider)))
-                   (format t "⚠️  Пропущено: не определён провайдер репозитория~%"))
+               (if providers
+                   ;; Обрабатываем каждый провайдер
+                   (dolist (provider providers)
+                     ;; Ищем ВСЕ локации с этим провайдером и url-xz
+                     (let ((matching-locs 
+                             (loop for k in (cl-git-tree/loc:all-location-keys)
+                                   for l = (cl-git-tree/loc:find-location k)
+                                   when (and l 
+                                             (eq (cl-git-tree/loc:<location>-provider l) provider)
+                                             (cl-git-tree/loc:<location>-url-xz l))
+                                   collect l)))
+                       (if matching-locs
+                           ;; Архивируем в каждую найденную локацию с url-xz
+                           (dolist (loc matching-locs)
+                             (when (create-tar-xz-archive repo-dir 
+                                                           (uiop:ensure-directory-pathname 
+                                                            (cl-git-tree/loc:<location>-url-xz loc)))
+                               (incf archived)))
+                           (format t "⚠️  Пропущено: провайдер ~A не имеет локаций с :url-xz~%" provider))))
+                   (format t "⚠️  Пропущено: не определены провайдеры репозитория~%"))
                ;; skip = t, репозиторий уже был пропущен ранее с объяснением
                nil)))
        
