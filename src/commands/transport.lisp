@@ -177,7 +177,7 @@
     ((or (null args) (member "--help" args :test #'string=))
      (format t "Управление транспортом репозиториев через tar.xz архивы.~%~%")
      (format t "Использование:~%")
-     (format t "  git-tree transport export [--days N]~%")
+     (format t "  git-tree transport export [--days N] [--verbose]~%")
      (format t "  git-tree transport import~%")
      (format t "  git-tree transport clean~%~%")
      (format t "Подкоманды:~%")
@@ -186,12 +186,15 @@
      (format t "  clean                Удалить tar.xz архивы из каталогов :url-xz всех провайдеров~%~%")
      (format t "Опции:~%")
      (format t "  --days N             Для export: архивировать только репозитории с коммитами не старее N дней (по умолчанию 30)~%")
+     (format t "  --verbose            Для export: показать подробный вывод~%")
      (format t "  --help               Показать эту справку~%~%")
      (format t "Примечание:~%")
      (format t "  Архивы создаются и импортируются для каждого локального провайдера в папки :url-xz и :url-git.~%")
      (format t "  Если :url-xz = NIL, операции для этого провайдера пропускаются.~%~%")
      (format t "Примеры:~%")
-     (format t "  git-tree transport export --days 30~%")
+     (format t "  git-tree transport export               # краткий вывод~%")
+     (format t "  git-tree transport export --verbose     # подробный вывод~%")
+     (format t "  git-tree transport export --days 7~%")
      (format t "  git-tree transport import~%")
      (format t "  git-tree transport clean~%"))
     ((and args (string= (first args) "clean"))
@@ -231,28 +234,27 @@
     ((and args (string= (first args) "export"))
          (let ((days-filter 30)
            (processed 0)
-           (archived 0))
+           (archived 0)
+           (verbose (member "--verbose" args :test #'string=)))
        
        ;; Парсим аргументы
        (loop for (arg val) on (rest args) by #'cddr
              do (when (string= arg "--days")
                   (setf days-filter (parse-integer val :junk-allowed t))))
        
-       (format t "🔍 Поиск репозиториев для архивирования...~%")
-       (format t "   Фильтр по дате: не старее ~A дней~%" days-filter)
-       (format t "   Источники: локальные провайдеры с установленным :url-xz~%~%")
+       (unless verbose
+         (format t "📦 Архивирование репозиториев (--days ~A)...~%" days-filter))
        
        (dolist (repo-dir (cl-git-tree/fs:find-git-repos))
          (incf processed)
          (let ((repo-name (cl-git-tree/fs:repo-name repo-dir))
                (providers (get-repo-providers repo-dir))
-               (skip nil))
-           (format t "~%Репозиторий: ~A~%" repo-name)
+               (skip nil)
+               (skip-reason nil))
            
            ;; Проверяем чистоту репозитория
            (unless (repo-is-clean-p repo-dir)
-             (format t "⚠️  Пропущено: репозиторий имеет незакоммиченные изменения~%")
-             (setf skip t))
+             (setf skip t skip-reason "незакоммиченные изменения"))
            
            ;; Проверяем дату последнего коммита
            (when (and (not skip) days-filter)
@@ -260,13 +262,19 @@
                (if days
                    (if (> days days-filter)
                        (progn
-                         (format t "⚠️  Пропущено: последний коммит ~A дней назад (> ~A)~%" 
-                                 days days-filter)
-                         (setf skip t))
-                       (format t "✔ Последний коммит ~A дней назад~%" days))
+                         (setf skip t skip-reason (format nil "коммит ~A дней назад" days)))
+                       (when verbose
+                         (format t "~%Репозиторий: ~A~%" repo-name)
+                         (format t "  ✔ Последний коммит ~A дней назад~%" days)))
                    (progn
-                     (format t "⚠️  Пропущено: не удалось определить дату последнего коммита~%")
-                     (setf skip t)))))
+                     (setf skip t skip-reason "не удалось определить дату коммита")))))
+           
+           ;; Выводим причину пропуска, если есть
+           (when (and verbose skip)
+             (unless skip-reason
+               (setf skip-reason "неизвестная причина"))
+             (format t "~%Репозиторий: ~A~%" repo-name)
+             (format t "  ⚠️  Пропущено: ~A~%" skip-reason))
            
            ;; Архивируем для каждого найденного провайдера
            (if (not skip)
@@ -287,15 +295,17 @@
                              (when (create-tar-xz-archive repo-dir 
                                                            (uiop:ensure-directory-pathname 
                                                             (cl-git-tree/loc:<location>-url-xz loc)))
-                               (incf archived)))
-                           (format t "⚠️  Пропущено: провайдер ~A не имеет локаций с :url-xz~%" provider))))
-                   (format t "⚠️  Пропущено: не определены провайдеры репозитория~%"))
-               ;; skip = t, репозиторий уже был пропущен ранее с объяснением
+                               (incf archived)
+                               (unless verbose
+                                 (format t "✔ ~A~%" repo-name))))
+                           (when verbose
+                             (format t "  ⚠️  Провайдер ~A не имеет локаций с :url-xz~%" provider)))))
+                   (when verbose
+                     (format t "  ⚠️  Не определены провайдеры репозитория~%")))
                nil)))
        
-       (format t "~%~%=== Итого ===~%")
-       (format t "Обработано репозиториев: ~A~%" processed)
-       (format t "Создано архивов: ~A~%" archived)))
+       (unless verbose
+         (format t "~%=== Архивировано: ~A из ~A ===~%" archived processed))))
     (t
      (format t "❌ Неизвестная подкоманда. Используйте: export, import или clean.~%")
      (format t "Справка: git-tree transport --help~%"))))
