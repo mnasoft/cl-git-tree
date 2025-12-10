@@ -192,18 +192,22 @@
            ;; Проверяем, что провайдер локальный и имеет url-xz
            (if (not skip)
                (if provider
-                   (let ((loc (cl-git-tree/loc:find-location 
-                               (loop for k in (cl-git-tree/loc:all-location-keys)
-                                     when (let ((l (cl-git-tree/loc:find-location k)))
-                                            (and l (eq (cl-git-tree/loc:<location>-provider l) provider)))
-                                     return k))))
-                     (if (and loc (cl-git-tree/loc:<location>-url-xz loc))
-                         ;; Архивируем в path из url-xz локации
-                         (when (create-tar-xz-archive repo-dir 
-                                                       (uiop:ensure-directory-pathname 
-                                                        (cl-git-tree/loc:<location>-url-xz loc)))
-                           (incf archived))
-                         (format t "⚠️  Пропущено: провайдер ~A не имеет настроенного :url-xz~%" provider)))
+                   ;; Ищем ВСЕ локации с этим провайдером и url-xz
+                   (let ((matching-locs 
+                           (loop for k in (cl-git-tree/loc:all-location-keys)
+                                 for l = (cl-git-tree/loc:find-location k)
+                                 when (and l 
+                                           (eq (cl-git-tree/loc:<location>-provider l) provider)
+                                           (cl-git-tree/loc:<location>-url-xz l))
+                                 collect l)))
+                     (if matching-locs
+                         ;; Архивируем в каждую найденную локацию с url-xz
+                         (dolist (loc matching-locs)
+                           (when (create-tar-xz-archive repo-dir 
+                                                         (uiop:ensure-directory-pathname 
+                                                          (cl-git-tree/loc:<location>-url-xz loc)))
+                             (incf archived)))
+                         (format t "⚠️  Пропущено: провайдер ~A не имеет локаций с :url-xz~%" provider)))
                    (format t "⚠️  Пропущено: не определён провайдер репозитория~%"))
                ;; skip = t, репозиторий уже был пропущен ранее с объяснением
                nil)))
