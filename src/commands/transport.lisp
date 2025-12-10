@@ -64,7 +64,6 @@
                      (merge-pathnames (make-pathname :directory (list :relative (format nil "tmp-git-tree-~A" (random 1000000))))
                                       (uiop:temporary-directory)))))
     (ensure-directories-exist output-path)
-    (format t "📦 Создаю архив ~A...~%" archive-path)
     
     ;; Создаём голый клон в временной директории
     (multiple-value-bind (out1 err1 code1)
@@ -93,7 +92,7 @@
               
               (if (zerop code)
                   (progn
-                    (format t "✔ Архив создан: ~A~%" archive-path)
+                    (format t "✔ Архив создан: ~A → ~A~%" archive-name (namestring output-path))
                     t)
                   (progn
                     (format t "❌ Ошибка при архивировании:~%~A~%" err)
@@ -197,17 +196,12 @@
                                when (let ((l (cl-git-tree/loc:find-location k)))
                                       (and l (eq (cl-git-tree/loc:<location>-provider l) provider)))
                                return k))))
-               (if (and loc (cl-git-tree/loc:<location>-url-xz loc))
-                   (progn
-                     (format t "✔ Провайдер: ~A (локальный с :url-xz)~%" provider)
-                     ;; Архивируем в path из url-xz локации
-                     (when (create-tar-xz-archive repo-dir 
-                                                   (uiop:ensure-directory-pathname 
-                                                    (cl-git-tree/loc:<location>-url-xz loc)))
-                       (incf archived)))
-                   (progn
-                     (format t "⚠️  Пропущено: провайдер ~A не локальный или :url-xz не установлен~%" provider)
-                     (setf skip t)))))))
+               (when (and loc (cl-git-tree/loc:<location>-url-xz loc))
+                 ;; Архивируем в path из url-xz локации
+                 (when (create-tar-xz-archive repo-dir 
+                                               (uiop:ensure-directory-pathname 
+                                                (cl-git-tree/loc:<location>-url-xz loc)))
+                   (incf archived)))))))
        
        (format t "~%~%=== Итого ===~%")
        (format t "Обработано репозиториев: ~A~%" processed)
