@@ -60,12 +60,15 @@
    Архив содержит только голый git-репозиторий (--bare, без рабочих файлов)."
   (let* ((repo-name (cl-git-tree/fs:repo-name repo-dir))
          (archive-name (format nil "~A.tar.xz" repo-name))
-         (archive-path (merge-pathnames archive-name output-path))
+         ;; Раскрываем output-path в случае, если там есть тильда
+         (expanded-output-path (uiop:ensure-directory-pathname 
+                                (uiop:ensure-pathname output-path :expand-user t)))
+         (archive-path (merge-pathnames archive-name expanded-output-path))
          (bare-name (concatenate 'string repo-name ".git"))
          (temp-dir (uiop:ensure-directory-pathname
                      (merge-pathnames (make-pathname :directory (list :relative (format nil "tmp-git-tree-~A" (random 1000000))))
                                       (uiop:temporary-directory)))))
-    (ensure-directories-exist output-path)
+    (ensure-directories-exist expanded-output-path)
     
     ;; Создаём голый клон в временной директории
     (multiple-value-bind (out1 err1 code1)
@@ -94,7 +97,7 @@
               
               (if (zerop code)
                   (progn
-                    (format t "✔ Архив создан: ~A → ~A~%" archive-name (namestring output-path))
+                    (format t "✔ Архив создан: ~A → ~A~%" archive-name (namestring expanded-output-path))
                     t)
                   (progn
                     (format t "❌ Ошибка при архивировании:~%~A~%" err)
