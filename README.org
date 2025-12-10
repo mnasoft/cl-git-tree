@@ -135,7 +135,7 @@ sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree) (cl-git-tree
 #+begin_src bash
 git tree transport export               # архивы в :url-xz для каждого локального провайдера
 git tree transport export --days 7      # ограничить по свежести коммита
-git tree transport clean                # удалить *.tar.xz в каталоге по умолчанию
+git tree transport clean                # удалить *.tar.xz из :url-xz всех провайдеров
 #+end_src
 
 Импорт архивов на другой машине (архивы уже лежат в соответствующих :url-xz):
