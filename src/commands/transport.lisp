@@ -57,7 +57,8 @@
 
 (defun create-tar-xz-archive (repo-dir output-path)
   "Создаёт tar.xz архив репозитория в указанном месте.
-   Архив содержит только голый git-репозиторий (--bare, без рабочих файлов)."
+   Архив содержит только голый git-репозиторий (--bare, без рабочих файлов).
+   Возвращает (values archive-name output-path) если успех, или (values nil nil) при ошибке."
   (let* ((repo-name (cl-git-tree/fs:repo-name repo-dir))
          (archive-name (format nil "~A.tar.xz" repo-name))
          ;; Раскрываем output-path в случае, если там есть тильда
@@ -65,8 +66,8 @@
          (archive-path (merge-pathnames archive-name expanded-output-path))
          (bare-name (concatenate 'string repo-name ".git"))
          (temp-dir (uiop:ensure-directory-pathname
-                     (merge-pathnames (make-pathname :directory (list :relative (format nil "tmp-git-tree-~A" (random 1000000))))
-                                      (uiop:temporary-directory)))))
+                    (merge-pathnames (make-pathname :directory (list :relative (format nil "tmp-git-tree-~A" (random 1000000))))
+                                     (uiop:temporary-directory)))))
     (ensure-directories-exist expanded-output-path)
     
     ;; Создаём голый клон в временной директории
@@ -95,17 +96,15 @@
               (uiop:delete-directory-tree temp-dir :validate t)
               
               (if (zerop code)
-                  (progn
-                    (format t "✔ Архив создан: ~A → ~A~%" archive-name (namestring expanded-output-path))
-                    t)
+                  (values archive-name (namestring expanded-output-path))
                   (progn
                     (format t "❌ Ошибка при архивировании:~%~A~%" err)
-                    nil))))
+                    (values nil nil)))))
           (progn
             ;; Очищаем временный каталог при ошибке
             (ignore-errors (uiop:delete-directory-tree temp-dir :validate t))
             (format t "❌ Ошибка при создании голого клона:~%~A~%" err1)
-            nil)))))
+            (values nil nil))))))
 
 (defun clean-tar-xz-archives (output-path)
   "Удаляет tar.xz архивы в каталоге output-path."
@@ -292,12 +291,14 @@
                        (if matching-locs
                            ;; Архивируем в каждую найденную локацию с url-xz
                            (dolist (loc matching-locs)
-                             (when (create-tar-xz-archive repo-dir 
-                                                           (uiop:ensure-directory-pathname 
-                                                            (cl-git-tree/loc:<location>-url-xz loc)))
-                               (incf archived)
-                               (unless verbose
-                                 (format t "✔ ~A~%" repo-name))))
+                             (multiple-value-bind (archive-name output-dir)
+                                 (create-tar-xz-archive repo-dir 
+                                                         (uiop:ensure-directory-pathname 
+                                                          (cl-git-tree/loc:<location>-url-xz loc)))
+                               (when archive-name
+                                 (incf archived)
+                                 (unless verbose
+                                   (format t "✅ ~A. Архив создан: ~A → ~A~%" repo-name archive-name output-dir)))))
                            (when verbose
                              (format t "  ⚠️  Провайдер ~A не имеет локаций с :url-xz~%" provider)))))
                    (when verbose
