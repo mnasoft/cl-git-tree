@@ -27,7 +27,8 @@
   locations add <key> :url-git <url> [:url-xz <xz>] [:tar <tar>] [:description <desc>] — добавить
   locations edit <key> [same args as add] — редактировать
   locations remove <key>       — удалить локацию
-  locations save                — принудительно сохранить locations.lisp
+  locations save               — принудительно сохранить locations.lisp
+  locations reset              — сбросить конфигурацию к дефолтным значениям (gh, lc)
   locations --help             — показать справку
 "
   (cond
@@ -41,6 +42,11 @@
     ((string= (first args) "save")
      (cl-git-tree/loc:save-locations-config)
      (format t "Saved locations to ~S~%" cl-git-tree:*config-path*))
+    ((string= (first args) "reset")
+     (cl-git-tree:reset-config)
+     (clrhash cl-git-tree/loc:*locations*)
+     (cl-git-tree:load-config)
+     (format t "Конфигурация перезагружена с дефолтными значениями.~%"))
     ((string= (first args) "add")
      (let ((key (second args)))
        (when (null key) (error "Specify key to add"))
@@ -99,4 +105,4 @@
 
 (eval-when (:load-toplevel :execute)
   (cl-git-tree/dispatch:register-command
-   "locations" #'cmd-locations "Управлять локациями (list/show/add/edit/remove/save)"))
+   "locations" #'cmd-locations "Управлять локациями (list/show/add/edit/remove/save/reset)"))

@@ -37,3 +37,13 @@
       (load *config-path*)
     (error (e)
       (format *error-output* "⚠️  Ошибка загрузки конфигурации ~A: ~A~%" *config-path* e))))
+
+(defun reset-config ()
+  "Перезаписывает конфигурационный файл дефолтными значениями."
+  (ensure-directories-exist (path:dirname *config-path*))
+  (with-open-file (s *config-path*
+                     :direction :output
+                     :if-does-not-exist :create
+                     :if-exists :supersede)
+    (format s "~A~%" *config-example*))
+  (format t "✅ Конфигурация сброшена: ~A~%" *config-path*))
