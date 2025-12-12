@@ -66,10 +66,13 @@ ID — строковый идентификатор локации (ключ в
       (when (uiop:string-prefix-p "http" url)
         (unless (uiop:string-suffix-p "/" url)
           (setf url (concatenate 'string url "/"))))
-      ;; SSH scp-подобный синтаксис (есть '@') — приводим конец к одиночному '/'
+      ;; SSH scp-подобный синтаксис (есть '@')
       (when (search "@" url)
         ;; заменить любую последовательность ':' или '/' в конце на одиночный '/'
-        (setf url (cl-ppcre:regex-replace-all "[:/]+$" url "/")))
+        (setf url (cl-ppcre:regex-replace-all "[:/]+$" url "/"))
+        ;; Убедимся, что в конце есть '/'
+        (unless (uiop:string-suffix-p "/" url)
+          (setf url (concatenate 'string url "/"))))
       ;; Убедимся, что в конце нет нескольких '/' — заменим на одну
       (setf url (cl-ppcre:regex-replace-all "/+$" url "/")))
 
