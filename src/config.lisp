@@ -32,5 +32,8 @@
                        :direction :output
                        :if-does-not-exist :create
                        :if-exists :supersede)
-      (format s "~S" *config-example*)))
-  (load *config-path*))
+      (format s "~A~%" *config-example*)))
+  (handler-case
+      (load *config-path*)
+    (error (e)
+      (format *error-output* "⚠️  Ошибка загрузки конфигурации ~A: ~A~%" *config-path* e))))

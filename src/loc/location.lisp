@@ -89,7 +89,7 @@ ID — строковый идентификатор локации (ключ в
              ((eq prov :local) '<local>)
              ((eq prov :github) '<github>)
              ((eq prov :gitlab) '<gitlab>)
-             (t '<location))))
+             (t '<location>))))
       (let ((loc (make-instance class
                                 :id id-str
                                 :description desc
