@@ -21,6 +21,7 @@
      (:file "test-all-commands")
      (:file "test-shell-utils")
      (:file "test-os-detection")
+     (:file "test-remote-create-delete-lc")
      (:module "workspace"
       :serial t
       :components
