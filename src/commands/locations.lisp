@@ -10,12 +10,13 @@
 (defun print-loc (loc-key)
   (let ((loc (find-location loc-key)))
     (if loc
-        (format t "~A: ~A~%   Git: ~A~%   TAR: ~A~%   XZ : ~A~%~%"
+        (format t "~A: ~A~%   Git: ~A~%   TAR: ~A~%   XZ : ~A~%   Provider: ~A~%~%"
                 loc-key
                 (<location>-description loc)
                 (<location>-url-git loc)
                 (<location>-tar loc)
-                (<location>-url-xz loc))
+                (<location>-url-xz loc)
+                (<location>-provider loc))
         (format t "Location ~A not found.~%" loc-key))))
 
 (defun cmd-locations (&rest args)
