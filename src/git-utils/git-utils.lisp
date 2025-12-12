@@ -2,6 +2,42 @@
 
 (in-package :cl-git-tree/git-utils)
 
+(defun normalize-path-for-git (path)
+  "Преобразует путь для совместимости с git под MSYS2.
+На MSYS2 конвертирует POSIX-пути в Windows-формат используя cygpath.
+На других платформах возвращает путь как есть."
+  (let* ((path-str (namestring path))
+         ;; Раскрываем ~/ или ~ в начале
+         (expanded (if (and (> (length path-str) 0) (char= (aref path-str 0) #\~))
+                       ;; Используем shell для раскрытия ~
+                       (let ((out (uiop:run-program
+                                   (list "sh" "-c" (format nil "echo ~A" path-str))
+                                   :output :string :error-output :string :ignore-error-status t)))
+                         (string-trim '(#\Newline #\Return) out))
+                       path-str)))
+    (handler-case
+        (let ((result (uiop:run-program
+                       (list "uname" "-o")
+                       :output :string
+                       :error-output :string
+                       :ignore-error-status t)))
+          (if (and result (string= "Msys" (string-trim '(#\Newline) result)))
+              ;; MSYS2: конвертируем в Windows-путь
+              (let ((converted (uiop:run-program
+                                (list "cygpath" "-m" expanded)
+                                :output :string
+                                :error-output :string
+                                :ignore-error-status t)))
+                (if converted
+                    (string-trim '(#\Newline) converted)
+                    expanded))
+              ;; Другие платформы: возвращаем как есть
+              expanded))
+      (error (c)
+        ;; Если ошибка при определении OS, возвращаем раскрытый путь
+        (declare (ignore c))
+        expanded))))
+
 (defun git-run (repo-dir &rest args)
   "Запускает команду git с аргументами ARGS в каталоге REPO-DIR.
 Возвращает три значения:
@@ -9,7 +45,7 @@
   2. stderr (строка),
   3. код возврата (целое число)."
   (uiop:run-program
-   (append (list "git" "-C" (namestring repo-dir)) args)
+   (append (list "git" "-C" (normalize-path-for-git repo-dir)) args)
    :output :string
    :error-output :string
    :ignore-error-status t))

@@ -4,6 +4,7 @@
   (:use :cl)
   (:export
    git-run
+   normalize-path-for-git
    current-branch
    repo-remotes)
   (:documentation

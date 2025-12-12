@@ -17,7 +17,10 @@
       (t
        (ensure-directories-exist target)
        (multiple-value-bind (out err code)
-           (cl-git-tree/git-utils:git-run repo-dir "clone" "--bare" "." (namestring target))
+           (cl-git-tree/git-utils:git-run 
+            repo-dir 
+            "clone" "--bare" "." 
+            (cl-git-tree/git-utils:normalize-path-for-git (namestring target)))
          (declare (ignore out))
          (if (zerop code)
              (format t "✔ ~A → ~A~%" repo-name target)

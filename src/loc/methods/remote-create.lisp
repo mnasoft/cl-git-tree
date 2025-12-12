@@ -66,11 +66,15 @@
       (t
        (ensure-directories-exist target)
        (multiple-value-bind (out err code)
-           (cl-git-tree/git-utils:git-run (<workspace>-path ws) "clone" "--bare" "." (namestring target))
+           (cl-git-tree/git-utils:git-run 
+            (<workspace>-path ws) 
+            "clone" "--bare" "." 
+            (cl-git-tree/git-utils:normalize-path-for-git (namestring target)))
          (declare (ignore out))
          (if (zerop code)
              (format t "✅ [~A] Bare-репозиторий ~A создан: ~A~%" 
                      (<location>-id provider) repo target)
              (format t "❌ [~A] Ошибка создания ~A: ~A~%" 
                      (<location>-id provider) repo err)))))
-  ws))
+    ws))
+
