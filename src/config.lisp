@@ -8,18 +8,20 @@
 (defparameter *config-example*
 "(in-package :cl-git-tree/loc)
 
+;; GitHub — удалённые публичные репозитории
 (add-location \"gh\"
     :url-git \"git@github.com:mnasoft\"
     :url-xz NIL
     :tar NIL
-    :description \"GitHub — шаблон для публичных проектов\"
+    :description \"GitHub remote repositories (public)\"
     :provider :GITHUB)
 
+;; Local — локальное зеркало репозиториев
 (add-location \"lc\"
     :url-git \"~/.git-tree/git/lc\"
     :url-xz \"~/.git-tree/xz/lc\"
     :tar \"lc.tar\"
-    :description \"Local mirror\"
+    :description \"Local mirror of repositories\"
     :provider :LOCAL)
 "
 )

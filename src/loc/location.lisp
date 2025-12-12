@@ -184,7 +184,7 @@ REPO-NAME — имя репозитория (строка без расшире�
   (maphash (lambda (key loc)
              (format t "~A: ~A~%   Git: ~A~%   TAR: ~A~%   XZ : ~A~%   Provider: ~A~%~%"
                      key
-                     (<location>-id loc)
+                     (<location>-description loc)
                      (<location>-url-git loc)
                      (<location>-tar loc)
                      (<location>-url-xz loc)
