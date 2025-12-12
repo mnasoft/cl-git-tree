@@ -62,11 +62,10 @@
 (deftest remote-create-lc-url-format-test
     (:fixture test-fixture)
   "Проверка правильного формата URL для локации lc"
-  (let* ((lc-loc (cl-git-tree/loc:find-location "lc"))
-         (ws (cl-git-tree/loc:make-workspace (uiop:getcwd)))
-         (url (cl-git-tree/loc:remote-url ws lc-loc)))
-    (is (stringp url) "URL должен быть строкой")
-    (is (search "/.git-tree/git/lc/" url) 
-        "URL должен содержать /.git-tree/git/lc/")
-    (is (uiop:string-suffix-p ".git" url) 
-        "URL должен заканчиваться на .git")))
+  (let* ((lc-loc (cl-git-tree/loc:find-location "lc")))
+    (is (stringp (cl-git-tree/loc:<location>-url-git lc-loc)) 
+        "URL-GIT должен быть строкой")
+    (is (search "/.git-tree/git/lc" (cl-git-tree/loc:<location>-url-git lc-loc)) 
+        "URL-GIT должен содержать /.git-tree/git/lc")
+    (is (uiop:string-suffix-p "/" (cl-git-tree/loc:<location>-url-git lc-loc)) 
+        "URL-GIT должен заканчиваться на /")))
