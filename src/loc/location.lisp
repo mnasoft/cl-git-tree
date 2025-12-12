@@ -182,12 +182,13 @@ REPO-NAME — имя репозитория (строка без расшире�
      XZ : NIL"
   (format t "~%=== Список локаций ===~%")
   (maphash (lambda (key loc)
-             (format t "~A: ~A~%   Git: ~A~%   TAR: ~A~%   XZ : ~A~%~%"
+             (format t "~A: ~A~%   Git: ~A~%   TAR: ~A~%   XZ : ~A~%   Provider: ~A~%~%"
                      key
                      (<location>-id loc)
                      (<location>-url-git loc)
                      (<location>-tar loc)
-                     (<location>-url-xz loc)))
+                     (<location>-url-xz loc)
+                     (<location>-provider loc)))
            *locations*))
 
 (defun remove-location (id)
