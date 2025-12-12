@@ -6,38 +6,21 @@
   "Путь к файлу конфигурации локаций (~/.git-tree/locations.lisp).")
 
 (defparameter *config-example*
-"\n;; #!/bin/sbcl --script
-;; Подключаем Quicklisp
-;; (load (merge-pathnames \"quicklisp/setup.lisp\" (user-homedir-pathname)))
-;; (ql:quickload :cl-git-tree)
+"(in-package :cl-git-tree/loc)
 
-(in-package :cl-git-tree)
-
-;; GitHub — шаблон для публичных проектов
 (add-location \"gh\"
-              :name    \"GitHub projects\"
-              :url-git \"git@github.com:mnasoft\")
+    :url-git \"git@github.com:mnasoft\"
+    :url-xz NIL
+    :tar NIL
+    :description \"GitHub — шаблон для публичных проектов\"
+    :provider :GITHUB)
 
-;; pp  — шаблон для публичных проектов
-(add-location \"pp\"
-              :name    \"local public pp\"
-              :url-git \"/home/mna/.git-tree/git/pp\"
-              :url-xz  \"/home/mna/.git-tree/xz/pp\"
-              :tar     \"pp.tar\")
-
-;; pz  — шаблон для закрытых проектов
-(add-location \"pp\"
-              :name    \"local private pz\"
-              :url-git \"/home/mna/.git-tree/git/pp\"
-              :url-xz  \"/home/mna/.git-tree/xz/pp\"
-              :tar     \"pz.tar\")
-
-;; pz — шаблон для закрытых проектов
-(add-location \"pz\"
-              :name    \"local private pz\"
-              :url-git \"/home/mna/.git-tree/git/pz\"
-              :url-xz  \"/home/mna/.git-tree/xz/pz\"
-              :tar     \"pz.tar\")
+(add-location \"lc\"
+    :url-git \"~/.git-tree/git/lc\"
+    :url-xz \"~/.git-tree/xz/lc\"
+    :tar \"lc.tar\"
+    :description \"Local mirror\"
+    :provider :LOCAL)
 "
 )
 

@@ -52,10 +52,9 @@ ID — строковый идентификатор локации (ключ в
   ;; ID как строка
     (let* ((id-str (if (stringp id) id (prin1-to-string id)))
       (desc (or description name))
-      (url (and url-git (or (stringp url-git) (pathnamep url-git))
-          (expand-home url-git)))
-      (url-xz* (and url-xz (expand-home url-xz)))
-      (tar* (and tar (expand-home tar)))
+      (url url-git)
+      (url-xz* url-xz)
+      (tar* tar)
       (prov provider))
     ;; Нормализация url-git
     (when url

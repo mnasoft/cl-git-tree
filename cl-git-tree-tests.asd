@@ -20,6 +20,7 @@
      (:file "test-dispatch")
      (:file "test-all-commands")
      (:file "test-shell-utils")
+     (:file "test-os-detection")
      (:module "workspace"
       :serial t
       :components

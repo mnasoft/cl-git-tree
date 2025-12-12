@@ -53,9 +53,13 @@
   (:export
    ;; класс
    <workspace>
+   <workspace-linux>
+   <workspace-windows>
+   <workspace-msys2>
    ;; аксессоры
    <workspace>-path
-   <workspace>-description 
+   <workspace>-description
+   <workspace>-os-type
    
    ;; generic-функции
    git-init
@@ -65,8 +69,9 @@
    repo-status
    repo-commit
    repo-branches
-   ;; конструктор
-   make-workspace)
+   ;; конструктор и утилиты
+   make-workspace
+   detect-os)
   (:documentation
    "Пакет CL-GIT-TREE/LOC инкапсулирует подсистему управления локациями.
 

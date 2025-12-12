@@ -2,30 +2,6 @@
 
 (in-package :cl-git-tree/loc)
 
-(defun make-workspace (path &key description)
-  "Создать объект <workspace> для указанного каталога PATH.
-   Аргумент DESCRIPTION задаёт человекочитаемое описание.
-   Если DESCRIPTION не указан, он вычисляется как имя каталога
-   (последний компонент PATH).
-   PATH всегда трактуется как каталог, даже если он указан без завершающего /."
-  (let* ((pathname (uiop:ensure-directory-pathname path))) 
-    (handler-case
-        (progn
-          ;; Убедиться, что это каталог (создать при необходимости)
-          (ensure-directories-exist pathname)
-          ;; Проверить, что truename действительно каталог
-          (let* ((truename (truename pathname)))
-            (unless (uiop:directory-exists-p truename)
-              (error "Путь ~A существует, но не является каталогом." truename))
-            (let ((desc (or description
-                            (car (last (pathname-directory truename))))))
-              (make-instance '<workspace>
-                             :path truename
-                             :description desc))))
-      (file-error (e)
-        (error "Не удалось создать или получить доступ к каталогу ~A: ~A"
-               path e)))))
-
 (defmethod git-initialized-p ((ws <workspace>))
   "Проверить, инициализирован ли git в рабочем пространстве.
    Использует git-run с командой rev-parse --show-toplevel, чтобы учесть родительские каталоги."

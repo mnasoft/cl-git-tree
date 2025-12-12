@@ -66,6 +66,17 @@
   (:documentation "Абстрактный базовый класс для всех провайдеров размещения.
 Не содержит слотов, служит для диспетчеризации методов."))
 
+(defun detect-os ()
+  "Определяет операционную систему. Возвращает :linux, :windows или :msys2."
+  (let ((os (uiop:operating-system)))
+    (cond
+      ;; MSYS2 определяется по наличию переменной окружения MSYSTEM
+      ((uiop:getenv "MSYSTEM") :msys2)
+      ;; Windows (без MSYS2)
+      ((member os '(:win :win32 :windows :mswindows)) :windows)
+      ;; Linux и остальные Unix-подобные
+      (t :linux))))
+
 (defclass <workspace> ()
   ((path
     :initarg :path
@@ -78,12 +89,60 @@
     :accessor <workspace>-description
     :initform ""
     :type string
-    :documentation "Человеко‑читаемое описание workspace, полезное для тестов и CLI help."))
+    :documentation "Человеко‑читаемое описание workspace, полезное для тестов и CLI help.")
+   (os-type
+    :initarg :os-type
+    :accessor <workspace>-os-type
+    :initform (detect-os)
+    :type symbol
+    :documentation "Тип операционной системы: :linux, :windows или :msys2."))
   (:documentation
-   "Класс <workspace> описывает локальный рабочий каталог, связанный с операциями над репозиториями.
-    Экземпляр хранит путь к каталогу и дополнительное описание. 
-    Workspace выступает как абстракция над файловой системой, позволяя методам (например, remote-create, 
-    repo-push, repo-pull) работать не с голым pathname, а с объектом с явными слотами и аксессорами."))
+   "Базовый класс <workspace> описывает локальный рабочий каталог.
+    Содержит путь к каталогу, описание и тип ОС для правильной обработки путей.
+    От него наследуются специализированные классы для разных ОС."))
+
+(defclass <workspace-linux> (<workspace>)
+  ()
+  (:documentation "Workspace для Linux. Использует прямые слеши в путях."))
+
+(defclass <workspace-windows> (<workspace>)
+  ()
+  (:documentation "Workspace для Windows (без MSYS2). Использует обратные слеши."))
+
+(defclass <workspace-msys2> (<workspace>)
+  ()
+  (:documentation "Workspace для MSYS2. Требует специальной обработки путей (прямые слеши в Unix-стиле, но работает в Windows)."))
+
+(defun make-workspace (path &key description)
+  "Создаёт экземпляр workspace для текущей ОС.
+   Автоматически выбирает подходящий класс в зависимости от detect-os.
+   
+   PATH — путь к каталогу workspace (будет создан, если не существует).
+   DESCRIPTION — человекочитаемое описание (по умолчанию — имя каталога)."
+  (let* ((pathname (uiop:ensure-directory-pathname path))
+         (os-type (detect-os))
+         (class (case os-type
+                  (:linux '<workspace-linux>)
+                  (:windows '<workspace-windows>)
+                  (:msys2 '<workspace-msys2>)
+                  (t '<workspace>))))
+    (handler-case
+        (progn
+          ;; Создаём каталог, если не существует
+          (ensure-directories-exist pathname)
+          ;; Получаем truename
+          (let* ((truename (truename pathname)))
+            (unless (uiop:directory-exists-p truename)
+              (error "Путь ~A существует, но не является каталогом." truename))
+            (let ((desc (or description
+                            (car (last (pathname-directory truename))))))
+              (make-instance class
+                             :path truename
+                             :description desc
+                             :os-type os-type))))
+      (file-error (e)
+        (error "Не удалось создать или получить доступ к каталогу ~A: ~A"
+               path e)))))
 
 
 
