@@ -89,4 +89,4 @@
       ;; Очистка
       (uiop:chdir original-cwd)
       (when (uiop:directory-exists-p root-dir)
-        (uiop:delete-directory-tree root-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory root-dir)))))

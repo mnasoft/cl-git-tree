@@ -23,7 +23,7 @@
     (unwind-protect
          (is (not (cl-git-tree/loc:git-initialized-p ws)))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
  (def-test git-initialized-p-with-git ()
   "Проверка git-initialized-p для workspace с git."
@@ -36,7 +36,7 @@
            (cl-git-tree/loc:git-init ws)
            (is (cl-git-tree/loc:git-initialized-p ws)))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 ;;; Тесты для git-root
 
@@ -55,7 +55,7 @@
     (unwind-protect
          (is (null (cl-git-tree/loc:git-root ws)))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 (def-test git-root-with-git ()
   "Проверка git-root для workspace с git."
@@ -71,7 +71,7 @@
              (is (pathnamep root))
              (is (uiop:directory-exists-p root))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 ;;; Тесты для git-init
 
@@ -94,7 +94,7 @@
            (is (cl-git-tree/loc:git-initialized-p ws))
            (is (not (null (cl-git-tree/loc:git-root ws)))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 (def-test git-init-idempotent ()
   "Проверка, что повторный вызов git-init не вызывает ошибок."
@@ -110,7 +110,7 @@
            (cl-git-tree/loc:git-init ws)
            (is (cl-git-tree/loc:git-initialized-p ws)))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 ;;; Тесты для repo-name
 
@@ -132,7 +132,7 @@
            (let ((name (cl-git-tree/loc:repo-name ws)))
              (is (or (stringp name) (null name)))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 ;;; Тесты для repo-status
 
@@ -154,7 +154,7 @@
            (let ((status (cl-git-tree/loc:repo-status ws (make-instance 'cl-git-tree/loc:<provider>))))
              (is (stringp status))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 ;;; Тесты для repo-branches
 
@@ -178,7 +178,7 @@
            (cl-git-tree/git-utils:git-run test-dir "config" "user.email" "test@example.com")
            (cl-git-tree/git-utils:git-run test-dir "config" "user.name" "Test User")
            ;; Создание файла README.org
-           (with-open-file (f readme-file :direction :output)
+           (with-open-file (f readme-file :direction :output :if-exists :supersede)
              (write-string "# Test Repository" f))
            ;; Добавление файла в индекс
            (cl-git-tree/git-utils:git-run test-dir "add" "README.org")
@@ -190,7 +190,7 @@
              ;; В репозитории с коммитом должна быть хотя бы одна ветка (обычно master или main)
              (is (>= (length branches) 1))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 ;;; Тесты для repo-commit
 
@@ -214,7 +214,7 @@
            (cl-git-tree/git-utils:git-run test-dir "config" "user.email" "test@example.com")
            (cl-git-tree/git-utils:git-run test-dir "config" "user.name" "Test User")
            ;; Создание файла
-           (with-open-file (f test-file :direction :output)
+           (with-open-file (f test-file :direction :output :if-exists :supersede)
              (write-string "test content" f))
            ;; Добавление файла в индекс
            (cl-git-tree/git-utils:git-run test-dir "add" "test.txt")
@@ -222,7 +222,7 @@
            (let ((result (cl-git-tree/loc:repo-commit ws :message "Test commit")))
              (is (stringp result))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 ;;; Тесты для аксессоров
 
@@ -243,7 +243,7 @@
            (is (pathnamep (cl-git-tree/loc:<workspace>-path ws)))
            (is (uiop:directory-exists-p (cl-git-tree/loc:<workspace>-path ws))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 (def-test workspace-description-accessor ()
   "Проверка аксессора <workspace>-description."
@@ -254,7 +254,7 @@
     (unwind-protect
          (is (string= (cl-git-tree/loc:<workspace>-description ws) "Test Description"))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 (def-test workspace-description-setf ()
   "Проверка установки description через setf."
@@ -267,7 +267,7 @@
            (setf (cl-git-tree/loc:<workspace>-description ws) "New Description")
            (is (string= (cl-git-tree/loc:<workspace>-description ws) "New Description")))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 #+nil
 (progn

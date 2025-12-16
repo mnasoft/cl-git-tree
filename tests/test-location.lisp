@@ -22,7 +22,7 @@
            #+nil
            (is-true (search "неприменим" (cl-git-tree/loc:repo-pull ws p :branch "main"))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 #+nil
 (progn 

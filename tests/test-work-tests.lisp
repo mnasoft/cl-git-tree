@@ -20,7 +20,7 @@
     
     ;; Удалить каталог ~/work/tests если существует
     (when (uiop:directory-exists-p work-tests-dir)
-      (uiop:delete-directory-tree work-tests-dir :validate t))
+      (ignore-errors (cl-git-tree/tests:force-delete-directory work-tests-dir)))
     
     ;; Создать каталог ~/work/tests
     (ensure-directories-exist work-tests-dir)
@@ -115,36 +115,42 @@
 
 (def-fixture test-directories-fixture ()
   "Фикстура: создаёт структуру ~/work/tests с подкаталогами test-01 и test-02"
-  (unwind-protect
-       (progn
-         (setup-test-directories)
-         (&body))
-    ;; Teardown: очистка (опционально)
-    ))
+  (let ((work-tests-dir (merge-pathnames "work/tests/" (user-homedir-pathname))))
+    (unwind-protect
+         (progn
+           (setup-test-directories)
+           (&body))
+      ;; Teardown: удаляем ~/work/tests после теста
+      (when (uiop:directory-exists-p work-tests-dir)
+        (cl-git-tree/tests:force-delete-directory work-tests-dir)))))
 
 (def-fixture test-git-repositories-fixture ()
   "Фикстура: создаёт структуру ~/work/tests с git-репозиториями test-01 и test-02"
-  (unwind-protect
-       (progn
-         (multiple-value-bind (work-tests-dir test-01-dir test-02-dir)
-             (setup-test-directories)
-           (declare (ignore work-tests-dir))
-           (setup-git-repositories test-01-dir test-02-dir))
-         (&body))
-    ;; Teardown: очистка (опционально)
-    ))
+  (let ((work-tests-dir (merge-pathnames "work/tests/" (user-homedir-pathname))))
+    (unwind-protect
+         (progn
+           (multiple-value-bind (wdir test-01-dir test-02-dir)
+               (setup-test-directories)
+             (declare (ignore wdir))
+             (setup-git-repositories test-01-dir test-02-dir))
+           (&body))
+      ;; Teardown: удаляем ~/work/tests после теста
+      (when (uiop:directory-exists-p work-tests-dir)
+        (cl-git-tree/tests:force-delete-directory work-tests-dir)))))
 
 (def-fixture test-git-repositories-with-readme-fixture ()
   "Фикстура: создаёт git-репозитории test-01 и test-02 с добавленными и закоммиченными README.org"
-  (unwind-protect
-       (progn
-         (multiple-value-bind (work-tests-dir test-01-dir test-02-dir)
-             (setup-test-directories)
-           (setup-git-repositories test-01-dir test-02-dir)
-           (add-and-commit-readme work-tests-dir))
-         (&body))
-    ;; Teardown: очистка (опционально)
-    ))
+  (let ((work-tests-dir (merge-pathnames "work/tests/" (user-homedir-pathname))))
+    (unwind-protect
+         (progn
+           (multiple-value-bind (wdir test-01-dir test-02-dir)
+               (setup-test-directories)
+             (setup-git-repositories test-01-dir test-02-dir)
+             (add-and-commit-readme wdir))
+           (&body))
+      ;; Teardown: удаляем ~/work/tests после теста
+      (when (uiop:directory-exists-p work-tests-dir)
+        (cl-git-tree/tests:force-delete-directory work-tests-dir)))))
 
 ;;; Тесты
 
@@ -172,13 +178,12 @@
     (is (probe-file readme-02)
         "Файл ~/work/tests/test-02/README.org должен быть создан")
     
-    ;; Проверяем git log --oneline (не должно быть git-репозиториев)
-    (multiple-value-bind (out err code)
-        (uiop:run-program (list "git" "-C" (namestring test-01-dir) "log" "--oneline")
-                          :output :string
-                          :error-output :string
-                          :ignore-error-status t)
-      (is (not (zerop code)) "git log должен завершиться с ошибкой - нет git-репозитория"))))
+    ;; Проверяем что git-репозиториев нет
+    (is (not (uiop:directory-exists-p (merge-pathnames ".git/" test-01-dir)))
+        "В test-01 не должно быть .git каталога")
+    
+    (is (not (uiop:directory-exists-p (merge-pathnames ".git/" test-02-dir)))
+        "В test-02 не должно быть .git каталога")))
 
 (def-test git-tree-status-test (:fixture test-directories-fixture)
   "Проверка выполнения команды git-tree status для ~/work/tests"

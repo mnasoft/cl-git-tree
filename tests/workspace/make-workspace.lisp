@@ -20,7 +20,7 @@
            (is (string= (cl-git-tree/loc:<workspace>-description ws)
                         "Тестовый WS")))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 (def-test create-without-description ()
   "Создание workspace без описания — берётся имя каталога."
@@ -34,7 +34,7 @@
            (is (string= (cl-git-tree/loc:<workspace>-description ws)
                         (car (last (pathname-directory (truename test-dir)))))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 (def-test description-type ()
   "Описание всегда строка."
@@ -46,7 +46,7 @@
          (progn
            (is (stringp (cl-git-tree/loc:<workspace>-description ws))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
 
 (def-test path-type ()
   "Path всегда pathname."
@@ -58,4 +58,4 @@
          (progn
            (is (pathnamep (cl-git-tree/loc:<workspace>-path ws))))
       (when (uiop:directory-exists-p test-dir)
-        (uiop:delete-directory-tree test-dir :validate t)))))
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
