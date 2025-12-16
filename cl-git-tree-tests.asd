@@ -21,6 +21,7 @@
      (:file "test-all-commands")
      (:file "test-shell-utils")
      (:file "test-os-detection")
+     (:file "test-work-tests")
      ;; (:file "test-remote-create-delete-lc")  ;; временно отключён - использует неправильный синтаксис
      (:module "workspace"
       :serial t

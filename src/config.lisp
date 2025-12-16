@@ -27,7 +27,8 @@
 )
 
 (defun load-config ()
-  "Загружает конфигурацию из locations.lisp или создаёт шаблон, если файл отсутствует."
+  "Загружает конфигурацию из locations.lisp или создаёт шаблон, если файл
+отсутствует."
   (unless (probe-file *config-path*)
     (ensure-directories-exist (path:dirname *config-path*))
     (with-open-file (s *config-path*

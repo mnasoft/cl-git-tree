@@ -62,14 +62,18 @@
   (declare (ignore yes))
   (let* ((repo (repo-name ws))
          (root (git-root ws))
-         (base (uiop:ensure-directory-pathname (<location>-url-git provider)))
-         (target (merge-pathnames (format nil "~A.git" repo) base)))
-    (when (probe-file target)
-      (cl-git-tree/shell-utils:shell-run-single
-       "/"
-       "rm" "-rf" (namestring target))
-      (format t "🗑️ Bare-репозиторий удалён: ~A~%" target))
+         ;; Expand user shorthand (e.g., "~") to a physical directory pathname.
+         (base (uiop:ensure-directory-pathname
+                (uiop:ensure-absolute-pathname (<location>-url-git provider)
+                                               (user-homedir-pathname))))
+         (target (uiop:ensure-directory-pathname
+                  (merge-pathnames (format nil "~A.git/" repo) base))))
+    (when (uiop:directory-exists-p target)
+      (uiop:delete-directory-tree target :validate t)
+      (format t "🗑️ Bare-репозиторий удалён: ~A~%"
+              (uiop:native-namestring target)))
     (unless remote-only
       (cl-git-tree/shell-utils:shell-run-single
        root "git" "remote" "remove" (<location>-id provider)))
     ws))
+
