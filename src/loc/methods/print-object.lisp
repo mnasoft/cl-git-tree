@@ -12,37 +12,9 @@
 
 (defmethod print-object ((loc <location>) stream)
   (print-unreadable-object (loc stream :type t :identity t)
-    (format stream "id=~S provider=~S url-git=~S url-xz=~S tar=~S desc=~S"
-            (if (slot-boundp loc 'id) (<location>-id loc) :unbound)
-            (if (slot-boundp loc 'provider) (<location>-provider loc) :unbound)
-            (if (slot-boundp loc 'url-git) (<location>-url-git loc) :unbound)
-            (if (slot-boundp loc 'url-xz) (<location>-url-xz loc) :unbound)
-            (if (slot-boundp loc 'tar) (<location>-tar loc) :unbound)
-            (if (slot-boundp loc 'description) (<location>-description loc) :unbound))))
-
-(defmethod print-object ((loc <local>) stream)
-  (print-unreadable-object (loc stream :type t :identity t)
-    (format stream "id=~S provider=~S url-git=~S desc=~S"
-            (if (slot-boundp loc 'id) (<location>-id loc) :unbound)
-            (if (slot-boundp loc 'provider) (<location>-provider loc) :unbound)            
-            (if (slot-boundp loc 'url-git) (<location>-url-git loc) :unbound)
-            (if (slot-boundp loc 'description) (<location>-description loc) :unbound))))
-
-(defmethod print-object ((loc <github>) stream)
-  (print-unreadable-object (loc stream :type t :identity t)
-    (format stream "id=~S provider=~S url-git=~S desc=~S"
-            (if (slot-boundp loc 'id) (<location>-id loc) :unbound)
-            (if (slot-boundp loc 'provider) (<location>-provider loc) :unbound)
-            (if (slot-boundp loc 'url-git) (<location>-url-git loc) :unbound)
-            (if (slot-boundp loc 'description) (<location>-description loc) :unbound))))
-
-(defmethod print-object ((loc <gitlab>) stream)
-  (print-unreadable-object (loc stream :type t :identity t)
-    (format stream "id=~S provider=~S url-git=~S desc=~S"
-            (if (slot-boundp loc 'id) (<location>-id loc) :unbound)
-            (if (slot-boundp loc 'provider) (<location>-provider loc) :unbound)
-            (if (slot-boundp loc 'url-git) (<location>-url-git loc) :unbound)
-            (if (slot-boundp loc 'description) (<location>-description loc) :unbound))))
-
-
-(make-instance '<local> :id "pp")
+    (format stream "~%~10T:id      ~20T ~S" (<location>-id loc))
+    (format stream "~%~10T:provider~20T ~S" (<location>-provider loc))
+    (format stream "~%~10T:url-git ~20T ~S" (<location>-url-git loc))
+    (format stream "~%~10T:url-xz  ~20T ~S" (<location>-url-xz loc))
+    (format stream "~%~10T:tar     ~20T ~S" (<location>-tar loc))
+    (format stream "~%~10T:desc    ~20T ~S" (<location>-description loc))))
