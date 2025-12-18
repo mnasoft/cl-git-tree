@@ -57,40 +57,53 @@
     ws))
 
 (defmethod remote-delete ((ws <workspace>) (provider <local>)
-                        &key (yes t) remote-only &allow-other-keys)
+                          &key (yes t) remote-only &allow-other-keys)
   "Удалить bare-репозиторий из локальной директории."
   (declare (ignore yes))
 
-        (flet ((force-delete-directory (dir)
-                                         "Удалить DIR, предварительно снимая атрибут read-only под Windows/MSYS2."
-                                         (handler-case
-                                                         (uiop:delete-directory-tree dir :validate t)
-                                                 (file-error (e)
-                                                         ;; На Windows pack-файлы в .git/objects иногда помечаются read-only
-                                                         ;; (или удерживаются индексатором). Снимаем атрибуты и пробуем ещё раз.
-                                                         (when (member (<workspace>-os-type ws) '(:windows :msys2))
-                                                                 (ignore-errors
-                                                                         (uiop:run-program (list "cmd.exe" "/c" "attrib" "-R" "/S" "/D"
-                                                                                                                                                                         (uiop:native-namestring dir))
-                                                                                                                                                 :ignore-error-status t))
-                                                                 (uiop:delete-directory-tree dir :validate nil)
-                                                                 (return-from force-delete-directory t))
-                                                         (error e)))))
+  (flet ((force-delete-directory (dir)
+           "Удалить DIR, предварительно снимая атрибут read-only под Windows/MSYS2."
+           (handler-case
+               (uiop:delete-directory-tree dir :validate t)
+             (file-error (e)
+	       ;; На Windows pack-файлы в .git/objects иногда помечаются read-only
+	       ;; (или удерживаются индексатором). Снимаем атрибуты и пробуем ещё раз.
+               (when (member (<workspace>-os-type ws) '(:windows :msys2))
+                 (ignore-errors
+                  (uiop:run-program (list "cmd.exe" "/c" "attrib" "-R" "/S" "/D"
+                                          (uiop:native-namestring dir))
+                                    :ignore-error-status t))
+                 (uiop:delete-directory-tree dir :validate nil)
+                 (return-from force-delete-directory t))
+               (error e)))))
 
-                (let* ((repo (repo-name ws))
-                                         (root (git-root ws))
-                                         ;; Expand user shorthand (e.g., "~") to a physical directory pathname.
-                                         (base (uiop:ensure-directory-pathname
-                                                                        (uiop:ensure-absolute-pathname (<location>-url-git provider)
-                                                                                                                                                                                                 (user-homedir-pathname))))
-                                         (target (uiop:ensure-directory-pathname
-                                                                                (merge-pathnames (format nil "~A.git/" repo) base))))
-                        (when (uiop:directory-exists-p target)
-                                (force-delete-directory target)
-                                (format t "🗑️ Bare-репозиторий удалён: ~A~%"
-                                                                (uiop:native-namestring target)))
-                        (unless remote-only
-                                (cl-git-tree/shell-utils:shell-run-single
-                                 root "git" "remote" "remove" (<location>-id provider)))
-                        ws)))
+    (let* ((repo (repo-name ws))
+           (root (git-root ws))
+	   ;; Expand user shorthand (e.g., "~") to a physical directory pathname.
+           (base (uiop:ensure-directory-pathname
+                  (uiop:ensure-absolute-pathname (<location>-url-git provider)
+                                                 (user-homedir-pathname))))
+           (target (uiop:ensure-directory-pathname
+                    (merge-pathnames (format nil "~A.git/" repo) base))))
+      (when (uiop:directory-exists-p target)
+        (force-delete-directory target)
+        (format t "🗑️ Bare-репозиторий удалён: ~A~%"
+                (uiop:native-namestring target)))
+      (unless remote-only
+        (cl-git-tree/shell-utils:shell-run-single
+         root "git" "remote" "remove" (<location>-id provider)))
+      ws)))
 
+(defmethod remote-delete ((ws <workspace-msys2>) (provider <local>)
+                          &key (yes t) remote-only &allow-other-keys)
+  "Удалить bare-репозиторий из локальной директории через rm -r."
+  (declare (ignore yes))
+  (let ((root (git-root ws))
+        (target (remote-url ws provider)))
+    ;; Удалить bare-репозиторий через rm -r
+    (cl-git-tree/shell-utils:shell-run-single "." "rm" "-rf" target)
+    ;; Удалить remote из конфигурации git
+    (unless remote-only
+      (cl-git-tree/shell-utils:shell-run-single
+       root "git" "remote" "remove" (<location>-id provider)))
+    ws))
