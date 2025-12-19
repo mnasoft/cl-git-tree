@@ -46,9 +46,8 @@
    repo-url
    print-locations
    infer-local-p
-   location-local-p
-   match-location-keys
-   expand-home)
+  location-local-p
+  match-location-keys)
 
   (:export
    ;; класс

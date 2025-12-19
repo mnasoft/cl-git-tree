@@ -1,6 +1,6 @@
 (defsystem "cl-git-tree-tests"
   :description "Тесты для cl-git-tree (global, workspace, loc, commands, fs, git-utils)"
-  :version "0.2.3"
+  :version "0.2.4"
   :author "Mykola Matvyeyev <mnasoft@gmail.com>"
   :license "GPL-3.0-or-later"
 

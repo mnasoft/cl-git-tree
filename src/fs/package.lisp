@@ -7,7 +7,8 @@
    with-repo
    ;; with-each-repo
    ;; with-each-repo-simple
-   )
+   expand-home
+   expand-tilde-directory-path)
   (:documentation
    "Подсистема работы с файловой системой для cl-git-tree.
 

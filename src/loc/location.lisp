@@ -10,18 +10,6 @@
 Используется всеми командами (clone, unclone, remote-*) для поиска и
 построения URL репозиториев.")
 
-(defun expand-home (path)
-  "Заменяет ведущий '~' на домашний каталог (Linux/MSYS2)."
-  (cond
-    ((pathnamep path)
-     (uiop:native-namestring (uiop:ensure-pathname path)))
-    ((and (stringp path) (> (length path) 0)
-          (char= (char path 0) #\~))
-     (handler-case
-         (uiop:native-namestring (uiop:ensure-pathname path :want-relative nil))
-       (error () path)))
-    (t path)))
-
 (defun register-location (loc)
   "Зарегистрировать объект LOC в глобальной таблице локаций.
 Если локация с таким id уже существует, она будет перезаписана."

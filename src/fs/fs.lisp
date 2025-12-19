@@ -139,3 +139,54 @@ ARGUMENTS:
 (defun with-repo (fn args)
   (dolist (repo-dir (find-git-repos))
     (funcall fn repo-dir args)))
+
+;; Нормализация и раскрытие путей с тильдой
+
+(defun normalize-pathname (pn)
+  "Нормализует pathname, раскрывая . и .. компоненты директории.
+Возвращает новый pathname без . и .. в directory-компонентах."
+  (let* ((dir (pathname-directory pn))
+         (cleaned-dir
+          (when dir
+            (let ((result (if (eq (car dir) :ABSOLUTE)
+                              '(:ABSOLUTE)
+                              '(:RELATIVE))))
+              (dolist (component (cdr dir))
+                (cond
+                  ((equal component ".")  nil)
+                  ((equal component "..")
+                   (when (> (length result) 1)
+                     (setf result (butlast result))))
+                  (t
+                   (setf result (append result (list component))))))
+              (or result '(:ABSOLUTE))))))
+    (make-pathname :directory cleaned-dir
+                   :device (pathname-device pn)
+                   :host (pathname-host pn)
+                   :name (pathname-name pn)
+                   :type (pathname-type pn))))
+
+(defun expand-tilde-directory-path (path)
+  "Раскрывает префикс ~ в начале PATH и возвращает полную путь-строку (namestring).
+Нормализует ./ и ../ компоненты пути (/./ → /, path/../ → path/).
+Если PATH не начинается с ~, возвращает нормализованный namestring директории."
+  (let* ((home-path (uiop:ensure-directory-pathname (uiop:getenv "HOME")))
+         (str (if (pathnamep path) (uiop:native-namestring path) path)))
+    (let* ((expanded
+            (if (and str (> (length str) 0) (char= (char str 0) #\~))
+                (let* ((rest (subseq str 1))
+                       (rel (if (and (> (length rest) 0)
+                                      (member (char rest 0) '(#\/ #\\)))
+                                 (subseq rest 1)
+                                 rest)))
+                  (merge-pathnames (uiop:parse-unix-namestring rel) home-path))
+                (uiop:parse-unix-namestring str)))
+           (normalized (normalize-pathname expanded))
+           (as-dir (uiop:ensure-directory-pathname normalized)))
+      (uiop:native-namestring as-dir))))
+
+(defun expand-home (path)
+  "Заменяет ведущий '~' на домашний каталог (Linux/MSYS2).
+Нормализует ./ и ../ компоненты пути: /./ → /, path/../ → path/.
+Общая обёртка над EXPAND-TILDE-DIRECTORY-ПATH для всего проекта."
+  (expand-tilde-directory-path path))

@@ -62,7 +62,7 @@
   (let* ((repo-name (cl-git-tree/fs:repo-name repo-dir))
          (archive-name (format nil "~A.tar.xz" repo-name))
          ;; Раскрываем output-path в случае, если там есть тильда
-         (expanded-output-path (cl-git-tree/loc:expand-home output-path))
+         (expanded-output-path (cl-git-tree/fs:expand-home output-path))
          (archive-path (merge-pathnames archive-name expanded-output-path))
          (bare-name (concatenate 'string repo-name ".git"))
          (temp-dir (uiop:ensure-directory-pathname
@@ -123,8 +123,8 @@
 
 (defun apply-tar-xz-archive (archive-path dest-root)
   "Распаковывает bare-архив в целевую директорию dest-root, заменяя существующий mirror."
-  (let* ((expanded-archive (cl-git-tree/loc:expand-home archive-path))
-         (expanded-dest-root (uiop:ensure-directory-pathname (cl-git-tree/loc:expand-home dest-root)))
+    (let* ((expanded-archive (cl-git-tree/fs:expand-home archive-path))
+      (expanded-dest-root (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home dest-root)))
          (archive-name (file-namestring expanded-archive))
          (repo-name (if (and archive-name (>= (length archive-name) 7)
                              (string= ".tar.xz" (subseq archive-name (- (length archive-name) 7))))
@@ -203,7 +203,7 @@
          (let* ((loc (cl-git-tree/loc:find-location loc-key))
                 (url-xz (and loc (cl-git-tree/loc:<location>-url-xz loc))))
            (when url-xz
-             (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/loc:expand-home url-xz)))
+             (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home url-xz)))
                     (deleted (clean-tar-xz-archives xz-dir)))
                (incf total-deleted deleted)))))
        (format t "~%=== Итого удалено архивов: ~A ===~%" total-deleted)))
@@ -217,7 +217,7 @@
                 (url-git (and loc (cl-git-tree/loc:<location>-url-git loc)))
                 (provider (and loc (cl-git-tree/loc:<location>-provider loc))))
            (when (and loc url-xz url-git)
-             (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/loc:expand-home url-xz)))
+             (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home url-xz)))
                     (archives (directory (merge-pathnames #p"*.tar.xz" xz-dir))))
                (when archives
                  (format t "Локация ~A (провайдер ~A)~%" loc-key provider)
