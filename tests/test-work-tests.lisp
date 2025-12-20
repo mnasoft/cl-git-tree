@@ -185,8 +185,8 @@
     (is (not (uiop:directory-exists-p (merge-pathnames ".git/" test-02-dir)))
         "В test-02 не должно быть .git каталога")))
 
-(def-test git-tree-status-test (:fixture test-directories-fixture)
-  "Проверка выполнения команды git-tree status для ~/work/tests"
+(def-test git-tree-audit-status-test (:fixture test-directories-fixture)
+  "Проверка выполнения команды git-tree audit status для ~/work/tests"
   (let* ((work-tests-dir (merge-pathnames "work/tests/" (user-homedir-pathname)))
          (original-dir (uiop:getcwd)))
     
@@ -195,10 +195,10 @@
          (progn
            (uiop:chdir work-tests-dir)
            
-           ;; Выполняем команду status
+             ;; Выполняем команду audit status
            (multiple-value-bind (out err code)
                (uiop:run-program (list "sbcl" "--eval" "(asdf:load-system :cl-git-tree)"
-                                       "--eval" "(cl-git-tree/cli:main '(\"prog\" \"status\"))"
+                           "--eval" "(cl-git-tree/cli:main '(\"prog\" \"audit\" \"status\"))"
                                        "--eval" "(sb-ext:exit)")
                                  :output :string
                                  :error-output :string

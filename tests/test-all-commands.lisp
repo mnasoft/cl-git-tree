@@ -26,21 +26,19 @@
          '("add"
            "aliases"
            "commit"
-           "info"
            "locations"
            "patterns"
            "pull"
            "push"
-           "remote"
-           "status")))
+           "remote")))
     (loop for cmd in expected-commands do
       (is-true (command-registered-p cmd)
                (format nil "Команда '~A' должна быть зарегистрирована" cmd)))))
 
 (test help-option-for-all-commands
   "Проверяем, что каждая команда имеет функцию и описание."
-  (let ((commands '("add" "commit" "info" "locations" "patterns"
-                    "pull" "push" "remote" "status" "aliases")))
+  (let ((commands '("add" "commit" "locations" "patterns"
+                    "pull" "push" "remote" "aliases")))
     (loop for cmd in commands do
       (let ((entry (get-command-entry cmd)))
         (is-true entry (format nil "Команда '~A' должна быть зарегистрирована" cmd))
@@ -82,6 +80,6 @@
 (test total-commands-count
   "Проверяем, что всего зарегистрировано ожидаемое количество команд."
   (let ((cmd-count (length cl-git-tree/dispatch:*commands*)))
-    ;; Минимум 12 команд: 10 основных + help + version
-    (is-true (>= cmd-count 12)
-             (format nil "Должно быть минимум 12 команд, найдено: ~A" cmd-count))))
+    ;; Минимум 11 команд: 9 основных + help + version
+    (is-true (>= cmd-count 11)
+             (format nil "Должно быть минимум 11 команд, найдено: ~A" cmd-count))))

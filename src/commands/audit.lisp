@@ -51,22 +51,28 @@
   "CLI-команда: проверяет состояние репозиториев.
   
   Подкоманды:
-    dirty    - показать репозитории с незакоммиченными изменениями
-    staged   - показать репозитории с неиндексированными изменениями (unstaged)
+    status    - показать git status во всех репозиториях
+    dirty     - показать репозитории с незакоммиченными изменениями
+    staged    - показать репозитории с неиндексированными изменениями (unstaged)
     untracked - показать репозитории с неотслеживаемыми файлами
-    --help   - показать эту справку"
+    --help    - показать эту справку"
   (cond
     ((member "--help" args :test #'string=)
      (format t "Проверяет состояние репозиториев на дереве.~%~%")
      (format t "Использование:~%")
+     (format t "  git-tree audit status~%")
      (format t "  git-tree audit dirty~%")
      (format t "  git-tree audit staged~%")
      (format t "  git-tree audit untracked~%")
      (format t "  git-tree audit --help~%~%")
      
      (format t "Подкоманды:~%~%")
+
+     (format t "  status~%")
+     (format t "    Показывает git status во всех git-репозиториях, найденных в дереве.~%")
+    (format t "~%")
      
-     (format t "  dirty~%")
+    (format t "  dirty~%")
      (format t "    Показывает репозитории с незакоммиченными изменениями (modified,~%")
      (format t "    added, deleted файлы в рабочей директории).~%")
      (format t "    Проверяет: git status --short~%")
@@ -79,7 +85,7 @@
      (format t "    Помогает найти файлы, которые были изменены, но не добавлены~%")
      (format t "    в индекс перед коммитом.~%~%")
      
-     (format t "  untracked~%")
+    (format t "  untracked~%")
      (format t "    Показывает репозитории с неотслеживаемыми (untracked) файлами.~%")
      (format t "    Выводит список неотслеживаемых файлов.~%")
      (format t "    Проверяет: git ls-files --others --exclude-standard~%")
@@ -90,10 +96,15 @@
      (format t "  Каждая подкоманда выводит количество найденных репозиториев~%")
      (format t "  и детальный список файлов для каждого репо.~%~%")
      
-     (format t "Примеры:~%")
-     (format t "  git-tree audit dirty              # Найти репо с незакоммиченными изменениями~%")
-     (format t "  git-tree audit staged             # Найти репо с unstaged файлами~%")
-     (format t "  git-tree audit untracked          # Найти репо с неотслеживаемыми файлами~%"))
+    (format t "Примеры:~%")
+    (format t "  git-tree audit status             # Показать git status во всех репозиториях~%")
+    (format t "  git-tree audit dirty              # Найти репо с незакоммиченными изменениями~%")
+    (format t "  git-tree audit staged             # Найти репо с unstaged файлами~%")
+    (format t "  git-tree audit untracked          # Найти репо с неотслеживаемыми файлами~%"))
+
+      ((and args (string= (first args) "status"))
+    (format t "Показываю git status во всех git-репозиториях (через audit).~%")
+    (cl-git-tree/fs:with-repo #'cl-git-tree/commands/status:status-repo args))
     
     ((and args (string= (first args) "dirty"))
      (let ((dirty 0))
@@ -143,7 +154,7 @@
            (format t "~%Всего репозиториев с untracked файлами: ~A~%" with-untracked))))
     
     (t
-     (format t "Используйте: git-tree audit <dirty|staged|untracked> или git-tree audit --help~%"))))
+     (format t "Используйте: git-tree audit <status|dirty|staged|untracked> или git-tree audit --help~%"))))
 
 (eval-when (:load-toplevel :execute)
   (cl-git-tree/dispatch:register-command

@@ -31,6 +31,7 @@
     (t
      (cl-git-tree/fs:with-repo #'status-repo args))))
 
-(eval-when (:load-toplevel :execute)
-  (cl-git-tree/dispatch:register-command
-   "status" #'cmd-status "Показать git status во всех репозиториях"))
+;; Обратите внимание: отдельная CLI-команда "git-tree status" больше не
+;; регистрируется. Вместо неё используется подкоманда "git-tree audit status".
+;; Функции из этого модуля (в частности, STATUS-REPO) переиспользуются командой
+;; AUDIT.
