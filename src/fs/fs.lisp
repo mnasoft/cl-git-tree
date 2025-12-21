@@ -174,6 +174,9 @@ ARGUMENTS:
          :error-output :string
          :ignore-error-status t)
       (declare (ignore out1))
+      (format t "DEBUG: git clone code1=~A~%" code1)
+      (when (> (length err1) 0)
+        (format t "DEBUG: git clone stderr=~A~%" err1))
 
       (if (zerop code1)
           (progn
