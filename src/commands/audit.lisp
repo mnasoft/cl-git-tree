@@ -40,13 +40,6 @@
         (when (> (length files) 0)
           (uiop:split-string files :separator (string #\Newline)))))))
 
-(defun repo-is-clean-p (repo-dir)
-  "Проверяет, что репозиторий чист (нет незакоммиченных изменений)."
-  (multiple-value-bind (out err code)
-      (cl-git-tree/git-utils:git-run repo-dir "status" "--short")
-    (declare (ignore err))
-    (and (zerop code) (string= out ""))))
-
 (defun cmd-audit (&rest args)
   "CLI-команда: проверяет состояние репозиториев.
   
@@ -110,11 +103,12 @@
      (let ((dirty 0))
        (format t "🔍 Поиск репозиториев с незакоммиченными изменениями...~%~%")
        (dolist (repo-dir (cl-git-tree/fs:find-git-repos))
-         (unless (repo-is-clean-p repo-dir)
-           (incf dirty)
-           (format t "⚠️  ~A (~A)~%"
-                   (cl-git-tree/fs:repo-name repo-dir)
-                   (namestring repo-dir))))
+         (let ((ws (cl-git-tree/loc:make-workspace repo-dir)))
+           (unless (cl-git-tree/loc:repo-is-clean-p ws)
+             (incf dirty)
+             (format t "⚠️  ~A (~A)~%"
+                     (cl-git-tree/fs:repo-name repo-dir)
+                     (namestring repo-dir)))))
        (if (zerop dirty)
            (format t "Все репозитории чистые.~%")
            (format t "~%Всего грязных репозиториев: ~A~%" dirty))))

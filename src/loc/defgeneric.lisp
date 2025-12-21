@@ -86,6 +86,12 @@
    "Определить список локаций-провайдеров git‑репозитория для WORKSPACE по его remotes.
 Возвращает список объектов <location>, соответствующих найденным remotes."))
 
+(defgeneric repo-transport-export (workspace provider &key &allow-other-keys)
+  (:documentation
+   "Создать tar.xz‑архив(ы) для git‑репозитория WORKSPACE на провайдере PROVIDER.
+Используется командой git-tree transport export. Возвращает количество
+созданных архивов (целое число)."))
+
 (defgeneric repo-add (workspace &key &allow-other-keys)
   (:documentation
    "Добавить файлы в git индекс для указанного WORKSPACE и PROVIDER (значение игнорироуется).
@@ -115,5 +121,24 @@
   (:documentation
    "Построить URL удалённого репозитория для WORKSPACE на провайдере PROVIDER.
     Возвращает строку с полным git-URL репозитория."))
+
+;;; ----------------------------------------------------------------------
+;;; Дополнительные операции над git-репозиторием рабочего пространства
+;;; ----------------------------------------------------------------------
+
+(defgeneric repo-is-clean-p (workspace)
+  (:documentation
+   "Проверить, что git‑репозиторий в WORKSPACE чист (нет незакоммиченных изменений).
+Возвращает T, если git status --short пустой и команда завершилась успешно."))
+
+(defgeneric repo-last-commit-date (workspace)
+  (:documentation
+   "Вернуть дату последнего коммита в WORKSPACE в формате Unix‑timestamp (целое число)
+или NIL, если дату получить не удалось."))
+
+(defgeneric days-since-last-commit (workspace)
+  (:documentation
+   "Вернуть количество дней, прошедших с момента последнего коммита в WORKSPACE,
+или NIL, если дату последнего коммита получить не удалось."))
 
 

@@ -8,7 +8,8 @@
    ;; with-each-repo
    ;; with-each-repo-simple
    expand-home
-   expand-tilde-directory-path)
+   expand-tilde-directory-path
+   create-tar-xz-archive)
   (:documentation
    "Подсистема работы с файловой системой для cl-git-tree.
 

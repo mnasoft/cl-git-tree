@@ -65,8 +65,12 @@
    git-initialized-p
   git-root
   repo-name
+  repo-is-clean-p
+  repo-last-commit-date
+  days-since-last-commit
   repo-provider-keys
   repo-providers
+  repo-transport-export
    repo-status
    repo-commit
    repo-branches

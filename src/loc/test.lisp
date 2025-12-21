@@ -62,7 +62,6 @@ cl-git-tree:*config-path*  ; => #P"D:/home/_namatv/PRG/msys64/home/namatv/.git-t
       :when (gethash pr-key *locations*)
       :collect :it)
 
-
-
-
 (repo-provider-keys *ws*)
+
+(repo-transport-export *ws*

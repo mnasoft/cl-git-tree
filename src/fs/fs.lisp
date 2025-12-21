@@ -190,3 +190,63 @@ ARGUMENTS:
 Нормализует ./ и ../ компоненты пути: /./ → /, path/../ → path/.
 Общая обёртка над EXPAND-TILDE-DIRECTORY-ПATH для всего проекта."
   (expand-tilde-directory-path path))
+
+
+;;; ----------------------------------------------------------------------
+;;; Утилиты для работы с tar.xz‑архивами git‑репозиториев
+;;; ----------------------------------------------------------------------
+
+(defun create-tar-xz-archive (repo-dir output-path)
+  "Создаёт tar.xz‑архив git‑репозитория REPO-DIR в каталоге OUTPUT-PATH.
+
+Архив содержит только голый git‑репозиторий (--bare, без рабочих файлов).
+Возвращает (values ARCHIVE-NAME OUTPUT-PATH) при успехе или (values NIL NIL)
+при ошибке. Путь OUTPUT-PATH может содержать тильду и будет раскрыт."
+  (let* ((repo-name (repo-name repo-dir))
+         (archive-name (format nil "~A.tar.xz" repo-name))
+         ;; Раскрываем output-path в случае, если там есть тильда
+         (expanded-output-path (expand-home output-path))
+         (archive-path (merge-pathnames archive-name expanded-output-path))
+         (bare-name (concatenate 'string repo-name ".git"))
+         (temp-dir (uiop:ensure-directory-pathname
+                    (merge-pathnames
+                     (make-pathname :directory (list :relative (format nil "tmp-git-tree-~A" (random 1000000))))
+                     (uiop:temporary-directory)))))
+    (ensure-directories-exist expanded-output-path)
+
+    ;; Создаём голый клон во временной директории
+    (multiple-value-bind (out1 err1 code1)
+        (uiop:run-program
+         (list "git" "clone" "--bare" (namestring repo-dir)
+               (namestring (merge-pathnames bare-name temp-dir)))
+         :output :string
+         :error-output :string
+         :ignore-error-status t)
+      (declare (ignore out1))
+
+      (if (zerop code1)
+          (progn
+            ;; Архивируем голый репозиторий
+            (multiple-value-bind (out err code)
+                (uiop:run-program
+                 (list "tar" "-C" (namestring temp-dir)
+                       "-cJf" (namestring archive-path)
+                       bare-name)
+                 :output :string
+                 :error-output :string
+                 :ignore-error-status t)
+              (declare (ignore out))
+
+              ;; Очищаем временный каталог
+              (uiop:delete-directory-tree temp-dir :validate t)
+
+              (if (zerop code)
+                  (values archive-name (namestring expanded-output-path))
+                  (progn
+                    (format t "❌ Ошибка при архивировании:~%~A~%" err)
+                    (values nil nil)))))
+          (progn
+            ;; Очищаем временный каталог при ошибке
+            (ignore-errors (uiop:delete-directory-tree temp-dir :validate t))
+            (format t "❌ Ошибка при создании голого клона:~%~A~%" err1)
+            (values nil nil))))))
