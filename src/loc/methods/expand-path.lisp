@@ -15,7 +15,20 @@
 
 ;;; Специализация для MSYS2: добавляет префикс диска для абсолютных POSIX-путей
 
-(defparameter *msys2-root-default* "c:/msys2/"
+(defun %get-msys2-root-default ()
+  "Определяет корень MSYS2 через вызов cygpath -m /"
+  (let ((result (string-trim '(#\Space #\Newline #\Return)
+                            (uiop:run-program "cygpath -m /"
+                                             :output :string
+                                             :error-output nil
+                                             :ignore-error-status t))))
+    (if (plusp (length result))
+        (if (char= (char result (1- (length result))) #\/)
+            result
+            (concatenate 'string result "/"))
+        "c:/msys64/")))
+
+(defparameter *msys2-root-default* (%get-msys2-root-default)
   "Значение корня MSYS2 по умолчанию, если MSYS2_ROOT не задан.")
 
 (defun %msys2-root-prefix ()

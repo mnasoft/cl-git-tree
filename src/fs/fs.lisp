@@ -171,7 +171,7 @@ ARGUMENTS:
 Нормализует ./ и ../ компоненты пути (/./ → /, path/../ → path/).
 Если PATH не начинается с ~, возвращает нормализованный namestring директории."
   (let* ((home-path (uiop:ensure-directory-pathname (uiop:getenv "HOME")))
-         (str (if (pathnamep path) (uiop:native-namestring path) path)))
+         (str (if (pathnamep path) (namestring path) path)))
     (let* ((expanded
             (if (and str (> (length str) 0) (char= (char str 0) #\~))
                 (let* ((rest (subseq str 1))
@@ -183,7 +183,7 @@ ARGUMENTS:
                 (uiop:parse-unix-namestring str)))
            (normalized (normalize-pathname expanded))
            (as-dir (uiop:ensure-directory-pathname normalized)))
-      (uiop:native-namestring as-dir))))
+      (namestring as-dir))))
 
 (defun expand-home (path)
   "Заменяет ведущий '~' на домашний каталог (Linux/MSYS2).
