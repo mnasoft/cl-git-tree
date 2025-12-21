@@ -230,7 +230,7 @@ ARGUMENTS:
             (multiple-value-bind (out err code)
                 (uiop:run-program
                  (list "tar" "-C" (namestring temp-dir)
-                       "-cJf" (namestring archive-path)
+                       "-c" "-J" "-f" (namestring archive-path)
                        bare-name)
                  :output :string
                  :error-output :string
@@ -238,9 +238,7 @@ ARGUMENTS:
               (declare (ignore out))
 
               ;; Очищаем временный каталог
-              (format t "COOOOOOOOOOOOOOOOO: 01")
               (delete-directory-tree temp-dir)
-              (format t "COOOOOOOOOOOOOOOOO: 02")
 
               (if (zerop code)
                   (values archive-name (namestring expanded-output-path))
@@ -249,9 +247,7 @@ ARGUMENTS:
                     (values nil nil)))))
           (progn
             ;; Очищаем временный каталог при ошибке
-            (format t "COOOOOOOOOOOOOOOOO: 03")
             (ignore-errors (delete-directory-tree temp-dir))
-            (format t "COOOOOOOOOOOOOOOOO: 04")
             (format t "❌ Ошибка при создании голого клона:~%~A~%" err1)
             (values nil nil))))))
 
