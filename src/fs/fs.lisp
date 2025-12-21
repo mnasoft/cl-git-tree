@@ -238,7 +238,9 @@ ARGUMENTS:
               (declare (ignore out))
 
               ;; Очищаем временный каталог
+              (format t "COOOOOOOOOOOOOOOOO: 01")
               (uiop:delete-directory-tree temp-dir :validate t)
+              (format t "COOOOOOOOOOOOOOOOO: 02")
 
               (if (zerop code)
                   (values archive-name (namestring expanded-output-path))
@@ -247,6 +249,8 @@ ARGUMENTS:
                     (values nil nil)))))
           (progn
             ;; Очищаем временный каталог при ошибке
+            (format t "COOOOOOOOOOOOOOOOO: 03")
             (ignore-errors (uiop:delete-directory-tree temp-dir :validate t))
+            (format t "COOOOOOOOOOOOOOOOO: 04")
             (format t "❌ Ошибка при создании голого клона:~%~A~%" err1)
             (values nil nil))))))
