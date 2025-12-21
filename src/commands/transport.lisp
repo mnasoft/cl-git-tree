@@ -34,26 +34,8 @@
              (days (floor diff-seconds 86400)))
         days))))
 
-(defun get-repo-providers (repo-dir)
-  "Определяет ВСЕ провайдеров репозитория по его remotes."
-  (let ((providers nil)
-        (remotes (cl-git-tree/git-utils:repo-remotes repo-dir)))
-    (dolist (remote remotes)
-      (multiple-value-bind (out err code)
-          (cl-git-tree/git-utils:git-run repo-dir "remote" "get-url" remote)
-        (declare (ignore err))
-        (when (zerop code)
-          (let ((url (string-trim '(#\Space #\Newline #\Return) out)))
-            ;; Проверяем, соответствует ли URL какой-либо зарегистрированной локации
-            (dolist (loc-key (cl-git-tree/loc:all-location-keys))
-              (let ((loc (cl-git-tree/loc:find-location loc-key)))
-                (when (and loc (cl-git-tree/loc:<location>-url-git loc))
-                  (let ((base-url (cl-git-tree/loc:<location>-url-git loc)))
-                    (when (search base-url url)
-                      (let ((provider (cl-git-tree/loc:<location>-provider loc)))
-                        (unless (member provider providers)
-                          (push provider providers))))))))))))
-    providers))
+;; Провайдеры репозитория теперь определяются через generic-функцию
+;; cl-git-tree/loc:repo-providers для объектов <workspace>.
 
 (defun create-tar-xz-archive (repo-dir output-path)
   "Создаёт tar.xz архив репозитория в указанном месте.
@@ -164,6 +146,148 @@
             (format t "❌ Ошибка распаковки:~%~A~%" err)
             nil)))))
 
+(defun print-transport-help ()
+  "Выводит справку по команде git-tree transport."
+  (format t "Управление транспортом репозиториев через tar.xz архивы.~%~%")
+  (format t "Использование:~%")
+  (format t "  git-tree transport export [--days N] [--verbose]~%")
+  (format t "  git-tree transport import~%")
+  (format t "  git-tree transport clean~%~%")
+  (format t "Подкоманды:~%")
+  (format t "  export               Создать tar.xz архивы из чистых репозиториев~%")
+  (format t "  import               Импортировать архивы в bare-хранилища~%")
+  (format t "  clean                Удалить tar.xz архивы из каталогов :url-xz всех провайдеров~%~%")
+  (format t "Опции:~%")
+  (format t "  --days N             Для export: архивировать только репозитории с коммитами не старее N дней (по умолчанию 30)~%")
+  (format t "  --verbose            Для export: показать подробный вывод~%")
+  (format t "  --help               Показать эту справку~%~%")
+  (format t "Примечание:~%")
+  (format t "  Архивы создаются и импортируются для каждого локального провайдера в папки :url-xz и :url-git.~%")
+  (format t "  Если :url-xz = NIL, операции для этого провайдера пропускаются.~%~%")
+  (format t "Примеры:~%")
+  (format t "  git-tree transport export               # краткий вывод~%")
+  (format t "  git-tree transport export --verbose     # подробный вывод~%")
+  (format t "  git-tree transport export --days 7~%")
+  (format t "  git-tree transport import~%")
+  (format t "  git-tree transport clean~%"))
+
+(defun transport-clean ()
+  "Очищает tar.xz-архивы во всех :url-xz для зарегистрированных локаций."
+  (let ((total-deleted 0))
+    (format t "🧹 Очистка архивов tar.xz из каталогов :url-xz всех провайдеров~%~%")
+    (dolist (loc-key (cl-git-tree/loc:all-location-keys))
+      (let* ((loc (cl-git-tree/loc:find-location loc-key))
+             (url-xz (and loc (cl-git-tree/loc:<location>-url-xz loc))))
+        (when url-xz
+          (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home url-xz)))
+                 (deleted (clean-tar-xz-archives xz-dir)))
+            (incf total-deleted deleted)))))
+    (format t "~%=== Итого удалено архивов: ~A ===~%" total-deleted)))
+
+(defun transport-import ()
+  "Импортирует все найденные *.tar.xz из :url-xz в :url-git для локальных локаций."
+  (let ((processed 0)
+        (applied 0))
+    (format t "⬇ Импорт архивов tar.xz из :url-xz в :url-git для всех локальных локаций~%~%")
+    (dolist (loc-key (cl-git-tree/loc:all-location-keys))
+      (let* ((loc (cl-git-tree/loc:find-location loc-key))
+             (url-xz (and loc (cl-git-tree/loc:<location>-url-xz loc)))
+             (url-git (and loc (cl-git-tree/loc:<location>-url-git loc)))
+             (provider (and loc (cl-git-tree/loc:<location>-provider loc))))
+        (when (and loc url-xz url-git)
+          (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home url-xz)))
+                 (archives (directory (merge-pathnames #p"*.tar.xz" xz-dir))))
+            (when archives
+              (format t "Локация ~A (провайдер ~A)~%" loc-key provider)
+              (dolist (archive archives)
+                (incf processed)
+                (format t "  • ~A~%" (namestring archive))
+                (if (apply-tar-xz-archive archive url-git)
+                    (incf applied)
+                    (format t "    ⚠️  Пропущено из-за ошибки~%"))))))))
+    (format t "~%=== Итог импорта ===~%")
+    (format t "Обработано архивов: ~A~%" processed)
+    (format t "Импортировано: ~A~%" applied)))
+
+(defun transport-export (args)
+  "Создаёт tar.xz-архивы для найденных репозиториев с учётом опций --days и --verbose.
+
+ARGS — список аргументов после слова export."
+  (let ((days-filter 30)
+        (processed 0)
+        (archived 0)
+        (verbose (member "--verbose" args :test #'string=)))
+
+    ;; Парсим аргументы
+    (loop for (arg val) on args by #'cddr
+          do (when (string= arg "--days")
+               (setf days-filter (parse-integer val :junk-allowed t))))
+
+    (unless verbose
+      (format t "📦 Архивирование репозиториев (--days ~A)...~%" days-filter))
+
+    (dolist (repo-dir (cl-git-tree/fs:find-git-repos))
+      (incf processed)
+      (let* ((repo-name (cl-git-tree/fs:repo-name repo-dir))
+             ;; Список локаций-провайдеров для данного репозитория
+             (provider-locs (cl-git-tree/loc:repo-providers
+                             (cl-git-tree/loc:make-workspace repo-dir)))
+             (skip nil)
+             (skip-reason nil))
+
+        ;; Проверяем чистоту репозитория
+        (unless (repo-is-clean-p repo-dir)
+          (setf skip t skip-reason "незакоммиченные изменения"))
+
+        ;; Проверяем дату последнего коммита
+        (when (and (not skip) days-filter)
+          (let ((days (days-since-last-commit repo-dir)))
+            (if days
+                (if (> days days-filter)
+                    (progn
+                      (setf skip t skip-reason (format nil "коммит ~A дней назад" days)))
+                    (when verbose
+                      (format t "~%Репозиторий: ~A~%" repo-name)
+                      (format t "  ✔ Последний коммит ~A дней назад~%" days)))
+                (progn
+                  (setf skip t skip-reason "не удалось определить дату коммита")))))
+
+        ;; Выводим причину пропуска, если есть
+        (when (and verbose skip)
+          (unless skip-reason
+            (setf skip-reason "неизвестная причина"))
+          (format t "~%Репозиторий: ~A~%" repo-name)
+          (format t "  ⚠️  Пропущено: ~A~%" skip-reason))
+
+        ;; Архивируем для каждой найденной локации-провайдера
+        (if (not skip)
+            (if provider-locs
+                ;; Обрабатываем каждую локацию-провайдера, у которой задан :url-xz
+                (dolist (loc provider-locs)
+                  (let ((url-xz (cl-git-tree/loc:<location>-url-xz loc))
+                        (provider (cl-git-tree/loc:<location>-provider loc)))
+                    (if url-xz
+                        (multiple-value-bind (archive-name output-dir)
+                            (create-tar-xz-archive
+                             repo-dir
+                             (uiop:ensure-directory-pathname
+                              (cl-git-tree/fs:expand-home url-xz)))
+                          (when archive-name
+                            (incf archived)
+                            (unless verbose
+                              (format t "✅ ~A (~A). Архив создан: ~A → ~A~%"
+                                      repo-name provider archive-name output-dir))))
+                        (when verbose
+                          (format t "  ⚠️  Локация ~A (провайдер ~A) не имеет :url-xz~%"
+                                  (cl-git-tree/loc:<location>-id loc)
+                                  provider)))))
+                (when verbose
+                  (format t "  ⚠️  Не определены провайдеры репозитория~%")))
+            nil)))
+
+    (unless verbose
+      (format t "~%=== Архивировано: ~A из ~A ===~%" archived processed))))
+
 (defun cmd-transport (&rest args)
   "CLI-команда: архивирует чистые репозитории в tar.xz или очищает каталоги с архивами.
   
@@ -174,139 +298,13 @@
     --help               - показать эту справку"
   (cond
     ((or (null args) (member "--help" args :test #'string=))
-     (format t "Управление транспортом репозиториев через tar.xz архивы.~%~%")
-     (format t "Использование:~%")
-     (format t "  git-tree transport export [--days N] [--verbose]~%")
-     (format t "  git-tree transport import~%")
-     (format t "  git-tree transport clean~%~%")
-     (format t "Подкоманды:~%")
-     (format t "  export               Создать tar.xz архивы из чистых репозиториев~%")
-     (format t "  import               Импортировать архивы в bare-хранилища~%")
-     (format t "  clean                Удалить tar.xz архивы из каталогов :url-xz всех провайдеров~%~%")
-     (format t "Опции:~%")
-     (format t "  --days N             Для export: архивировать только репозитории с коммитами не старее N дней (по умолчанию 30)~%")
-     (format t "  --verbose            Для export: показать подробный вывод~%")
-     (format t "  --help               Показать эту справку~%~%")
-     (format t "Примечание:~%")
-     (format t "  Архивы создаются и импортируются для каждого локального провайдера в папки :url-xz и :url-git.~%")
-     (format t "  Если :url-xz = NIL, операции для этого провайдера пропускаются.~%~%")
-     (format t "Примеры:~%")
-     (format t "  git-tree transport export               # краткий вывод~%")
-     (format t "  git-tree transport export --verbose     # подробный вывод~%")
-     (format t "  git-tree transport export --days 7~%")
-     (format t "  git-tree transport import~%")
-     (format t "  git-tree transport clean~%"))
+     (print-transport-help))
     ((and args (string= (first args) "clean"))
-     (let ((total-deleted 0))
-       (format t "🧹 Очистка архивов tar.xz из каталогов :url-xz всех провайдеров~%~%")
-       (dolist (loc-key (cl-git-tree/loc:all-location-keys))
-         (let* ((loc (cl-git-tree/loc:find-location loc-key))
-                (url-xz (and loc (cl-git-tree/loc:<location>-url-xz loc))))
-           (when url-xz
-             (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home url-xz)))
-                    (deleted (clean-tar-xz-archives xz-dir)))
-               (incf total-deleted deleted)))))
-       (format t "~%=== Итого удалено архивов: ~A ===~%" total-deleted)))
+     (transport-clean))
     ((and args (string= (first args) "import"))
-     (let ((processed 0)
-           (applied 0))
-       (format t "⬇ Импорт архивов tar.xz из :url-xz в :url-git для всех локальных локаций~%~%")
-       (dolist (loc-key (cl-git-tree/loc:all-location-keys))
-         (let* ((loc (cl-git-tree/loc:find-location loc-key))
-                (url-xz (and loc (cl-git-tree/loc:<location>-url-xz loc)))
-                (url-git (and loc (cl-git-tree/loc:<location>-url-git loc)))
-                (provider (and loc (cl-git-tree/loc:<location>-provider loc))))
-           (when (and loc url-xz url-git)
-             (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home url-xz)))
-                    (archives (directory (merge-pathnames #p"*.tar.xz" xz-dir))))
-               (when archives
-                 (format t "Локация ~A (провайдер ~A)~%" loc-key provider)
-                 (dolist (archive archives)
-                   (incf processed)
-                   (format t "  • ~A~%" (namestring archive))
-                   (if (apply-tar-xz-archive archive url-git)
-                       (incf applied)
-                       (format t "    ⚠️  Пропущено из-за ошибки~%"))))))))
-       (format t "~%=== Итог импорта ===~%")
-       (format t "Обработано архивов: ~A~%" processed)
-       (format t "Импортировано: ~A~%" applied)))
+     (transport-import))
     ((and args (string= (first args) "export"))
-         (let ((days-filter 30)
-           (processed 0)
-           (archived 0)
-           (verbose (member "--verbose" args :test #'string=)))
-       
-       ;; Парсим аргументы
-       (loop for (arg val) on (rest args) by #'cddr
-             do (when (string= arg "--days")
-                  (setf days-filter (parse-integer val :junk-allowed t))))
-       
-       (unless verbose
-         (format t "📦 Архивирование репозиториев (--days ~A)...~%" days-filter))
-       
-       (dolist (repo-dir (cl-git-tree/fs:find-git-repos))
-         (incf processed)
-         (let ((repo-name (cl-git-tree/fs:repo-name repo-dir))
-               (providers (get-repo-providers repo-dir))
-               (skip nil)
-               (skip-reason nil))
-           
-           ;; Проверяем чистоту репозитория
-           (unless (repo-is-clean-p repo-dir)
-             (setf skip t skip-reason "незакоммиченные изменения"))
-           
-           ;; Проверяем дату последнего коммита
-           (when (and (not skip) days-filter)
-             (let ((days (days-since-last-commit repo-dir)))
-               (if days
-                   (if (> days days-filter)
-                       (progn
-                         (setf skip t skip-reason (format nil "коммит ~A дней назад" days)))
-                       (when verbose
-                         (format t "~%Репозиторий: ~A~%" repo-name)
-                         (format t "  ✔ Последний коммит ~A дней назад~%" days)))
-                   (progn
-                     (setf skip t skip-reason "не удалось определить дату коммита")))))
-           
-           ;; Выводим причину пропуска, если есть
-           (when (and verbose skip)
-             (unless skip-reason
-               (setf skip-reason "неизвестная причина"))
-             (format t "~%Репозиторий: ~A~%" repo-name)
-             (format t "  ⚠️  Пропущено: ~A~%" skip-reason))
-           
-           ;; Архивируем для каждого найденного провайдера
-           (if (not skip)
-               (if providers
-                   ;; Обрабатываем каждый провайдер
-                   (dolist (provider providers)
-                     ;; Ищем ВСЕ локации с этим провайдером и url-xz
-                     (let ((matching-locs 
-                             (loop for k in (cl-git-tree/loc:all-location-keys)
-                                   for l = (cl-git-tree/loc:find-location k)
-                                   when (and l 
-                                             (eq (cl-git-tree/loc:<location>-provider l) provider)
-                                             (cl-git-tree/loc:<location>-url-xz l))
-                                   collect l)))
-                       (if matching-locs
-                           ;; Архивируем в каждую найденную локацию с url-xz
-                           (dolist (loc matching-locs)
-                             (multiple-value-bind (archive-name output-dir)
-                                 (create-tar-xz-archive repo-dir 
-                                                         (uiop:ensure-directory-pathname 
-                                                          (cl-git-tree/loc:<location>-url-xz loc)))
-                               (when archive-name
-                                 (incf archived)
-                                 (unless verbose
-                                   (format t "✅ ~A. Архив создан: ~A → ~A~%" repo-name archive-name output-dir)))))
-                           (when verbose
-                             (format t "  ⚠️  Провайдер ~A не имеет локаций с :url-xz~%" provider)))))
-                   (when verbose
-                     (format t "  ⚠️  Не определены провайдеры репозитория~%")))
-               nil)))
-       
-       (unless verbose
-         (format t "~%=== Архивировано: ~A из ~A ===~%" archived processed))))
+     (transport-export (rest args)))
     (t
      (format t "❌ Неизвестная подкоманда. Используйте: export, import или clean.~%")
      (format t "Справка: git-tree transport --help~%"))))

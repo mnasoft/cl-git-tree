@@ -63,8 +63,10 @@
    ;; generic-функции
    git-init
    git-initialized-p
-   git-root
-   repo-name
+  git-root
+  repo-name
+  repo-provider-keys
+  repo-providers
    repo-status
    repo-commit
    repo-branches

@@ -134,6 +134,53 @@
       (when (uiop:directory-exists-p test-dir)
         (cl-git-tree/tests:force-delete-directory test-dir)))))
 
+;;; Тесты для repo-provider-keys и repo-providers
+
+(def-suite workspace-repo-providers
+  :description "Тесты для методов repo-provider-keys и repo-providers"
+  :in workspace)
+
+(in-suite workspace-repo-providers)
+
+(def-test repo-provider-keys-and-providers-basic ()
+  "Проверяем, что repo-provider-keys и repo-providers возвращают
+ожидаемые значения для простого репозитория с одним remote."
+  (let* ((test-dir (uiop:merge-pathnames*
+                    (make-pathname :directory '(:relative "test-ws-providers"))
+                    (uiop:temporary-directory)))
+         (ws (cl-git-tree/loc:make-workspace test-dir)))
+    (unwind-protect
+         (progn
+           ;; Инициализируем git-репозиторий и настраиваем простой remote
+           (cl-git-tree/loc:git-init ws)
+
+           ;; Регистрируем локацию с id "origin" и базовым URL
+           (cl-git-tree/loc:add-location "origin"
+             :description "Test Origin"
+             :url-git "https://example.org/repos/")
+
+           ;; Добавляем remote origin, указывающий на эту локацию
+           (cl-git-tree/git-utils:git-run
+            test-dir "remote" "add" "origin" "https://example.org/repos/test.git")
+
+           ;; Проверяем repo-provider-keys
+           (let ((keys (cl-git-tree/loc:repo-provider-keys ws)))
+             (is (listp keys))
+             (is (= (length keys) 1))
+             (is (string= (first keys) "origin")))
+
+           ;; Проверяем repo-providers
+           (let ((providers (cl-git-tree/loc:repo-providers ws)))
+             (is (listp providers))
+             (is (= (length providers) 1))
+             (let ((loc (first providers)))
+               (is (typep loc 'cl-git-tree/loc:<location>))
+               (is (string= (cl-git-tree/loc:<location>-id loc) "origin"))
+               (is (string= (cl-git-tree/loc:<location>-url-git loc)
+                            "https://example.org/repos/")))))
+      (when (uiop:directory-exists-p test-dir)
+        (cl-git-tree/tests:force-delete-directory test-dir)))))
+
 ;;; Тесты для repo-status
 
 (def-suite workspace-repo-status

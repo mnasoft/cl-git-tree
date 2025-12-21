@@ -75,6 +75,17 @@
    "Вернуть базовое имя git-репозитория для указанного объекта.
     Если git не инициализирован, возвращает NIL."))
 
+(defgeneric repo-provider-keys (workspace)
+  (:documentation
+   "Вернуть список ключей (имен remotes), соответствующих зарегистрированным локациям
+для указанного WORKSPACE. Обычно это строковые идентификаторы локаций
+в глобальной таблице *locations* (например, \"lc\", \"gh\")."))
+
+(defgeneric repo-providers (workspace)
+  (:documentation
+   "Определить список локаций-провайдеров git‑репозитория для WORKSPACE по его remotes.
+Возвращает список объектов <location>, соответствующих найденным remotes."))
+
 (defgeneric repo-add (workspace &key &allow-other-keys)
   (:documentation
    "Добавить файлы в git индекс для указанного WORKSPACE и PROVIDER (значение игнорироуется).

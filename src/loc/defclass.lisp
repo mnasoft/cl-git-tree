@@ -119,7 +119,8 @@
    
    PATH — путь к каталогу workspace (будет создан, если не существует).
    DESCRIPTION — человекочитаемое описание (по умолчанию — имя каталога)."
-  (let* ((pathname (uiop:ensure-directory-pathname path))
+  (let* ((pathname (uiop:ensure-directory-pathname
+                    (cl-git-tree/fs:expand-home path)))
          (os-type (detect-os))
          (class (case os-type
                   (:linux '<workspace-linux>)
@@ -150,3 +151,5 @@
 (progn (make-instance '<local>  :id "lc")
        (make-instance '<github> :id "gh")
        (make-instance '<gitlab> :id "gl"))
+
+(cl-git-tree/fs:expand-home "~")

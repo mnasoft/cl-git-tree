@@ -115,6 +115,8 @@
        (:file "repo-status")
        (:file "repo-commit")
        (:file "repo-name")
+      (:file "repo-provider-keys")
+      (:file "repo-providers")
        (:file "remote-url")
        (:file "remote-add")
        (:file "remote-readd")
