@@ -63,10 +63,21 @@
     ((:file "package")
      (:file "git-utils")))))
 
+(defsystem "cl-git-tree/shell-utils"
+  :description "Утилиты для запуска произвольных CLI-команд из Common Lisp"
+  :depends-on (:uiop :cl-ppcre)
+  :components
+  ((:module "src/shell-utils"
+    :components
+    ((:file "package")
+     (:file "core")
+     (:file "ssh-utils")))))
+
 (defsystem "cl-git-tree/fs"
   :description "Файловая подсистема для поиска и обхода git-репозиториев."
   :depends-on (:uiop
                :cl-fad
+               :cl-git-tree/shell-utils
                ;; :cl-git-tree/loc
                )
   :serial t
@@ -150,13 +161,3 @@
     :components
     ((:file "package")
      (:file "git-global")))))
-
-(defsystem "cl-git-tree/shell-utils"
-  :description "Утилиты для запуска произвольных CLI-команд из Common Lisp"
-  :depends-on (:uiop :cl-ppcre)
-  :components
-  ((:module "src/shell-utils"
-    :components
-    ((:file "package")
-     (:file "core")
-     (:file "ssh-utils")))))

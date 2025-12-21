@@ -11,7 +11,7 @@
   "Удалить DIR, предварительно снимая атрибут read-only под Windows/MSYS2.
    Используется в тестах для очистки git-репозиториев, где объекты могут быть read-only."
   (handler-case
-      (uiop:delete-directory-tree dir :validate t)
+      (cl-git-tree/fs:delete-directory-tree dir)
     (error (e)
       ;; На Windows pack-файлы в .git/objects иногда помечаются read-only.
       ;; Снимаем атрибуты через cmd.exe и пробуем ещё раз.
@@ -26,7 +26,7 @@
                                     (uiop:native-namestring dir))
                               :ignore-error-status t))
           ;; После снятия атрибутов пробуем удалить ещё раз (игнорируя любые ошибки)
-          (ignore-errors (uiop:delete-directory-tree dir :validate nil))
+          (ignore-errors (cl-git-tree/fs:delete-directory-tree dir))
           (return-from force-delete-directory t))
         ;; На Linux/других ОС — просто пробрасываем ошибку
         (error e)))))

@@ -34,11 +34,9 @@ cl-git-tree:*config-path*  ; => #P"D:/home/_namatv/PRG/msys64/home/namatv/.git-t
 (defparameter *ws* (make-workspace #P"~/quicklisp/local-projects/cl-git-tree"))
 (defparameter *lc* (find-location "lc"))
 
-(uiop:delete-directory-tree
+(cl-git-tree/fs:delete-directory-tree
  (uiop:ensure-directory-pathname
-  (remote-url *ws* *lc*))
- :validate t
- )
+  (remote-url *ws* *lc*)))
 
 (cl-git-tree/shell-utils:shell-run-single "."
 					  "rm" "-r"

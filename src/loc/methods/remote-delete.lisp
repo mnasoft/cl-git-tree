@@ -64,7 +64,7 @@
   (flet ((force-delete-directory (dir)
            "Удалить DIR, предварительно снимая атрибут read-only под Windows/MSYS2."
            (handler-case
-               (uiop:delete-directory-tree dir :validate t)
+               (cl-git-tree/fs:delete-directory-tree dir)
              (file-error (e)
 	       ;; На Windows pack-файлы в .git/objects иногда помечаются read-only
 	       ;; (или удерживаются индексатором). Снимаем атрибуты и пробуем ещё раз.
@@ -73,7 +73,7 @@
                   (uiop:run-program (list "cmd.exe" "/c" "attrib" "-R" "/S" "/D"
                                           (uiop:native-namestring dir))
                                     :ignore-error-status t))
-                 (uiop:delete-directory-tree dir :validate nil)
+                 (cl-git-tree/fs:delete-directory-tree dir)
                  (return-from force-delete-directory t))
                (error e)))))
 

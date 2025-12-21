@@ -239,7 +239,7 @@ ARGUMENTS:
 
               ;; Очищаем временный каталог
               (format t "COOOOOOOOOOOOOOOOO: 01")
-              (uiop:delete-directory-tree temp-dir :validate t)
+              (delete-directory-tree temp-dir)
               (format t "COOOOOOOOOOOOOOOOO: 02")
 
               (if (zerop code)
@@ -250,7 +250,36 @@ ARGUMENTS:
           (progn
             ;; Очищаем временный каталог при ошибке
             (format t "COOOOOOOOOOOOOOOOO: 03")
-            (ignore-errors (uiop:delete-directory-tree temp-dir :validate t))
+            (ignore-errors (delete-directory-tree temp-dir))
             (format t "COOOOOOOOOOOOOOOOO: 04")
             (format t "❌ Ошибка при создании голого клона:~%~A~%" err1)
             (values nil nil))))))
+
+(defun delete-directory-tree (target-path)
+  "Удаляет каталог с содержимым через shell команду (rm -rf) вместо UIOP для совместимости с MSYS2.
+
+ARGUMENTS:
+  TARGET-PATH — путь к каталогу, который нужно удалить (строка или pathname).
+
+DESCRIPTION:
+  Функция использует shell команду 'rm -rf' вместо UIOP:DELETE-DIRECTORY-TREE,
+  так как последняя работает нестабильно под MSYS2. Команда выполняется через
+  CL-GIT-TREE/SHELL-UTILS:SHELL-RUN-SINGLE.
+
+  Удаление выполняется из корневого каталога (текущей директории) для избежания
+  проблем с путями в MSYS2.
+
+RETURNS:
+  T если операция успешна, NIL в случае ошибки.
+
+EXAMPLE:
+  (delete-directory-tree #P\"/tmp/test-dir/\")
+  ;; => T"
+  (let ((path-str (namestring (pathname target-path))))
+    (handler-case
+        (progn
+          (cl-git-tree/shell-utils:shell-run-single "." "rm" "-rf" path-str)
+          t)
+      (error (e)
+        (format t "❌ Ошибка при удалении ~A: ~A~%" path-str e)
+        nil))))

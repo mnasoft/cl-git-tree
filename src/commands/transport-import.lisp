@@ -28,18 +28,18 @@
             (if (probe-file extracted)
                 (progn
                   (when (probe-file dest-path)
-                    (uiop:delete-directory-tree dest-path :validate t))
+                    (cl-git-tree/fs:delete-directory-tree dest-path))
                   (ensure-directories-exist expanded-dest-root)
                   (rename-file extracted dest-path)
-                  (uiop:delete-directory-tree temp-dir :validate t)
+                  (cl-git-tree/fs:delete-directory-tree temp-dir)
                   (format t "✔ Импортировано: ~A~%" (namestring dest-path))
                   t)
                 (progn
-                  (uiop:delete-directory-tree temp-dir :validate t)
+                  (cl-git-tree/fs:delete-directory-tree temp-dir)
                   (format t "❌ Ошибка: в архиве не найден каталог ~A~%" bare-name)
                   nil)))
           (progn
-            (uiop:delete-directory-tree temp-dir :validate t)
+            (cl-git-tree/fs:delete-directory-tree temp-dir)
             (format t "❌ Ошибка распаковки:~%~A~%" err)
             nil)))))
 
