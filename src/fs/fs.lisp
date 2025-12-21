@@ -173,10 +173,7 @@ ARGUMENTS:
          :output :string
          :error-output :string
          :ignore-error-status t)
-      (declare (ignore out1))
-      (format t "DEBUG: git clone code1=~A~%" code1)
-      (when (> (length err1) 0)
-        (format t "DEBUG: git clone stderr=~A~%" err1))
+      (declare (ignore out1 err1))
 
       (if (zerop code1)
           (progn
@@ -202,12 +199,12 @@ ARGUMENTS:
                     (values archive-name (namestring expanded-output-path))
                     (progn
                       (format t "❌ Ошибка при архивировании:~%~A~%" err)
-                      (values nil nil)))))))
+                      (values nil nil))))))
           (progn
             ;; Очищаем временный каталог при ошибке
             (ignore-errors (delete-directory-tree temp-dir))
-            (format t "❌ Ошибка при создании голого клона:~%~A~%" err1)
-            (values nil nil)))))
+            (format t "❌ Ошибка при создании голого клона~%")
+            (values nil nil))))))
 
 (defun delete-directory-tree (target-path)
   "Удаляет каталог с содержимым через shell команду (rm -rf) вместо UIOP для совместимости с MSYS2.
