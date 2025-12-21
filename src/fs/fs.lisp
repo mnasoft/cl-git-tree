@@ -70,72 +70,6 @@ ARGUMENTS:
                results)))
     (scan root)))
 
-#+nil 
-(defun with-each-repo (loc-key fn)
-  "Находит все git‑репозитории для локации LOC-KEY и вызывает функцию FN для каждого.
-
-Аргументы:
-  LOC-KEY — ключ (обычно строка или символ), по которому ищется объект <location>
-            в глобальной таблице cl-git-tree/loc:*locations*.
-  FN      — функция, которая будет вызвана для каждого найденного репозитория.
-
-Вызов FN происходит с тремя аргументами:
-  (repo-dir loc-key base-url)
-
-  repo-dir — pathname корня git‑репозитория;
-  loc-key  — тот же ключ, что был передан в with-each-repo;
-  base-url — базовый git‑URL, полученный из объекта <location>.
-
-Если LOC-KEY не найден в *locations* или у него нет git‑URL,
-функция выводит сообщение об ошибке и не вызывает FN.
-
-Примеры:
-  ;; Вывести список всех репозиториев для локации \"gh\"
-  (with-each-repo \"gh\"
-    (lambda (repo loc-key base-url)
-      (format t \"~&[~A] ~A (base ~A)~%\"
-              loc-key repo base-url))))
-
-  ;; Использовать для массового pull
-  (with-each-repo \"work\"
-    (lambda (repo loc-key base-url)
-      (uiop:run-program (list \"git\" \"-C\" (namestring repo) \"pull\"))))"
-  (let* ((loc (gethash loc-key cl-git-tree/loc:*locations*))
-         (base-url (and loc (cl-git-tree/loc:<location>-url-git loc))))
-    (if (null base-url)
-        (format t "Неизвестная локация: ~A~%" loc-key)
-        (dolist (repo-dir (find-git-repos))
-          (funcall fn repo-dir loc-key base-url)))))
-
-#+nil 
-(defun with-each-repo-simple (fn)
-  "Вызывает функцию FN для каждого найденного git‑репозитория.
-
-Аргументы:
-  FN — функция одного аргумента, которая будет вызвана для каждого
-       найденного git‑репозитория. Аргументом передаётся pathname
-       корневого каталога репозитория.
-
-Функция использует FIND-GIT-REPOS для поиска всех репозиториев,
-и для каждого из них вызывает FN.
-
-Возвращаемое значение:
-  NIL (результаты вычислений FN игнорируются).
-
-Примеры:
-  ;; Вывести список всех найденных репозиториев
-  (with-each-repo-simple
-    (lambda (repo-dir)
-      (format t \"~&Repo: ~A~%\" repo-dir)))
-
-  ;; Выполнить git pull во всех репозиториях
-  (with-each-repo-simple
-    (lambda (repo-dir)
-      (uiop:run-program (list \"git\" \"-C\" (namestring repo-dir) \"pull\"))))"
-  (dolist (repo-dir (find-git-repos))
-    (funcall fn repo-dir)))
-
-
 (defun with-repo (fn args)
   (dolist (repo-dir (find-git-repos))
     (funcall fn repo-dir args)))
@@ -191,6 +125,23 @@ ARGUMENTS:
 Общая обёртка над EXPAND-TILDE-DIRECTORY-ПATH для всего проекта."
   (expand-tilde-directory-path path))
 
+(defun to-posix-path (windows-or-posix-path)
+  "Преобразует Windows-путь в POSIX-путь используя cygpath для MSYS2.
+Если путь уже POSIX, возвращает как есть."
+  (let* ((path-str (if (pathnamep windows-or-posix-path)
+                        (namestring windows-or-posix-path)
+                        windows-or-posix-path))
+         (is-windows (or (search ":" path-str)
+                         (search "\\" path-str))))
+    (if is-windows
+        (string-trim '(#\Newline #\Return #\Space)
+                    (uiop:run-program
+                     (list "cygpath" "-u" path-str)
+                     :output :string
+                     :error-output nil
+                     :ignore-error-status t))
+        path-str)))
+
 
 ;;; ----------------------------------------------------------------------
 ;;; Утилиты для работы с tar.xz‑архивами git‑репозиториев
@@ -227,13 +178,15 @@ ARGUMENTS:
       (if (zerop code1)
           (progn
             ;; Архивируем голый репозиторий
-            (let ((tar-cmd (list "tar" "-C" (namestring temp-dir)
-                                 "-c" "-J" "-f" (namestring archive-path)
-                                 bare-name)))
-              (format t "DEBUG tar cmd: ~A~%" tar-cmd)
+            (let* ((temp-dir-posix (to-posix-path (namestring temp-dir)))
+                   (archive-path-posix (to-posix-path (namestring archive-path)))
+                   (tar-cmd-str (format nil "tar -C ~A -c -J -f ~A ~A"
+                                        temp-dir-posix
+                                        archive-path-posix
+                                        bare-name)))
               (multiple-value-bind (out err code)
                   (uiop:run-program
-                   tar-cmd
+                   tar-cmd-str
                    :output :string
                    :error-output :string
                    :ignore-error-status t)
@@ -251,7 +204,7 @@ ARGUMENTS:
             ;; Очищаем временный каталог при ошибке
             (ignore-errors (delete-directory-tree temp-dir))
             (format t "❌ Ошибка при создании голого клона:~%~A~%" err1)
-            (values nil nil))))))
+            (values nil nil)))))
 
 (defun delete-directory-tree (target-path)
   "Удаляет каталог с содержимым через shell команду (rm -rf) вместо UIOP для совместимости с MSYS2.
