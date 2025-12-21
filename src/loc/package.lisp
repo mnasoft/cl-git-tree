@@ -71,6 +71,7 @@
   repo-provider-keys
   repo-providers
   repo-transport-export
+  expand-path
    repo-status
    repo-commit
    repo-branches

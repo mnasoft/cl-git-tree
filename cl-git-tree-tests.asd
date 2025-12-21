@@ -23,6 +23,7 @@
      (:file "test-os-detection")
      (:file "test-work-tests")
      (:file "test-remote-delete-msys2-local")
+    (:file "test-expand-path-msys2")
     (:file "test-transport")
      ;; (:file "test-remote-create-delete-lc")  ;; временно отключён - использует неправильный синтаксис
      (:module "workspace"
