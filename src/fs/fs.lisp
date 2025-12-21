@@ -227,24 +227,26 @@ ARGUMENTS:
       (if (zerop code1)
           (progn
             ;; Архивируем голый репозиторий
-            (multiple-value-bind (out err code)
-                (uiop:run-program
-                 (list "tar" "-C" (namestring temp-dir)
-                       "-c" "-J" "-f" (namestring archive-path)
-                       bare-name)
-                 :output :string
-                 :error-output :string
-                 :ignore-error-status t)
-              (declare (ignore out))
+            (let ((tar-cmd (list "tar" "-C" (namestring temp-dir)
+                                 "-c" "-J" "-f" (namestring archive-path)
+                                 bare-name)))
+              (format t "DEBUG tar cmd: ~A~%" tar-cmd)
+              (multiple-value-bind (out err code)
+                  (uiop:run-program
+                   tar-cmd
+                   :output :string
+                   :error-output :string
+                   :ignore-error-status t)
+                (declare (ignore out))
 
-              ;; Очищаем временный каталог
-              (delete-directory-tree temp-dir)
+                ;; Очищаем временный каталог
+                (delete-directory-tree temp-dir)
 
-              (if (zerop code)
-                  (values archive-name (namestring expanded-output-path))
-                  (progn
-                    (format t "❌ Ошибка при архивировании:~%~A~%" err)
-                    (values nil nil)))))
+                (if (zerop code)
+                    (values archive-name (namestring expanded-output-path))
+                    (progn
+                      (format t "❌ Ошибка при архивировании:~%~A~%" err)
+                      (values nil nil)))))))
           (progn
             ;; Очищаем временный каталог при ошибке
             (ignore-errors (delete-directory-tree temp-dir))
