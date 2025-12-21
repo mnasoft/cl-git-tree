@@ -22,7 +22,7 @@ DAYS-FILTER пока не используется непосредственн�
           (cl-git-tree/fs:create-tar-xz-archive
            repo-dir
            (uiop:ensure-directory-pathname
-            (cl-git-tree/fs:expand-home url-xz)))
+             (expand-path ws url-xz)))
         (when archive-name
           (incf archived)
           (unless verbose
