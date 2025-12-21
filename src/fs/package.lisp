@@ -9,6 +9,7 @@
    ;; with-each-repo-simple
    expand-home
    expand-tilde-directory-path
+   to-posix-path
    create-tar-xz-archive
    delete-directory-tree)
   (:documentation
