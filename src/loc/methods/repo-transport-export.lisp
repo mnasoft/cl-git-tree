@@ -31,5 +31,5 @@ DAYS-FILTER пока не используется непосредственн�
     (when (and verbose (not url-xz))
       (format t "  ⚠️  Локация ~A (провайдер ~A) не имеет :url-xz~%"
               (<location>-id provider)
-              пров-symbol))
+              prov-symbol))
     archived))
