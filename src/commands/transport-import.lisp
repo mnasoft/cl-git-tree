@@ -66,29 +66,36 @@
               (format t "❌ Ошибка распаковки:~%~A~%" err)
               nil))))))
 
-(defun transport-import ()
-  "Импортирует все найденные *.tar.xz из :url-xz в :url-git для локальных локаций."
+
+
+;; Импорт изменений для одного репозитория
+(defun transport-import-repo (repo-dir verbose)
+  "Импортирует изменения из tar.xz для одного репозитория REPO-DIR. Возвращает количество успешных импортов."
+  (let* ((ws (cl-git-tree/loc:make-workspace repo-dir))
+         (repo-name (cl-git-tree/fs:repo-name repo-dir))
+         (provider-locs (cl-git-tree/loc:repo-providers ws))
+         (imported 0))
+    (when verbose
+      (format t "\nРепозиторий: ~A~%" repo-name))
+    (when provider-locs
+      (dolist (loc provider-locs)
+        (when (cl-git-tree/loc:repo-transport-import ws loc :verbose verbose)
+          (incf imported))))
+    imported))
+
+;; Главная команда: обход всех репозиториев и импорт
+(defun transport-import (args)
+  "Импортирует изменения из tar.xz архивов для найденных репозиториев с учётом опций --verbose.
+ARGS — список аргументов после слова import."
   (let ((processed 0)
-        (applied 0))
-    (format t "⬇ Импорт архивов tar.xz из :url-xz в :url-git для всех локальных локаций~%~%")
-    (dolist (loc-key (cl-git-tree/loc:all-location-keys))
-      (let* ((loc (cl-git-tree/loc:find-location loc-key))
-             (url-xz (and loc (cl-git-tree/loc:<location>-url-xz loc)))
-             (url-git (and loc (cl-git-tree/loc:<location>-url-git loc)))
-             (provider (and loc (cl-git-tree/loc:<location>-provider loc))))
-        (when (and loc url-xz url-git)
-          (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home url-xz)))
-                 (archives (directory (merge-pathnames #p"*.tar.xz" xz-dir))))
-            (format t "~%archives: ~S~%" archives)
-            (format t "~%url-git: ~S~%"  url-git)
-            (when archives
-              (format t "Локация ~A (провайдер ~A)~%" loc-key provider)
-              (dolist (archive archives)
-                (incf processed)
-                (format t "  • ~A~%" (namestring archive))
-                (if (apply-tar-xz-archive archive url-git)
-                    (incf applied)
-                    (format t "    ⚠️  Пропущено из-за ошибки~%"))))))))
-    (format t "~%=== Итог импорта ===~%")
-    (format t "Обработано архивов: ~A~%" processed)
-    (format t "Импортировано: ~A~%" applied)))
+        (imported 0)
+        (verbose (member "--verbose" args :test #'string=)))
+    (unless verbose
+      (format t "⬇ Импорт изменений из архивов для всех репозиториев...~%"))
+    (flet ((import-one (repo-dir _args)
+             (declare (ignore _args))
+             (incf processed)
+             (incf imported (transport-import-repo repo-dir verbose))))
+      (cl-git-tree/fs:with-repo #'import-one args))
+    (unless verbose
+      (format t "~%=== Импортировано: ~A из ~A ===~%" imported processed))))

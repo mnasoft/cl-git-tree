@@ -135,6 +135,7 @@
       (:file "days-since-last-commit")       (:file "expand-path")      (:file "repo-provider-keys")
       (:file "repo-providers")
       (:file "repo-transport-export")
+      (:file "repo-transport-import")
        (:file "remote-url")
        (:file "remote-add")
        (:file "remote-readd")

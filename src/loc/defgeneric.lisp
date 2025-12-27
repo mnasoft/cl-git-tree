@@ -86,11 +86,16 @@
    "Определить список локаций-провайдеров git‑репозитория для WORKSPACE по его remotes.
 Возвращает список объектов <location>, соответствующих найденным remotes."))
 
+
 (defgeneric repo-transport-export (workspace provider &key &allow-other-keys)
   (:documentation
    "Создать tar.xz‑архив(ы) для git‑репозитория WORKSPACE на провайдере PROVIDER.
 Используется командой git-tree transport export. Возвращает количество
 созданных архивов (целое число)."))
+
+(defgeneric repo-transport-import (workspace provider &key verbose &allow-other-keys)
+  (:documentation
+   "Импортировать изменения из tar.xz архива для WORKSPACE и PROVIDER.\n\nДолжен распаковать архив из :url-xz провайдера в рабочий каталог репозитория.\nВозвращает T при успешном импорте, NIL иначе."))
 
 (defgeneric repo-add (workspace &key &allow-other-keys)
   (:documentation
