@@ -1,47 +1,70 @@
 (in-package :cl-git-tree/commands/transport)
 
+
+;; Новый вариант: распаковка архива в тот же каталог, добавление временного remote, git pull master, удаление remote и каталога
 (defun apply-tar-xz-archive (archive-path dest-root)
-  "Распаковывает bare-архив в целевую директорию dest-root, заменяя существующий mirror."
-  (let* ((expanded-archive (cl-git-tree/fs:expand-home archive-path))
-         (expanded-dest-root (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home dest-root)))
+  "Распаковывает bare-архив в каталог архива, делает pull через временный remote, удаляет временный remote и каталог."
+  (let* ((archive-path (if (and (stringp archive-path)
+                                (> (length archive-path) 0)
+                                (char= (char archive-path (- (length archive-path) 1)) #\/))
+                           (subseq archive-path 0 (- (length archive-path) 1))
+                           archive-path))
+         (expanded-archive (cl-git-tree/fs:expand-home archive-path))
+         (archive-dir (uiop:pathname-directory-pathname expanded-archive))
          (archive-name (file-namestring expanded-archive))
          (repo-name (if (and archive-name (>= (length archive-name) 7)
                              (string= ".tar.xz" (subseq archive-name (- (length archive-name) 7))))
                         (subseq archive-name 0 (- (length archive-name) 7))
                         archive-name))
          (bare-name (concatenate 'string repo-name ".git"))
-         (dest-path (merge-pathnames bare-name expanded-dest-root))
-         (temp-dir (uiop:ensure-directory-pathname
-                    (merge-pathnames (make-pathname :directory (list :relative (format nil "tmp-git-tree-~A" (random 1000000))))
-                                     (uiop:temporary-directory)))))
-    (ensure-directories-exist expanded-dest-root)
-    (format t "⬇ Распаковка ~A → ~A~%" archive-name (namestring dest-path))
+         (bare-path (merge-pathnames bare-name archive-dir))
+         (expanded-dest-root (cl-git-tree/fs:expand-home dest-root)))
+    (format t "⬇ Распаковка ~A → ~A~%" archive-name (namestring archive-dir))
     (multiple-value-bind (out err code)
         (uiop:run-program
-         (list "tar" "-C" (namestring temp-dir) "-xJf" (namestring expanded-archive))
-         :output :string
-         :error-output :string
-         :ignore-error-status t)
+         (list "tar" "-xJf" (namestring expanded-archive) "-C" (namestring archive-dir))
+         :output :string :error-output :string :ignore-error-status t)
       (declare (ignore out))
       (if (zerop code)
-          (let ((extracted (merge-pathnames bare-name temp-dir)))
-            (if (probe-file extracted)
-                (progn
-                  (when (probe-file dest-path)
-                    (cl-git-tree/fs:delete-directory-tree dest-path))
-                  (ensure-directories-exist expanded-dest-root)
-                  (rename-file extracted dest-path)
-                  (cl-git-tree/fs:delete-directory-tree temp-dir)
-                  (format t "✔ Импортировано: ~A~%" (namestring dest-path))
-                  t)
-                (progn
-                  (cl-git-tree/fs:delete-directory-tree temp-dir)
-                  (format t "❌ Ошибка: в архиве не найден каталог ~A~%" bare-name)
-                  nil)))
           (progn
-            (cl-git-tree/fs:delete-directory-tree temp-dir)
-            (format t "❌ Ошибка распаковки:~%~A~%" err)
-            nil)))))
+            (if (probe-file bare-path)
+                (let* ((default-directory (namestring expanded-dest-root))
+                       (remote-name "lc-temp"))
+                  (format t "✔ Распаковано: ~A~%" (namestring bare-path))
+                  ;; Добавить временный remote
+                  (multiple-value-bind (out2 err2 code2)
+                      (uiop:run-program
+                       (list "git" "-C" default-directory "remote" "add" remote-name (namestring bare-path))
+                       :output :string :error-output :string :ignore-error-status t)
+                    (declare (ignore out2))
+                    (if (zerop code2)
+                        (progn
+                          ;; git pull lc-temp master
+                          (multiple-value-bind (out3 err3 code3)
+                              (uiop:run-program
+                               (list "git" "-C" default-directory "pull" remote-name "master")
+                               :output :string :error-output :string :ignore-error-status t)
+                            (declare (ignore out3))
+                            (if (zerop code3)
+                                (format t "✔ git pull lc-temp master успешно~%")
+                                (format t "❌ Ошибка git pull:~%~A~%" err3)))
+                          ;; Удалить remote
+                          (uiop:run-program
+                           (list "git" "-C" default-directory "remote" "remove" remote-name)
+                           :output :string :error-output :string :ignore-error-status t)
+                          ;; Удалить bare-репозиторий
+                          (cl-git-tree/fs:delete-directory-tree bare-path)
+                          t)
+                        (progn
+                          (format t "❌ Ошибка добавления remote:~%~A~%" err2)
+                          (cl-git-tree/fs:delete-directory-tree bare-path)
+                          nil)))
+                  (progn
+                    (format t "❌ Ошибка: не найден каталог ~A после распаковки~%" bare-path)
+                    nil)))
+            (progn
+              (format t "❌ Ошибка распаковки:~%~A~%" err)
+              nil))))))
 
 (defun transport-import ()
   "Импортирует все найденные *.tar.xz из :url-xz в :url-git для локальных локаций."
