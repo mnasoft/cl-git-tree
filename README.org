@@ -212,19 +212,20 @@ git tree transport import               # распаковать *.tar.xz в bar
 
 | Команда | Описание |
 |---------|---------|
-| =add= | Добавить файлы в индекс |
-| =clone= | Клонировать все локальные репозитории |
+| =add= | Добавить файлы в индекс (git add) |
+| =clone= | Клонировать все локальные репозитории из известных локаций |
 | =commit= | Сделать git commit во всех репозиториях |
 | =pull= | Выполнить git pull во всех репозиториях |
 | =push= | Выполнить git push во всех репозиториях |
-| =all= | Выполнить pull → add → commit → push |
-| =remote= | Управление remote (add/remove/readd/create/delete/list) |
+| =all= | Выполнить pull → add → commit → push по порядку |
+| =remote= | Управление remote (add/remove/readd/create/delete) |
 | =locations= | Управление локациями (list/show/add/edit/remove/save) |
-| =patterns= | Управление паттернами файлов |
-| =aliases= | Показать git-алиасы |
-| =info= | Показать список локаций |
+| =patterns= | Управление паттернами файлов (list/add/remove/reset) |
+| =aliases= | Показать git-алиасы и доступные команды |
+| =info= | Показать информацию о системе и зарегистрированных локациях |
 | =transport= | Архивация репозиториев в tar.xz / импорт / очистка |
 | =audit= | Проверка состояния репозиториев (status/dirty/staged/untracked) |
+| =remake-xz= | Пересоздание архивов (внутренняя команда) |
 | =help= | Показать справку |
 | =version= | Показать версию |
 
@@ -270,54 +271,85 @@ sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree-tests) (uiop:
 #+begin_src
 cl-git-tree/
 ├── src/
-│   ├── cli.lisp                          # CLI точка входа
-│   ├── config.lisp                       # Загрузка конфигурации
+│   ├── cli.lisp                          # CLI точка входа (main)
+│   ├── config.lisp                       # Загрузка конфигурации при старте
 │   ├── package.lisp                      # Основной пакет
-│   ├── commands/                         # 20+ CLI-команд
-│   │   ├── clone.lisp, unclone.lisp      # Локальное клонирование
-│   │   ├── clone-remote.lisp             # Удалённое клонирование
-│   │   ├── remote-create.lisp            # Создание bare-репозиториев
-│   │   ├── add.lisp, commit.lisp         # Git файловые операции
-│   │   ├── pull.lisp, push.lisp          # Синхронизация
-│   │   ├── remote-*.lisp                 # Управление remotes
+│   ├── commands/                         # 23 CLI-команды
+│   │   ├── add.lisp                      # git add (файловые операции)
+│   │   ├── aliases.lisp                  # Показать команды и алиасы
+│   │   ├── all.lisp                      # pull → add → commit → push
+│   │   ├── audit.lisp                    # Проверка состояния репозиториев
+│   │   ├── commit.lisp                   # git commit (файловые операции)
+│   │   ├── info.lisp                     # Информация о системе
 │   │   ├── locations.lisp                # Управление локациями
-│   │   ├── patterns.lisp                 # Управление шаблонами
-│   │   ├── status.lisp                   # Вспомогательные функции статуса для audit
-│   │   └── aliases.lisp, all.lisp        # Утилиты
+│   │   ├── patterns.lisp                 # Управление паттернами файлов
+│   │   ├── pull.lisp                     # git pull (синхронизация)
+│   │   ├── push.lisp                     # git push (синхронизация)
+│   │   ├── remake-xz.lisp                # Пересоздание архивов
+│   │   ├── remote.lisp                   # Справка по управлению remote
+│   │   ├── remote-add.lisp               # Добавить remote
+│   │   ├── remote-create.lisp            # Создать bare-репозиторий
+│   │   ├── remote-delete.lisp            # Удалить remote на провайдере
+│   │   ├── remote-readd.lisp             # Заново добавить remote
+│   │   ├── remote-remove.lisp            # Удалить remote
+│   │   ├── status.lisp                   # Вспомогательные функции статуса
+│   │   ├── transport.lisp                # Справка по архивам
+│   │   ├── transport-clean.lisp          # Удалить *.tar.xz
+│   │   ├── transport-export.lisp         # Создать архивы
+│   │   └── transport-import.lisp         # Импортировать архивы
 │   ├── dispatch/
-│   │   └── dispatcher.lisp               # Реестр и диспетчер команд
+│   │   ├── dispatcher.lisp               # Реестр и диспетчер команд
+│   │   └── package.lisp
 │   ├── loc/
 │   │   ├── defclass.lisp                 # Классы <location>, <workspace>
+│   │   ├── defgeneric.lisp               # Сигнатуры методов
 │   │   ├── provider.lisp                 # Классы провайдеров
 │   │   ├── location.lisp                 # API для работы с локациями
-│   │   ├── methods/                      # Методы для провайдеров
-│   │   │   ├── remote-create.lisp
+│   │   ├── workspace.lisp                # API для workspace
+│   │   ├── methods/                      # Методы для провайдеров (20+ методов)
+│   │   │   ├── clone.lisp, repo-add.lisp, repo-commit.lisp
+│   │   │   ├── remote-create/delete/add/readd/remove.lisp
+│   │   │   ├── repo-push.lisp, repo-pull.lisp
 │   │   │   └── ...
 │   │   └── package.lisp
 │   ├── fs/
 │   │   ├── fs.lisp                       # Утилиты файловой системы
 │   │   └── package.lisp
 │   ├── git-utils/
-│   │   ├── git-utils.lisp                # Обёртки для git
+│   │   ├── git-utils.lisp                # Обёртки для git-команд
 │   │   └── package.lisp
 │   ├── shell-utils/
-│   │   ├── core.lisp, ssh-utils.lisp     # Shell-операции
+│   │   ├── core.lisp                     # Выполнение shell-команд
+│   │   ├── ssh-utils.lisp                # Парсинг SSH URL
 │   │   └── package.lisp
-│   ├── config/                           # Управление конфигурацией
-│   │   ├── defaults.lisp
-│   │   ├── file-patterns.lisp
+│   ├── config/                           # Управление конфигурациями
+│   │   ├── defaults.lisp                 # Значения по умолчанию
+│   │   ├── file-patterns.lisp            # Управление паттернами файлов
 │   │   └── package.lisp
-│   └── global/
-│       └── git-global.lisp               # Глобальные переменные git
-├── tests/
+│   ├── global/
+│   │   ├── git-global.lisp               # Глобальные переменные git
+│   │   └── package.lisp
+│   └── package.lisp                      # Основной пакет
+├── tests/                                # Набор тестов (15+ тестовых модулей)
 │   ├── test-location.lisp                # Тесты для локаций
 │   ├── test-global.lisp                  # Тесты конфигурации
+│   ├── test-dispatch.lisp                # Тесты диспетчера команд
+│   ├── test-commands.lisp                # Тесты CLI-команд
+│   ├── test-all-commands.lisp            # Проверка регистрации команд
+│   ├── test-shell-utils.lisp             # Тесты парсинга
+│   ├── test-fs.lisp                      # Тесты файловой системы
+│   ├── test-git-utils.lisp               # Тесты git-обёрток
+│   ├── test-patterns.lisp                # Тесты паттернов
+│   ├── test-transport.lisp               # Тесты архивов
 │   ├── workspace/                        # Тесты для workspace
-│   ├── test-*.lisp                       # Специализированные тесты
-│   └── run.lisp                          # Запуск всех тестов
+│   ├── run.lisp                          # Запуск всех тестов
+│   └── package.lisp
 ├── cl-git-tree.asd                       # Определение системы ASDF
-├── cl-git-tree-tests.asd                 # Система тестов
-└── README.org                            # Этот файл
+├── cl-git-tree-tests.asd                 # Система тестов ASDF
+├── cli-script.lisp                       # Скрипт для запуска из командной строки
+├── README.org                            # Этот файл
+├── ToDo.org                              # План развития проекта
+└── install-git-tree.sh                   # Скрипт установки
 #+end_src
 
 ** Добавление новой команды

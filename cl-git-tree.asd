@@ -19,6 +19,7 @@
                "cl-git-tree/global"
                "cl-git-tree/config"
                "cl-git-tree/shell-utils"
+               "cl-git-tree/utils"
                )
   :serial t
   :in-order-to ((test-op (test-op "cl-git-tree-tests")))
@@ -160,3 +161,11 @@
     :components
     ((:file "package")
      (:file "git-global")))))
+
+(defsystem "cl-git-tree/utils"
+  :description "Утилиты для форматирования и вывода (двухколоночный формат и т.д.)"
+  :serial t
+  :components
+  ((:module "src/utils"
+    :components
+    ((:file "two-columns")))))
