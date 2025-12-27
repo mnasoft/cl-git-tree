@@ -79,6 +79,8 @@
         (when (and loc url-xz url-git)
           (let* ((xz-dir (uiop:ensure-directory-pathname (cl-git-tree/fs:expand-home url-xz)))
                  (archives (directory (merge-pathnames #p"*.tar.xz" xz-dir))))
+            (format t "~%archives: ~S~%" archives)
+            (format t "~%url-git: ~S~%"  url-git)
             (when archives
               (format t "Локация ~A (провайдер ~A)~%" loc-key provider)
               (dolist (archive archives)
