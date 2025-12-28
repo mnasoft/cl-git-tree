@@ -7,7 +7,6 @@
          (repo-name (cl-git-tree/fs:repo-name repo-dir))
          (provider-locs (cl-git-tree/loc:repo-providers ws))
          (imported 0))
-    (format t "ws ~S~%provider-locs ~S~%verbose ~S~%" ws provider-locs verbose)
     (when verbose
       (format t "~%Репозиторий: ~A~%" repo-name))
     (when provider-locs
