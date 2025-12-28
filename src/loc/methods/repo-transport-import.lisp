@@ -25,5 +25,7 @@
              ;; Отключаем временный remote
              (remote-import-disconnect ws provider :remote-name tmp-remote :verbose verbose)
              ;; Удаляем каталог временного remote
-             (remote-import-cleanup-dir ws provider :remote-name tmp-remote :verbose verbose))))
+             (remote-import-cleanup-dir ws provider :verbose verbose)
+             ;; Удаляем архив
+             (remote-import-delete-archive ws provider :verbose verbose))))
        t))))

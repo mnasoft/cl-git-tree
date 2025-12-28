@@ -226,7 +226,8 @@ RETURNS:
 EXAMPLE:
   (delete-directory-tree #P\"/tmp/test-dir/\")
   ;; => T"
-  (let ((path-str (namestring (pathname target-path))))
+  (let* ((name (probe-file target-path))
+         (path-str (namestring name)))
     (handler-case
         (progn
           (cl-git-tree/shell-utils:shell-run-single "." "rm" "-rf" path-str)
@@ -234,3 +235,4 @@ EXAMPLE:
       (error (e)
         (format t "❌ Ошибка при удалении ~A: ~A~%" path-str e)
         nil))))
+

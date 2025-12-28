@@ -152,4 +152,13 @@
    "Раскрыть '~' в пути PATH в контексте WORKSPACE.
     Заменяет ведущий '~' на домашний каталог. Нормализует ./ и ../ компоненты пути."))
 
+(defgeneric remote-import-cleanup-dir (ws provider &key &allow-other-keys) 
+  (:documentation
+   "Удаляет каталог временного remote после отключения.
+Аргументы: ws, provider."))
+
+(defgeneric remote-import-delete-archive (ws provider &key &allow-other-keys) 
+  (:documentation
+   "Удаляет tar.xz архив для WORKSPACE/PROVIDER. Аргументы: ws, provider."))
+
 

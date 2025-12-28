@@ -33,6 +33,7 @@
   remote-import-connect
   remote-import-disconnect
   remote-import-cleanup-dir
+  remote-import-delete-archive
 
    ;; глобальная таблица
    *locations* 
