@@ -72,8 +72,9 @@
    days-since-last-commit
    repo-provider-keys
    repo-providers
-   repo-transport-export
-   repo-transport-import
+  repo-transport-export
+  repo-transport-import
+  repo-transport-unpack
    expand-path
    repo-status
    repo-commit
