@@ -1,7 +1,9 @@
 (in-package :cl-git-tree/loc)
 
 (defmethod repo-transport-import ((ws <workspace>) (provider <provider>) &key verbose &allow-other-keys)
-  "Импортирует изменения из tar.xz архива для WORKSPACE и PROVIDER.\nРаспаковывает архив из :url-xz провайдера в рабочий каталог репозитория."
+  "Импортирует изменения из tar.xz архива для WORKSPACE и
+PROVIDER. Распаковывает архив из :url-xz провайдера в рабочий каталог
+репозитория."
   (let* ((repo-dir (or (git-root ws)
                        (<workspace>-path ws)))
          (repo-name (and repo-dir (cl-git-tree/fs:repo-name repo-dir)))
@@ -41,7 +43,7 @@
                  (let ((tmp-remote (format nil "~A-import" (<location>-id provider))))
                    (when (remote-import-connect ws provider :remote-name tmp-remote :verbose verbose)
                      ;; Выполняем pull с использованием временного remote
-                     (cl-git-tree/loc:repo-pull ws provider :remote tmp-remote)
+                     (cl-git-tree/loc:repo-pull ws provider :remote tmp-remote :branch "master")
                      ;; Отключаем временный remote
                      (remote-import-disconnect ws provider :remote-name tmp-remote :verbose verbose)))
                  t)
@@ -49,18 +51,3 @@
                  (when verbose
                    (format t "  ❌ Ошибка при импорте: ~A~%" repo-name))
                  nil))))))))
-
-#+nil
-(progn 
-  (cl-git-tree:load-config)
-
-  (defparameter *ws*
-    (make-workspace #P"/home/mna/quicklisp/local-projects/clisp/cl-git-tree/"))
-
-  (defparameter *lc*
-    (find-location "lc"))
-
-  (repo-transport-import *ws* *lc*
-                         :verbose t))
-
-
