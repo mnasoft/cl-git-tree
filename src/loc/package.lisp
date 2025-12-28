@@ -30,8 +30,9 @@
    remote-add
    remote-remove
    remote-readd
-   remote-import-connect
-   remote-import-disconnect
+  remote-import-connect
+  remote-import-disconnect
+  remote-import-cleanup-dir
 
    ;; глобальная таблица
    *locations* 

@@ -139,6 +139,7 @@
       (:file "repo-transport-unpack")
       (:file "remote-import-connect")
       (:file "remote-import-disconnect")
+        (:file "remote-import-cleanup-dir")
        (:file "remote-url")
        (:file "remote-add")
        (:file "remote-readd")

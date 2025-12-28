@@ -23,5 +23,7 @@
              ;; Выполняем pull с использованием временного remote
              (cl-git-tree/loc:repo-pull ws provider :remote tmp-remote :branch "master")
              ;; Отключаем временный remote
-             (remote-import-disconnect ws provider :remote-name tmp-remote :verbose verbose)))
-         t)))))
+             (remote-import-disconnect ws provider :remote-name tmp-remote :verbose verbose)
+             ;; Удаляем каталог временного remote
+             (remote-import-cleanup-dir ws provider :remote-name tmp-remote :verbose verbose))))
+       t))))
