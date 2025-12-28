@@ -46,7 +46,7 @@
     ((and args (string= (first args) "clean"))
      (transport-clean))
     ((and args (string= (first args) "import"))
-     (transport-import))
+     (transport-import (rest args)))
     ((and args (string= (first args) "export"))
      (transport-export (rest args)))
     (t

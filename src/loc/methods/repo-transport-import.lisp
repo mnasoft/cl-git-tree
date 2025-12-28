@@ -1,15 +1,13 @@
 (in-package :cl-git-tree/loc)
 
-
-
-
 (defmethod repo-transport-import ((ws <workspace>) (provider <provider>) &key verbose &allow-other-keys)
   "Импортирует изменения из tar.xz архива для WORKSPACE и PROVIDER.\nРаспаковывает архив из :url-xz провайдера в рабочий каталог репозитория."
   (let* ((repo-dir (or (git-root ws)
                        (<workspace>-path ws)))
          (repo-name (and repo-dir (cl-git-tree/fs:repo-name repo-dir)))
          (url-xz (and provider (<location>-url-xz provider)))
-         (prov-symbol (and provider (<location>-provider provider))))
+         (prov-symbol (and provider (<location>-provider provider)))
+         (tar-xz (concatenate 'string url-xz "/" repo-name ".tar.xz")))
     (cond
       ((not repo-dir)
        (when verbose
@@ -25,8 +23,11 @@
        (when verbose
          (format t "  ⚠️  Архив не найден: ~A~%" url-xz))
        nil)
+      ((not (probe-file tar-xz))
+       (when verbose
+         (format t "  ⚠️  Архив не найден: ~A~%" tar-xz)))
       (t
-       (let ((cmd (format nil "tar -xJf ~A -C ~A" url-xz repo-dir)))
+       (let ((cmd (format nil "tar -xJf ~A -C ~A" tar-xz url-xz)))
          (when verbose
            (format t "  ⏳ Импорт: ~A → ~A~%" url-xz repo-dir))
          (multiple-value-bind (output error-output exit-code)
@@ -36,8 +37,30 @@
                (progn
                  (when verbose
                    (format t "  ✅ Импорт завершён: ~A~%" repo-name))
+                 ;; Подключаем временный remote (например, "<loc>-import"), делаем pull, затем отключаем
+                 (let ((tmp-remote (format nil "~A-import" (<location>-id provider))))
+                   (when (remote-import-connect ws provider :remote-name tmp-remote :verbose verbose)
+                     ;; Выполняем pull с использованием временного remote
+                     (cl-git-tree/loc:repo-pull ws provider :remote tmp-remote)
+                     ;; Отключаем временный remote
+                     (remote-import-disconnect ws provider :remote-name tmp-remote :verbose verbose)))
                  t)
                (progn
                  (when verbose
                    (format t "  ❌ Ошибка при импорте: ~A~%" repo-name))
                  nil))))))))
+
+#+nil
+(progn 
+  (cl-git-tree:load-config)
+
+  (defparameter *ws*
+    (make-workspace #P"/home/mna/quicklisp/local-projects/clisp/cl-git-tree/"))
+
+  (defparameter *lc*
+    (find-location "lc"))
+
+  (repo-transport-import *ws* *lc*
+                         :verbose t))
+
+

@@ -4,11 +4,10 @@
   "Красивый вывод объекта <workspace> в REPL.
    Показывает path, description, git-root и repo-name."
   (print-unreadable-object (ws stream :type t :identity t)
-    (format stream "path: ~S~%git-root: ~S~%repo-name: ~S~%desc: ~S"
-            (<workspace>-path ws)
-            (git-root ws)
-            (repo-name ws)
-            (<workspace>-description ws))))
+    (format stream "~%path     : ~S" (<workspace>-path ws))
+    (format stream "~%git-root : ~S" (git-root ws))
+    (format stream "~%repo-name: ~S" (repo-name ws))
+    (format stream "~%desc     : ~S" (<workspace>-description ws))))
 
 (defmethod print-object ((loc <location>) stream)
   (print-unreadable-object (loc stream :type t :identity t)

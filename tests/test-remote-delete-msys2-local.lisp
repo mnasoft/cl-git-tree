@@ -53,7 +53,10 @@
                     "Bare-репозиторий должен быть создан")
            
            ;; 2. Создать workspace и provider
-           (let* ((ws (cl-git-tree/loc:make-workspace ws-dir))
+           (let* ((ws (make-instance 'cl-git-tree/loc:<workspace-msys2>
+                                    :path (truename ws-dir)
+                                    :description "test-msys2"
+                                    :os-type :msys2))
                   (provider (make-instance 'cl-git-tree/loc:<local>
                               :id "test-local"
                               :url-git (namestring bare-base))))
@@ -131,7 +134,10 @@
                              :output :string
                              :error-output :string)
            
-           (let* ((ws (cl-git-tree/loc:make-workspace ws-dir))
+           (let* ((ws (make-instance 'cl-git-tree/loc:<workspace-msys2>
+                                    :path (truename ws-dir)
+                                    :description "test-msys2"
+                                    :os-type :msys2))
                   (provider (make-instance 'cl-git-tree/loc:<local>
                               :id "test-local-missing"
                               :url-git (namestring bare-base))))

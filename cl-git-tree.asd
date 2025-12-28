@@ -136,6 +136,8 @@
       (:file "repo-providers")
       (:file "repo-transport-export")
       (:file "repo-transport-import")
+      (:file "remote-import-connect")
+      (:file "remote-import-disconnect")
        (:file "remote-url")
        (:file "remote-add")
        (:file "remote-readd")

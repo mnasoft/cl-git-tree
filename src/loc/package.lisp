@@ -30,6 +30,8 @@
    remote-add
    remote-remove
    remote-readd
+   remote-import-connect
+   remote-import-disconnect
 
    ;; глобальная таблица
    *locations* 
@@ -46,8 +48,8 @@
    repo-url
    print-locations
    infer-local-p
-  location-local-p
-  match-location-keys)
+   location-local-p
+   match-location-keys)
 
   (:export
    ;; класс
@@ -63,16 +65,16 @@
    ;; generic-функции
    git-init
    git-initialized-p
-  git-root
-  repo-name
-  repo-is-clean-p
-  repo-last-commit-date
-  days-since-last-commit
-  repo-provider-keys
-  repo-providers
-  repo-transport-export
-  repo-transport-import
-  expand-path
+   git-root
+   repo-name
+   repo-is-clean-p
+   repo-last-commit-date
+   days-since-last-commit
+   repo-provider-keys
+   repo-providers
+   repo-transport-export
+   repo-transport-import
+   expand-path
    repo-status
    repo-commit
    repo-branches
