@@ -1,8 +1,10 @@
 (in-package :cl-git-tree/loc)
 
-(defmethod repo-transport-import ((ws <workspace>) (provider <provider>) &key verbose &allow-other-keys)
+;; cleanup-remote-dir заменён на keep-remote-dir (по умолчанию NIL, если T — каталог не удаляется)
+(defmethod repo-transport-import ((ws <workspace>) (provider <provider>) &key verbose keep-remote-dir delete-archive &allow-other-keys)
   "Импортирует изменения из tar.xz архива для WORKSPACE и PROVIDER.
-Распаковывает архив из :url-xz провайдера в рабочий каталог репозитория."
+Распаковывает архив из :url-xz провайдера в рабочий каталог репозитория.
+Если keep-remote-dir=T, временный каталог remote не удаляется."
   (let* ((repo-dir (or (git-root ws)
                        (<workspace>-path ws)))
          (repo-name (and repo-dir (cl-git-tree/fs:repo-name repo-dir)))
@@ -24,8 +26,10 @@
              (cl-git-tree/loc:repo-pull ws provider :remote tmp-remote :branch "master")
              ;; Отключаем временный remote
              (remote-import-disconnect ws provider :remote-name tmp-remote :verbose verbose)
-             ;; Удаляем каталог временного remote
-             (remote-import-cleanup-dir ws provider :verbose verbose)
-             ;; Удаляем архив
-             (remote-import-delete-archive ws provider :verbose verbose))))
+             ;; Удаляем каталог временного remote (по умолчанию, если не keep-remote-dir)
+             (unless keep-remote-dir
+               (remote-import-cleanup-dir ws provider :verbose verbose))
+             ;; Удаляем архив (опционально)
+             (when delete-archive
+               (remote-import-delete-archive ws provider :verbose verbose)))))
        t))))
