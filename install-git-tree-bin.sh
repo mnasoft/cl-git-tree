@@ -2,8 +2,8 @@
 # install-git-tree-bin.sh — установщик standalone бинарника git-tree
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-BIN_SRC="$PROJECT_DIR/bin/git-tree.exe"
-BIN_DEST="/usr/local/bin/git-tree.exe"
+BIN_SRC="$PROJECT_DIR/bin/git-tree-bin.exe"
+BIN_DEST="/usr/local/bin/git-tree-bin.exe"
 BIN_WRAPPER_SRC="$PROJECT_DIR/bin/git-tree"
 BIN_WRAPPER_DEST="/usr/local/bin/git-tree"
 SRC_LISP="$PROJECT_DIR/git-tree-bin.lisp"
@@ -19,6 +19,10 @@ for arg in "$@"; do
 done
 
 ensure_sudo() {
+  # Не вызывать sudo под MSYS2/MinGW/Cygwin — установка выполняется под текущим пользователем
+  if [ -n "$MSYSTEM" ] || uname -o 2>/dev/null | grep -iq "msys\|mingw\|cygwin"; then
+    return 0
+  fi
   if [ "$EUID" -ne 0 ]; then
     echo "⚠️  Нужен sudo для записи в /usr/local/bin"
     exec sudo "$0" "$@"
@@ -55,7 +59,7 @@ install_bin() {
   echo "✅ Установлен: $BIN_WRAPPER_DEST"
 
   # Оставляем установку обёрточного скрипта в $BIN_WRAPPER_DEST
-  # (не перезаписываем его симлинком на git-tree.exe)
+  # (не перезаписываем его симлинком на git-tree-bin.exe)
 
   # Копировать lisp-исходник для воспроизводимости (опционально)
   if [ "$COPY_SOURCE" -eq 1 ]; then
