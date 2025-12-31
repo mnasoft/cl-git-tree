@@ -10,6 +10,14 @@ SRC_LISP="$PROJECT_DIR/git-tree-bin.lisp"
 LISP_DEST_DIR="/usr/local/lib/git-tree"
 LISP_DEST="$LISP_DEST_DIR/git-tree-bin.lisp"
 
+# По умолчанию копируем исходник; можно отключить флагом --no-source
+COPY_SOURCE=1
+for arg in "$@"; do
+  if [ "$arg" = "--no-source" ]; then
+    COPY_SOURCE=0
+  fi
+done
+
 ensure_sudo() {
   if [ "$EUID" -ne 0 ]; then
     echo "⚠️  Нужен sudo для записи в /usr/local/bin"
@@ -49,11 +57,15 @@ install_bin() {
   # Оставляем установку обёрточного скрипта в $BIN_WRAPPER_DEST
   # (не перезаписываем его симлинком на git-tree.exe)
 
-  # Копировать lisp-исходник для воспроизводимости
-  mkdir -p "$LISP_DEST_DIR"
-  if [ -f "$SRC_LISP" ]; then
-    cp -f "$SRC_LISP" "$LISP_DEST"
-    echo "📄 Исходник git-tree-bin.lisp установлен: $LISP_DEST"
+  # Копировать lisp-исходник для воспроизводимости (опционально)
+  if [ "$COPY_SOURCE" -eq 1 ]; then
+    mkdir -p "$LISP_DEST_DIR"
+    if [ -f "$SRC_LISP" ]; then
+      cp -f "$SRC_LISP" "$LISP_DEST"
+      echo "📄 Исходник git-tree-bin.lisp установлен: $LISP_DEST"
+    fi
+  else
+    echo "ℹ️  Пропускаю копирование исходника (--no-source)"
   fi
 }
 
@@ -79,10 +91,11 @@ case "$1" in
   --help|-h)
     echo "Установщик standalone git-tree (бинарник)"
     echo ""
-    echo "Использование: $0 [--install|--uninstall|--help]"
+    echo "Использование: $0 [--install|--uninstall|--help] [--no-source]"
     echo "  --install    установить бинарник (по умолчанию)"
     echo "  --uninstall  удалить бинарник"
     echo "  --help       показать эту справку"
+    echo "  --no-source  не копировать git-tree-bin.lisp в /usr/local/lib/git-tree"
     ;;
   --uninstall)
     uninstall_bin "$@"
