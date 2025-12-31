@@ -6,7 +6,10 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Paths and defaults used by embedded installers
 LINK_DIR="/usr/local/bin"
 LINK="$LINK_DIR/git-tree"
-CLI_SRC="$PROJECT_DIR/cli-script.lisp"
+# Примечание: cli-script.lisp не управляется этим установщиком напрямую.
+# Если нужно, разместите cli-script.lisp в /usr/local/lib/git-tree вручную.
+
+# Директория для установки lisp-скриптов (используется для бинарной установки)
 CLI_DEST_DIR="/usr/local/lib/git-tree"
 CLI_DEST="$CLI_DEST_DIR/cli-script.lisp"
 
@@ -21,7 +24,6 @@ LISP_DEST="$LISP_DEST_DIR/git-tree-bin.lisp"
 
 ACTION="install"
 MODE="script"
-COPY_SOURCE=1
 
 usage(){
   cat <<EOF
@@ -96,20 +98,37 @@ ensure_sudo() {
 }
 
 install_link() {
-  if [ "$SYSTEM" = "linux" ]; then
-    ensure_sudo "$@"
-  fi
-  if [ "$SYSTEM" = "msys2" ]; then
-    TARGET="$PROJECT_DIR/sh/git-tree-MSYS2"
-  else
-    TARGET="$PROJECT_DIR/sh/git-tree"
+  TARGET="$PROJECT_DIR/sh/git-tree"
+  if [ "$SYSTEM" = "linux" ] || [ "$SYSTEM" = "msys2" ]; then
+    # Генерируем lisp-обёртку для обеих систем
+    cat > "$TARGET" <<'EOF'
+#!/usr/bin/env sbcl --script
+
+(load (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname)))
+
+;; Тихая загрузка системы
+(let ((*standard-output* (make-broadcast-stream)))
+  (ql:quickload :cl-git-tree :silent t))
+
+(cl-git-tree/cli:main sb-ext:*posix-argv*)
+EOF
+    chmod +x "$TARGET"
+    echo "ℹ️  Сгенерирован $TARGET (sbcl wrapper)"
+    # Автоматически подставляем путь к sbcl в shebang, если он доступен
+    SBCL_PATH="$(command -v sbcl 2>/dev/null || true)"
+    if [ -n "$SBCL_PATH" ]; then
+      tmpfile="$(mktemp)"
+      echo "#!$SBCL_PATH --script" > "$tmpfile"
+      sed '1d' "$TARGET" >> "$tmpfile"
+      mv "$tmpfile" "$TARGET"
+      chmod +x "$TARGET"
+      echo "ℹ️  Обновлён shebang в $TARGET → $SBCL_PATH"
+    else
+      echo "⚠️  SBCL не найден в PATH — shebang в $TARGET оставлен без изменений"
+    fi
   fi
   if [ ! -f "$TARGET" ]; then
     echo "❌ Ошибка: файл не найден: $TARGET"
-    exit 1
-  fi
-  if [ ! -f "$CLI_SRC" ]; then
-    echo "❌ Ошибка: cli-скрипт не найден: $CLI_SRC"
     exit 1
   fi
   if [ ! -d "$LINK_DIR" ]; then
@@ -121,23 +140,14 @@ install_link() {
     echo "❌ Ошибка создания директории $CLI_DEST_DIR"
     exit 1
   fi
-  if [ "$COPY_SOURCE" -eq 1 ]; then
-    cp -f "$CLI_SRC" "$CLI_DEST"
-    if [ $? -ne 0 ]; then
-      echo "❌ Ошибка копирования cli-скрипта в $CLI_DEST"
-      exit 1
-    fi
-    echo "📄 CLI-скрипт скопирован: $CLI_DEST"
-  else
-    echo "ℹ️  Пропускаю копирование cli-скрипта (--no-source)"
-  fi
+  # CLI-скрипт не копируется этим установщиком.
   ln -sf "$TARGET" "$LINK"
   if [ $? -eq 0 ]; then
     chmod +x "$TARGET"
     echo "✅ Установка завершена!"
     echo "   Система: $SYSTEM"
     echo "   Симлинк: $LINK → $TARGET"
-    echo "   CLI-скрипт: $CLI_DEST"
+    echo "   CLI-скрипт: (не установлен этим скриптом)"
     echo "   Используйте: git-tree --help"
   else
     echo "❌ Ошибка создания симлинка"
@@ -155,13 +165,10 @@ uninstall_link() {
   else
     echo "⚠️  Ссылка не найдена: $LINK"
   fi
-  if [ -f "$CLI_DEST" ]; then
-    rm -f "$CLI_DEST"
-    echo "🗑️  Удалён CLI-скрипт: $CLI_DEST"
-  fi
-  if [ -d "$CLI_DEST_DIR" ] && [ -z "$(ls -A "$CLI_DEST_DIR")" ]; then
-    rmdir "$CLI_DEST_DIR"
-    echo "🗑️  Удалена директория: $CLI_DEST_DIR"
+  # CLI-скрипт не управляется этим установщиком; ничего не удаляем в /usr/local/lib/git-tree
+  if [ -d "$LISP_DEST_DIR" ] && [ -z "$(ls -A "$LISP_DEST_DIR")" ]; then
+    rmdir "$LISP_DEST_DIR"
+    echo "🗑️  Удалена директория: $LISP_DEST_DIR"
   fi
 }
 
@@ -187,17 +194,40 @@ install_bin() {
     rm -f "$BIN_WRAPPER_DEST"
     echo "🗑️  Удалён старый скрипт/ссылка: $BIN_WRAPPER_DEST"
   fi
-  cp -f "$BIN_WRAPPER_SRC" "$BIN_WRAPPER_DEST"
+  # Генерируем wrapper динамически: сначала пытаемся запустить бинарник рядом с wrapper'ом,
+  # затем — lisp-скрипт через найденный sbcl (подставляем путь на момент установки)
+  SBCL_PATH="$(command -v sbcl 2>/dev/null || true)"
+
+  cat > "$BIN_WRAPPER_DEST" <<'EOF'
+#!/bin/bash
+# Generated wrapper for cl-git-tree (binary + fallback to SBCL)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BIN="$SCRIPT_DIR/$(basename "$BIN_DEST")"
+if [[ -x "$BIN" ]]; then
+  exec "$BIN" "$@"
+fi
+
+# SBCL detected at install time
+SBCL_EXEC="$SBCL_PATH"
+if [ -z "$SBCL_EXEC" ]; then
+  SBCL_EXEC="$(command -v sbcl 2>/dev/null || true)"
+fi
+CLI_SCRIPT="/usr/local/lib/git-tree/cli-script.lisp"
+if [ -n "$SBCL_EXEC" ] && [ -f "$CLI_SCRIPT" ]; then
+  exec "$SBCL_EXEC" --script "$CLI_SCRIPT" "$@"
+fi
+
+echo "❌ Ошибка: ни бинарник, ни SBCL+CLI-скрипт не доступны."
+exit 1
+EOF
+
   chmod +x "$BIN_WRAPPER_DEST"
   echo "✅ Установлен: $BIN_WRAPPER_DEST"
-  if [ "$COPY_SOURCE" -eq 1 ]; then
-    mkdir -p "$LISP_DEST_DIR"
-    if [ -f "$SRC_LISP" ]; then
-      cp -f "$SRC_LISP" "$LISP_DEST"
-      echo "📄 Исходник git-tree-bin.lisp установлен: $LISP_DEST"
-    fi
-  else
-    echo "ℹ️  Пропускаю копирование исходника (--no-source)"
+  # Всегда копируем исходник бинарника для воспроизводимости (если он есть)
+  mkdir -p "$LISP_DEST_DIR"
+  if [ -f "$SRC_LISP" ]; then
+    cp -f "$SRC_LISP" "$LISP_DEST"
+    echo "📄 Исходник git-tree-bin.lisp установлен: $LISP_DEST"
   fi
 }
 
@@ -208,6 +238,10 @@ uninstall_bin() {
     echo "🗑️  Удалён: $BIN_DEST"
   else
     echo "⚠️  Не найден: $BIN_DEST"
+  fi
+  if [ -f "$BIN_WRAPPER_DEST" ]; then
+    rm -f "$BIN_WRAPPER_DEST"
+    echo "🗑️  Удалён wrapper: $BIN_WRAPPER_DEST"
   fi
   if [ -f "$LISP_DEST" ]; then
     rm -f "$LISP_DEST"

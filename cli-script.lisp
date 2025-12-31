@@ -1,9 +1,0 @@
-;;; CLI скрипт для cl-git-tree
-
-(load (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname)))
-
-;; Тихая загрузка системы
-(let ((*standard-output* (make-broadcast-stream)))
-  (ql:quickload :cl-git-tree :silent t))
-
-(cl-git-tree/cli:main sb-ext:*posix-argv*)
