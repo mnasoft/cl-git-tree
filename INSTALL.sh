@@ -82,10 +82,14 @@ install_link() {
     if [ "$SYSTEM" = "linux" ] || [ "$SYSTEM" = "msys2" ]
     then
         # Генерируем bash-обёртку для обеих систем
-        sudo -u "$SUDO_USER" sh build-src.sh
-
-#        chmod +x "$TARGET"
-#        chmod +r "$TARGET"
+        if [ -z "$SUDO_USER" ]
+        then
+            echo "Нет sudo"
+            sh build-src.sh
+        else
+            echo "Есть sudo: $SUDO_USER"
+            sudo -u "$SUDO_USER" sh build-src.sh
+        fi
         echo "ℹ️  Сгенерирован $TARGET (sbcl wrapper)"
     fi
     if [ ! -f "$TARGET" ]; then
@@ -127,7 +131,15 @@ uninstall_link() {
 
 install_bin() {
     ensure_sudo "$@"
-    sudo -u "$SUDO_USER" sh build-bin.sh 
+    if [ -z "$SUDO_USER" ]
+    then
+        echo "Нет sudo"
+        sh build-bin.sh
+    else
+        echo "Есть sudo: $SUDO_USER"
+        sudo -u "$SUDO_USER" sh build-bin.sh
+    fi   
+    
     if [ ! -f "$BIN_SRC" ]
     then
         echo "❌ Не найден бинарник: $BIN_SRC"
