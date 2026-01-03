@@ -21,24 +21,7 @@ BIN_WRAPPER_DEST="$BIN_DEST_DIR/git-tree"
 ACTION="install"
 MODE="script"
 
-# Test output
-test_output() {
-    echo "##################################################"    
-    echo "PROJECT_DIR     =$PROJECT_DIR"
-    echo "LINK_DIR        =$LINK_DIR"
-    echo "LINK            =$LINK"
-    echo "BIN_SRC_DIR     =$BIN_SRC_DIR"
-    echo "BIN_DEST_DIR    =$BIN_DEST_DIR"
-    echo "BIN_SRC         =$BIN_SRC"
-    echo "BIN_WRAPPER_SRC =$BIN_WRAPPER_SRC"
-    echo "BIN_DEST        =$BIN_DEST"
-    echo "BIN_WRAPPER_DEST=$BIN_WRAPPER_DEST"
-    echo "ACTION          =$ACTION"
-    echo "MODE            =$MODE"
-    echo "##################################################"
-}
-
-test_output
+# Debug/test output removed for cleaner installer output
 
 ##################################################
 #### functions
