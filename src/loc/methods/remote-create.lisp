@@ -52,7 +52,8 @@
                  (<location>-id provider) code (or stderr stdout)))))
     ws))
 
-(defmethod remote-create ((ws <workspace>) (provider <local>) &key &allow-other-keys)
+(defmethod remote-create ((ws <workspace>) (provider <local>)
+                          &key &allow-other-keys)
   "Создать bare-репозиторий для WORKSPACE под локальным провайдером.
 Если цель уже существует — пропустить; иначе выполнить `git clone --bare`
 из рабочего каталога в каталог провайдера (например ~/.git-tree/git/<id>/REPO.git)."
@@ -61,7 +62,7 @@
          (target (merge-pathnames (format nil "~A.git" repo) base)))
     (cond
       ((probe-file target)
-       (format t "⚠️  [~A] Репозиторий ~A уже существует: ~A~%" 
+       (format t "⚠️ [~A] Репозиторий ~A уже существует: ~A~%" 
                (<location>-id provider) repo target))
       (t
        (ensure-directories-exist target)
@@ -72,8 +73,10 @@
             (cl-git-tree/git-utils:normalize-path-for-git (namestring target)))
          (declare (ignore out))
          (if (zerop code)
-             (format t "✅ [~A] Bare-репозиторий ~A создан: ~A~%" 
-                     (<location>-id provider) repo target)
+             (progn 
+               (format t "🧬 [~A] Bare-репозиторий создан: ~A~%" 
+                       (<location>-id provider) target)
+               (remote-add ws provider))
              (format t "❌ [~A] Ошибка создания ~A: ~A~%" 
                      (<location>-id provider) repo err)))))
     ws))

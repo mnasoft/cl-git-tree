@@ -77,21 +77,21 @@
                  (return-from force-delete-directory t))
                (error e)))))
 
-    (let* ((repo (repo-name ws))
-           (root (git-root ws))
+    (let* (
 	   ;; Expand user shorthand (e.g., "~") to a physical directory pathname.
            (base (uiop:ensure-directory-pathname
                   (uiop:ensure-absolute-pathname (<location>-url-git provider)
                                                  (user-homedir-pathname))))
            (target (uiop:ensure-directory-pathname
-                    (merge-pathnames (format nil "~A.git/" repo) base))))
+                    (merge-pathnames (format nil "~A.git/" (repo-name ws)) base))))
       (when (uiop:directory-exists-p target)
         (force-delete-directory target)
-        (format t "🗑️ Bare-репозиторий удалён: ~A~%"
-                (uiop:native-namestring target)))
-      (unless remote-only
-        (cl-git-tree/shell-utils:shell-run-single
-         root "git" "remote" "remove" (<location>-id provider)))
+        (format t "🗑️  [~A] Bare-репозиторий удалён: ~A~%"
+                (<location>-id provider) (uiop:native-namestring target))
+        (remote-remove ws provider)
+        )
+      (unless remote-only nil ;; ToDo
+        )
       ws)))
 
 (defmethod remote-delete ((ws <workspace-msys2>) (provider <local>)
@@ -103,7 +103,7 @@
     ;; Удалить bare-репозиторий через rm -r
     (cl-git-tree/shell-utils:shell-run-single "." "rm" "-rf" target)
     ;; Удалить remote из конфигурации git
-    (unless remote-only
-      (cl-git-tree/shell-utils:shell-run-single
-       root "git" "remote" "remove" (<location>-id provider)))
+    (remote-remove ws provider)
+    (unless remote-only nil ;; ToDo
+      )
     ws))

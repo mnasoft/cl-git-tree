@@ -2,16 +2,21 @@
 #+AUTHOR: Mykola Matvyeyev
 #+LANGUAGE: ru
 
-* [ ] ToDo
-1. [X] Ошибку в repo-clone, с связанную с преобразованием путей под
-   cygpath.
-2. [ ] repo-create repo-clone на данный момент эти две функции делают
+* [0/2] ToDo
+1. [ ] remote-delete ((ws <workspace>) (provider <local>) - выглядит
+   очень длинно.  Ключи yes и remote-only вероятно можно исключить
+2. [ ] сделать аналог команды git-timecapsule
+   
+* [5/5] DoNe
+1. [X] При создании отдаленного репозитория методом repo-create
+   необходимо его подключить.
+2. [X] repo-create repo-clone на данный момент эти две функции делают
    одно и то же самое. Имя repo-create более информативно. 
-3. [ ] сделать аналог команды git-timecapsule
-* [2/2] DoNe
-1. [X] Изменить сигнатуру вызова для команд
+3. [X] Ошибку в repo-clone, с связанную с преобразованием путей под
+   cygpath.
+4. [X] Изменить сигнатуру вызова для команд
    - [X] git tree remote-add -> git tree remote add
    - [X] git tree remote-remove -> git tree remote remove
    - [X] git tree remote-readd -> git tree remote readd
-2. [X] Переопределить команду clone через repo-clone
+5. [X] Переопределить команду clone через repo-clone
    
