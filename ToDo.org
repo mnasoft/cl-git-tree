@@ -3,11 +3,11 @@
 #+LANGUAGE: ru
 
 * [0/2] ToDo
-1. [ ] remote-delete ((ws <workspace>) (provider <local>) - выглядит
-   очень длинно.  Ключи yes и remote-only вероятно можно исключить
 2. [ ] сделать аналог команды git-timecapsule
    
 * [5/5] DoNe
+1. [ ] remote-delete ((ws <workspace>) (provider <local>) - выглядит
+   очень длинно - укорочены.  Ключи yes и remote-only исключены
 1. [X] При создании отдаленного репозитория методом repo-create
    необходимо его подключить.
 2. [X] repo-create repo-clone на данный момент эти две функции делают

@@ -21,7 +21,7 @@
           "." "config" "--global" "--get-regexp" "^alias\\.")
        (if (zerop code)
            (format t "~A~%" out)
-           (format t "⚠ Не удалось получить список алиасов: ~A~%" err))))
+           (format t "⚠️ Не удалось получить список алиасов: ~A~%" err))))
     ;; режим установки
     (t
      (git-global-config "alias.lg" "log --oneline --graph")

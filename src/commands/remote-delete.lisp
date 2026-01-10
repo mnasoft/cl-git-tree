@@ -11,10 +11,10 @@
   (let* ((loc-key (first args))
          (loc (cl-git-tree/loc:find-location loc-key)))
     (unless loc
-      (format t "⚠ Локация ~A не найдена~%" loc-key)
+      (format t "⚠️ Локация ~A не найдена~%" loc-key)
       (return-from remote-delete-workspace))
     (let* ((ws (cl-git-tree/loc:make-workspace repo-dir)))
-      (cl-git-tree/loc:remote-delete ws loc :yes t :remote-only nil))))
+      (cl-git-tree/loc:remote-delete ws loc))))
 
 (defun cmd-remote-delete (&rest args)
   "CLI-команда: удалить репозитории для всех локальных git-каталогов через метод remote-delete.
@@ -32,7 +32,7 @@
      (let* ((location-name (first args))
             (loc (cl-git-tree/loc:find-location location-name)))
        (if (null loc)
-           (format t "⚠ Локация ~A не найдена в конфиге.~%" location-name)
+           (format t "⚠️ Локация ~A не найдена в конфиге.~%" location-name)
            ;; запуск по дереву
            (cl-git-tree/fs:with-repo #'remote-delete-workspace args))))))
 

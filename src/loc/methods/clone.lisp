@@ -13,7 +13,7 @@
     (cond
       ;; если уже существует — пропускаем
       ((probe-file target)
-       (format t "⚠ ~A: уже существует ~A~%" repo-name target))
+       (format t "⚠️ ~A: уже существует ~A~%" repo-name target))
       (t
        (ensure-directories-exist target)
        (multiple-value-bind (out err code)
