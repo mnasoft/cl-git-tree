@@ -1,7 +1,8 @@
 (in-package :cl-git-tree/loc)
 
 ;; cleanup-remote-dir заменён на keep-remote-dir (по умолчанию NIL, если T — каталог не удаляется)
-(defmethod repo-transport-import ((ws <workspace>) (provider <provider>) &key verbose keep-remote-dir delete-archive &allow-other-keys)
+(defmethod repo-transport-import ((ws <workspace>) (provider <provider>)
+                                  &key verbose keep-remote-dir delete-archive &allow-other-keys)
   "Импортирует изменения из tar.xz архива для WORKSPACE и PROVIDER.
 Распаковывает архив из :url-xz провайдера в рабочий каталог репозитория.
 Если keep-remote-dir=T, временный каталог remote не удаляется."
@@ -12,10 +13,16 @@
          (prov-symbol (and provider (<location>-provider provider))))
     (cond
       ((not repo-dir)
-       (when verbose (format t "  ⚠️  Не найден путь к репозиторию для ~A~%" repo-name))
+       (when verbose
+         (format t "~A Не найден путь к репозиторию для ~A~%"
+                 (find-emo ws "warning")
+                 repo-name))
        nil)
       ((not url-xz)
-       (when verbose (format t "  ⚠️  Локация ~A (провайдер ~A) не имеет :url-xz~%" (<location>-id provider) prov-symbol))
+       (when verbose
+         (format t "~A Локация ~A (провайдер ~A) не имеет :url-xz~%"
+                 (find-emo ws "warning")
+                 (<location>-id provider) prov-symbol))
        nil)
       (t
        (when (repo-transport-unpack ws provider :verbose verbose)

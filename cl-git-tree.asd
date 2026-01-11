@@ -105,7 +105,8 @@
                "cl-ppcre"
                "cl-git-tree/fs"
                "cl-git-tree/git-utils"
-               "cl-git-tree/shell-utils")
+               "cl-git-tree/shell-utils"
+               "cl-git-tree/emodji")
   :serial t
   :components
   ((:module "src/loc"
@@ -118,8 +119,7 @@
      (:file "workspace") 
      (:module "methods"     ; реализация методов по generic
       :components
-      ((:file "clone")
-       (:file "initialize-instance")
+      ((:file "initialize-instance")
        (:file "print-object")
        (:file "remote-create")
        (:file "remote-delete")
@@ -175,3 +175,19 @@
   ((:module "src/utils"
     :components
     ((:file "two-columns")))))
+
+(defsystem "cl-git-tree/emodji"
+  :description "Unified monochrome + color symbol table for Git commands"
+  :version "0.1.0"
+  :serial t
+  :components
+  ((:module "src/emodji"
+    :components
+    ((:file "package")
+     (:file "core")
+     (:file "emodji-status")
+     (:file "emodji-git")
+     
+     ))))
+  
+

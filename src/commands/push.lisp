@@ -23,14 +23,19 @@
                   ;; repo-push implementations may print their own status
                   )
               (error (e)
-                (format t "❌ [~A] Ошибка: ~A~%" remote e)))
+                (format t "~A [~A] Ошибка: ~A~%"
+                        (cl-git-tree/loc:find-emo ws "error")
+                        remote e)))
             ;; Otherwise fall back to raw git push
             (multiple-value-bind (_out err code)
                 (cl-git-tree/git-utils:git-run repo-dir "push" remote branch)
               (declare (ignore _out))
               (if (zerop code)
-                  (format t "✅ ~A: push ~A/~A успешно~%" repo-dir remote branch)
-                  (format t "❌ ~A: push ~A/~A завершился с кодом ~A:~%~A"
+                  (format t "~A ~A: push ~A/~A успешно~%"
+                          (cl-git-tree/loc:find-emo ws "success")
+                          repo-dir remote branch)
+                  (format t "~A ~A: push ~A/~A завершился с кодом ~A:~%~A"
+                          (cl-git-tree/loc:find-emo ws "error")
                           repo-dir remote branch code err))))))))
 
 (defun cmd-push (&rest args)

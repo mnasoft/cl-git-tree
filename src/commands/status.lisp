@@ -10,15 +10,18 @@
 (defun status-repo (repo-dir args)
   "Выводит git status для одного репозитория REPO-DIR."
   (declare (ignore args))
-  (multiple-value-bind (out err code)
-      (cl-git-tree/git-utils:git-run repo-dir "status" "--short")
-    (if (zerop code)
-        (progn
-          (format t "~%📁 ~A~%" repo-dir)
-          (if (string= out "")
-              (format t "✔ Чисто~%")
-              (format t "~A~%" out)))
-        (format t "❌ ~A: git status завершился с кодом ~A:~%~A~%" repo-dir code err))))
+  (let ((ws (cl-git-tree/loc:make-workspace repo-dir)))
+    (multiple-value-bind (out err code)
+        (cl-git-tree/git-utils:git-run repo-dir "status" "--short")
+      (if (zerop code)
+          (progn
+            (format t "~%📁 ~A~%" repo-dir)
+            (if (string= out "")
+                (format t "✔ Чисто~%")
+                (format t "~A~%" out)))
+          (format t "~A ~A: git status завершился с кодом ~A:~%~A~%"
+                  (cl-git-tree/loc:find-emo ws "error")
+                  repo-dir code err)))))
 
 
 (defun cmd-status (&rest args)

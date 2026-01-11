@@ -15,12 +15,14 @@
                         :error-output :string
                         :ignore-error-status t)
     (cond ((zerop code)
-           (format t "✅ [~A] Репозиторий ~A удалён на GitHub~%" 
+           (format t "~A [~A] Репозиторий ~A удалён на GitHub~%"
+                   (find-emo ws "success")
                    (<location>-id provider)
                    (repo-name ws))
            (remote-remove ws provider))
           (t
-           (format t "❌ [~A] Ошибка при удалении ~A (код ~A): ~A~%"
+           (format t "~A [~A] Ошибка при удалении ~A (код ~A): ~A~%"
+                   (find-emo ws "error")
                    (<location>-id provider)
                    (repo-name ws)
                    code
@@ -38,12 +40,14 @@
                         :ignore-error-status t)
     (cond
       ((zerop code)
-       (format t "✅ [~A] Репозиторий ~A удалён на GitLab~%" 
+       (format t "~A [~A] Репозиторий ~A удалён на GitLab~%"
+               (find-emo ws "success")
                (<location>-id provider)
                (repo-name ws))
        (remote-remove ws provider))
       (t
-       (format t "❌ [~A] Ошибка при удалении ~A (код ~A): ~A~%"
+       (format t "~A [~A] Ошибка при удалении ~A (код ~A): ~A~%"
+               (find-emo ws "error")
                (<location>-id provider)
                (repo-name ws)
                code

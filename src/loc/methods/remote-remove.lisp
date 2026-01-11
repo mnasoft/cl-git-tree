@@ -18,7 +18,8 @@
                (remote-url ws provider)))
         
       (t
-       (format t "❌ Ошибка при отключении remote '~A' из ~A: ~A"
+       (format t "~A Ошибка при отключении remote '~A' из ~A: ~A"
+               (find-emo ws "error")
                (<location>-id provider)
                (repo-name ws)
                (or stderr stdout)))))

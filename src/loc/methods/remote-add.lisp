@@ -10,7 +10,8 @@
       (cl-git-tree/git-utils:git-run (git-root ws) "remote")
     (declare (ignore stderr code))
     (if (search (<location>-id provider) stdout :test #'string=)
-        (format t "⚠️  Репозиторий ~A: remote '~A' уже существует~%"
+        (format t "~A Репозиторий ~A: remote '~A' уже существует~%"
+                (find-emo ws "warning")
                 (repo-name ws) (<location>-id provider))
         (multiple-value-bind (out err code)
             (cl-git-tree/git-utils:git-run
@@ -24,7 +25,8 @@
                      (repo-name ws)
                      (remote-url ws provider)))
             (t
-             (format t "❌ Ошибка при добавлении remote '~A' в ~A: ~A~%"
+             (format t "~A Ошибка при добавлении remote '~A' в ~A: ~A~%"
+                     (find-emo ws "error")
                      (<location>-id provider)
                      (repo-name ws)
                      (or err out)))))))

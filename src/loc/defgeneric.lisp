@@ -162,3 +162,6 @@
    "Удаляет tar.xz архив для WORKSPACE/PROVIDER. Аргументы: ws, provider."))
 
 
+(defgeneric find-emo (workspace key)
+  (:documentation
+   "Возвращает emodji по ключу key в рабочем пространстве workspace."))

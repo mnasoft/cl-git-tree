@@ -24,12 +24,19 @@
           (if (zerop code)
               (progn
                 (when verbose
-                  (format t "✅ Временный remote '~A' добавлен → ~A~%" remote url))
+                  (format t "~A Временный remote '~A' добавлен → ~A~%"
+                          (find-emo ws "success")
+                          remote url))
                 (setf found t))
               (when verbose
-                (format t "❌ Ошибка при добавлении временного remote '~A' (путь ~A): ~A~%" remote url (or err out)))))))
+                (format t "~A Ошибка при добавлении временного remote '~A' (путь ~A): ~A~%"
+                        (find-emo ws "error")
+                        remote url (or err out)))))))
     (if found
         t
         (progn (when verbose
-                 (format t "⚠️  Не найден распакованный каталог для репозитория ~A в ~A~%" repo xz-base))
+                 (format t "~A  Не найден распакованный каталог для репозитория ~A в ~A~%"
+                         (find-emo ws "warning")
+                         repo
+                         xz-base))
                nil))))

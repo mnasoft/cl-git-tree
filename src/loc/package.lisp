@@ -30,10 +30,10 @@
    remote-add
    remote-remove
    remote-readd
-  remote-import-connect
-  remote-import-disconnect
-  remote-import-cleanup-dir
-  remote-import-delete-archive
+   remote-import-connect
+   remote-import-disconnect
+   remote-import-cleanup-dir
+   remote-import-delete-archive
 
    ;; глобальная таблица
    *locations* 
@@ -74,16 +74,20 @@
    days-since-last-commit
    repo-provider-keys
    repo-providers
-  repo-transport-export
-  repo-transport-import
-  repo-transport-unpack
+   repo-transport-export
+   repo-transport-import
+   repo-transport-unpack
    expand-path
    repo-status
    repo-commit
    repo-branches
    ;; конструктор и утилиты
    make-workspace
-   detect-os)
+   detect-os
+   )
+  (:export
+   find-emo
+   )
   (:documentation
    "Пакет CL-GIT-TREE/LOC инкапсулирует подсистему управления локациями.
 

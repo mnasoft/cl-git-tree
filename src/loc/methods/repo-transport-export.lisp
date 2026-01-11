@@ -1,7 +1,6 @@
 (in-package :cl-git-tree/loc)
 
-(defmethod repo-transport-export
-    ((ws <workspace>) (provider <provider>)
+(defmethod repo-transport-export ((ws <workspace>) (provider <provider>)
      &key (days-filter 30) verbose &allow-other-keys)
   "Создаёт tar.xz‑архив для WORKSPACE в каталоге :url-xz провайдера PROVIDER.
 
@@ -26,10 +25,12 @@ DAYS-FILTER пока не используется непосредственн�
         (when archive-name
           (incf archived)
           (unless verbose
-                (format t "✅ ~A (~A). Архив создан: ~A → ~A~%"
-                  repo-name prov-symbol archive-name output-dir)))))
+            (format t "~A ~A (~A). Архив создан: ~A → ~A~%"
+                    (find-emo ws "success")
+                    repo-name prov-symbol archive-name output-dir)))))
     (when (and verbose (not url-xz))
-      (format t "  ⚠️  Локация ~A (провайдер ~A) не имеет :url-xz~%"
+      (format t "~A  Локация ~A (провайдер ~A) не имеет :url-xz~%"
+              (find-emo ws "warning")
               (<location>-id provider)
               prov-symbol))
     archived))

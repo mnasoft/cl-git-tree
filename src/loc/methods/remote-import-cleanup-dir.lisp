@@ -19,10 +19,15 @@
          (remote-name (concatenate 'string repo-name "-import")))
     (cond
       ((not candidate)
-       (when verbose (format t "  ⚠️  Не удалось вычислить путь для удаления каталога remote: ~A~%" remote-name))
+       (when verbose
+         (format t "~A Не удалось вычислить путь для удаления каталога remote: ~A~%"
+                 (find-emo ws "warning")
+                 remote-name))
        nil)
       ((not (probe-file candidate))
-       (when verbose (format t "  ⚠️  Каталог remote не найден: ~A~%" candidate))
+       (when verbose (format t "~A Каталог remote не найден: ~A~%"
+                             (find-emo ws "warning")
+                             candidate))
        nil)
       (t
        (when verbose (format t "  🗑️  Удаляю каталог remote: ~A~%" candidate))

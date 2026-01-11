@@ -9,10 +9,14 @@
          (tar-xz (and url-xz repo-name (concatenate 'string url-xz "/" repo-name ".tar.xz"))))
     (cond
       ((not tar-xz)
-       (when verbose (format t "  ⚠️  Не удалось вычислить путь к архиву для удаления~%"))
+       (when verbose
+         (format t "~A Не удалось вычислить путь к архиву для удаления~%"
+                 (find-emo ws "warning")))
        nil)
       ((not (probe-file tar-xz))
-       (when verbose (format t "  ⚠️  Архив не найден: ~A~%" tar-xz))
+       (when verbose (format t "~A Архив не найден: ~A~%"
+                             (find-emo ws "warning")
+                             tar-xz))
        nil)
       (t
        (when verbose (format t "  🗑️  Удаляю архив: ~A~%" tar-xz))

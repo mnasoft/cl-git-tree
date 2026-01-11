@@ -59,8 +59,12 @@
                     ((zerop code)
                      (format t "✅ Git-репозиторий инициализирован: ~A~%" path))
                     (t
-                     (format t "❌ Ошибка при инициализации git в ~A (код ~A)~%" path code))))))
+                     (format t "~A Ошибка при инициализации git в ~A (код ~A)~%"
+                             (find-emo ws "error")
+                             path code))))))
           ws)
       (error (c)
-        (format t "❌ Не удалось создать каталог ~A: ~A~%" path c)
+        (format t "~A Не удалось создать каталог ~A: ~A~%"
+                (find-emo ws "error")
+                path c)
         ws))))

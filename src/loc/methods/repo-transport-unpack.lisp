@@ -10,10 +10,15 @@
          (tar-xz (and url-xz (concatenate 'string url-xz "/" repo-name ".tar.xz"))))
     (cond
       ((not url-xz)
-       (when verbose (format t "  ⚠️  Локация ~A не имеет :url-xz~%" (<location>-id provider)))
+       (when verbose (format t "~A Локация ~A не имеет :url-xz~%"
+                             (find-emo ws "warning")
+                             (<location>-id provider)))
        nil)
       ((not (probe-file tar-xz))
-       (when verbose (format t "  ⚠️  Архив не найден: ~A~%" tar-xz))
+       (when verbose
+         (format t "~A Архив не найден: ~A~%"
+                 (find-emo ws "warning")
+                 tar-xz))
        nil)
       (t
        (let ((cmd (format nil "tar -xJf ~A -C ~A" tar-xz url-xz)))
@@ -22,5 +27,12 @@
              (uiop:run-program cmd :output :string :error-output :string :ignore-error-status t)
            (declare (ignore output))
            (if (zerop exit-code)
-               (progn (when verbose (format t "  ✅ Импорт завершён: ~A~%" repo-name)) t)
-               (progn (when verbose (format t "  ❌ Ошибка при распаковке ~A: ~A~%" tar-xz error-output)) nil))))))))
+               (progn (when verbose (format t "~A Импорт завершён: ~A~%"
+                                            (find-emo ws "success")
+                                            repo-name)) t)
+               (progn
+                 (when verbose
+                   (format t "~A Ошибка при распаковке ~A: ~A~%"
+                           (find-emo ws "error")
+                           tar-xz error-output))
+                 nil))))))))

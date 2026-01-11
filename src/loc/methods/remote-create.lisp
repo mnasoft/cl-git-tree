@@ -21,10 +21,12 @@
                           :ignore-error-status t)
       (cond
         ((zerop code)
-         (format t "✅ [~A] Репозиторий ~A создан на GitHub (~A)~%"
+         (format t "~A [~A] Репозиторий ~A создан на GitHub (~A)~%"
+                 (find-emo ws "success")
                  (<location>-id provider) repo (if private "private" "public")))
         (t
-         (format t "❌ [~A] Ошибка при создании репозитория на GitHub (код ~A): ~A~%"
+         (format t "~A [~A] Ошибка при создании репозитория на GitHub (код ~A): ~A~%"
+                 (find-emo ws "error")
                  (<location>-id provider) code (or stderr stdout)))))
     ws))
 
@@ -45,10 +47,12 @@
                           :ignore-error-status t)
       (cond
         ((zerop code)
-         (format t "✅ [~A] Репозиторий ~A создан на GitLab (~A)~%"
+         (format t "~A [~A] Репозиторий ~A создан на GitLab (~A)~%"
+                 (find-emo ws "success")
                  (<location>-id provider) repo (if private "private" "public")))
         (t
-         (format t "❌ [~A] Ошибка при создании репозитория на GitLab (код ~A): ~A~%"
+         (format t "~A [~A] Ошибка при создании репозитория на GitLab (код ~A): ~A~%"
+                 (find-emo ws "error")
                  (<location>-id provider) code (or stderr stdout)))))
     ws))
 
@@ -62,7 +66,8 @@
          (target (merge-pathnames (format nil "~A.git" repo) base)))
     (cond
       ((probe-file target)
-       (format t "⚠️ [~A] Репозиторий ~A уже существует: ~A~%" 
+       (format t "~A [~A] Репозиторий ~A уже существует: ~A~%"
+               (find-emo ws "warning")
                (<location>-id provider) repo target))
       (t
        (ensure-directories-exist target)
@@ -74,10 +79,12 @@
          (declare (ignore out))
          (if (zerop code)
              (progn 
-               (format t "🧬 [~A] Bare-репозиторий создан: ~A~%" 
+               (format t "~A [~A] Bare-репозиторий создан: ~A~%"
+                       (find-emo *ws* "git clone --bare")
                        (<location>-id provider) target)
                (remote-add ws provider))
-             (format t "❌ [~A] Ошибка создания ~A: ~A~%" 
+             (format t "~A [~A] Ошибка создания ~A: ~A~%"
+                     (find-emo ws "error")
                      (<location>-id provider) repo err)))))
     ws))
 

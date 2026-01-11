@@ -15,5 +15,8 @@
          t)
         (t
          ;; Если команда вернула ошибку, возможно remote не существует — не считаем это фатальным
-         (when verbose (format t "⚠️  Не удалось удалить temporary remote '~A': ~A~%" remote (or err out)))
+         (when verbose
+           (format t "~A  Не удалось удалить temporary remote '~A': ~A~%"
+                   (find-emo ws "warning")
+                   remote (or err out)))
          nil)))))

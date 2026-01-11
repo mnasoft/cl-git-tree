@@ -16,10 +16,12 @@
         (apply #'cl-git-tree/git-utils:git-run root args)
       (cond
         ((zerop code)
-         (format t "✅ [~A] Push ~A~A успешно~%"
+         (format t "~A [~A] Push ~A~A успешно~%"
+                 (find-emo ws "success")
                  remote (repo-name ws) (if branch (format nil "/~A" branch) "")))
         (t
-         (format t "❌ [~A] Ошибка push ~A: ~A~%" 
+         (format t "~A [~A] Ошибка push ~A: ~A~%"
+                 (find-emo ws "error")
                  remote (repo-name ws) 
                  (or stderr stdout "неизвестная ошибка")))))
     ws))

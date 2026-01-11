@@ -23,14 +23,17 @@
                   ;; repo-pull implementations may print their own status
                   )
               (error (e)
-                (format t "❌ [~A] Ошибка: ~A~%" remote e)))
+                (format t "~A [~A] Ошибка: ~A~%"
+                        (cl-git-tree/loc:find-emo ws "error")
+                        remote e)))
             ;; Otherwise fall back to raw git pull
             (multiple-value-bind (_out err code)
                 (cl-git-tree/git-utils:git-run repo-dir "pull" remote branch)
               (declare (ignore _out))
               (if (zerop code)
                   (format t "✅ ~A: pull ~A/~A успешно~%" repo-dir remote branch)
-                  (format t "❌ ~A: pull ~A/~A завершился с кодом ~A:~%~A"
+                  (format t "~A ~A: pull ~A/~A завершился с кодом ~A:~%~A"
+                          (cl-git-tree/loc:find-emo ws "error")
                           repo-dir remote branch code err))))))))
 
 (defun cmd-pull (&rest args)
