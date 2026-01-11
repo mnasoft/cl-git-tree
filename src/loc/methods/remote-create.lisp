@@ -80,7 +80,7 @@
          (if (zerop code)
              (progn 
                (format t "~A [~A] Bare-репозиторий создан: ~A~%"
-                       (find-emo *ws* "git clone --bare")
+                       (find-emo ws "git clone --bare")
                        (<location>-id provider) target)
                (remote-add ws provider))
              (format t "~A [~A] Ошибка создания ~A: ~A~%"
