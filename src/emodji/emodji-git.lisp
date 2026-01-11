@@ -51,4 +51,5 @@
 (define-emodji "git status" :git-diag "Состояние" "○" "🧭")
 (define-emodji "git diff"   :git-diag "Разница" "≠" "⚖️")
 (define-emodji "git blame"  :git-diag "Кто изменил строку" "☍" "🕵️")
+(define-emodji "git audit"  :git-diag "Аудит репозиториев" "⌕" "🔍")
 

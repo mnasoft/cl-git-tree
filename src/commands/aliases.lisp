@@ -16,12 +16,13 @@
   (cond
     ;; режим просмотра
     ((and args (string= (first args) "list"))
-     (multiple-value-bind (out err code)
-         (cl-git-tree/git-utils:git-run
-          "." "config" "--global" "--get-regexp" "^alias\\.")
-       (if (zerop code)
-           (format t "~A~%" out)
-           (format t "⚠️ Не удалось получить список алиасов: ~A~%" err))))
+     (let ((ws (cl-git-tree/loc:make-workspace ".")))
+       (multiple-value-bind (out err code)
+           (cl-git-tree/git-utils:git-run
+            "." "config" "--global" "--get-regexp" "^alias\\.")
+         (if (zerop code)
+             (format t "~A~%" out)
+             (format t "~A Не удалось получить список алиасов: ~A~%" (cl-git-tree/loc:find-emo ws "warning") err)))))
     ;; режим установки
     (t
      (git-global-config "alias.lg" "log --oneline --graph")

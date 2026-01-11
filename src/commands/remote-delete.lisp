@@ -9,9 +9,10 @@
 (defun remote-delete-workspace (repo-dir args)
   "Удаляет репозиторий через метод remote-delete для указанной локации."
   (let* ((loc-key (first args))
-         (loc (cl-git-tree/loc:find-location loc-key)))
+         (loc (cl-git-tree/loc:find-location loc-key))
+         (ws (cl-git-tree/loc:make-workspace repo-dir)))
     (unless loc
-      (format t "⚠️ Локация ~A не найдена~%" loc-key)
+      (format t "~A Локация ~A не найдена~%" (cl-git-tree/loc:find-emo ws "warning") loc-key)
       (return-from remote-delete-workspace))
     (let* ((ws (cl-git-tree/loc:make-workspace repo-dir)))
       (cl-git-tree/loc:remote-delete ws loc))))
@@ -30,9 +31,10 @@
     ;; проверка существования локации
     (t
      (let* ((location-name (first args))
-            (loc (cl-git-tree/loc:find-location location-name)))
+            (loc (cl-git-tree/loc:find-location location-name))
+            (ws (cl-git-tree/loc:make-workspace ".")))
        (if (null loc)
-           (format t "⚠️ Локация ~A не найдена в конфиге.~%" location-name)
+           (format t "~A Локация ~A не найдена в конфиге.~%" (cl-git-tree/loc:find-emo ws "warning") location-name)
            ;; запуск по дереву
            (cl-git-tree/fs:with-repo #'remote-delete-workspace args))))))
 

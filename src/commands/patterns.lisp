@@ -10,6 +10,79 @@
 
 (in-package :cl-git-tree/commands/patterns)
 
+(defun cmd-patterns-help ()
+  "Показывает справку по команде patterns."
+  (format t "Управление паттернами файлов.~%~%")
+  (format t "Использование:~%")
+  (format t "  git-tree patterns list [tracked|excluded]~%")
+  (format t "  git-tree patterns add tracked <pattern>~%")
+  (format t "  git-tree patterns add excluded <pattern>~%")
+  (format t "  git-tree patterns remove tracked <pattern>~%")
+  (format t "  git-tree patterns remove excluded <pattern>~%")
+  (format t "  git-tree patterns reset~%~%")
+  (format t "Примеры:~%")
+  (format t "  git-tree patterns list           ;; показать все~%")
+  (format t "  git-tree patterns list tracked   ;; только включения~%")
+  (format t "  git-tree patterns add tracked *.rs~%")
+  (format t "  git-tree patterns remove tracked *.tcl*~%")
+  (format t "  git-tree patterns reset          ;; вернуть дефолты~%"))
+
+(defun cmd-patterns-list (filter)
+  "Показывает паттерны. FILTER может быть nil, 'tracked' или 'excluded'."
+  (let ((ws (cl-git-tree/loc:make-workspace ".")))
+    (cond
+      ((null filter)
+       ;; Показываем все
+       (format t "~A Паттерны для ВКЛЮЧЕНИЯ:~%" (cl-git-tree/loc:find-emo ws "pin"))
+       (dolist (p (get-tracked-patterns))
+         (format t "  ~A ~A~%" (cl-git-tree/loc:find-emo ws "checked") p))
+       (format t "~%~A Паттерны для ИСКЛЮЧЕНИЯ:~%" (cl-git-tree/loc:find-emo ws "block"))
+       (dolist (p (get-excluded-patterns))
+         (format t "  ~A ~A~%" (cl-git-tree/loc:find-emo ws "unchecked") p)))
+      ((string= filter "tracked")
+       (format t "~A Паттерны для ВКЛЮЧЕНИЯ:~%" (cl-git-tree/loc:find-emo ws "pin"))
+       (dolist (p (get-tracked-patterns))
+         (format t "  ~A ~A~%" (cl-git-tree/loc:find-emo ws "checked") p)))
+      ((string= filter "excluded")
+       (format t "~A Паттерны для ИСКЛЮЧЕНИЯ:~%" (cl-git-tree/loc:find-emo ws "block"))
+       (dolist (p (get-excluded-patterns))
+         (format t "  ~A ~A~%" (cl-git-tree/loc:find-emo ws "unchecked") p)))
+      (t
+       (format t "~A Неизвестный фильтр: ~A~%" (cl-git-tree/loc:find-emo ws "error") filter)
+       (format t "Используйте: tracked или excluded~%")))))
+
+(defun cmd-patterns-add (sub pattern)
+  "Добавляет паттерн. SUB может быть 'tracked' или 'excluded'."
+  (let ((ws (cl-git-tree/loc:make-workspace ".")))
+    (if (null pattern)
+        (format t "~A Укажите паттерн для добавления~%" (cl-git-tree/loc:find-emo ws "error"))
+        (if (string= sub "tracked")
+            (if (add-tracked-pattern pattern)
+                (format t "~A Паттерн '~A' добавлен в включение~%" (cl-git-tree/loc:find-emo ws "success") pattern)
+                (format t "~A  Паттерн '~A' уже есть в списке включения~%" (cl-git-tree/loc:find-emo ws "warning") pattern))
+            (if (add-excluded-pattern pattern)
+                (format t "~A Паттерн '~A' добавлен в исключение~%" (cl-git-tree/loc:find-emo ws "success") pattern)
+                (format t "~A  Паттерн '~A' уже есть в списке исключения~%" (cl-git-tree/loc:find-emo ws "warning") pattern))))))
+
+(defun cmd-patterns-remove (sub pattern)
+  "Удаляет паттерн. SUB может быть 'tracked' или 'excluded'."
+  (let ((ws (cl-git-tree/loc:make-workspace ".")))
+    (if (null pattern)
+        (format t "~A Укажите паттерн для удаления~%" (cl-git-tree/loc:find-emo ws "error"))
+        (if (string= sub "tracked")
+            (if (remove-tracked-pattern pattern)
+                (format t "~A Паттерн '~A' удалён из включения~%" (cl-git-tree/loc:find-emo ws "success") pattern)
+                (format t "~A  Паттерн '~A' не найден в списке включения~%" (cl-git-tree/loc:find-emo ws "warning") pattern))
+            (if (remove-excluded-pattern pattern)
+                (format t "~A Паттерн '~A' удалён из исключения~%" (cl-git-tree/loc:find-emo ws "success") pattern)
+                (format t "~A  Паттерн '~A' не найден в списке исключения~%" (cl-git-tree/loc:find-emo ws "warning") pattern))))))
+
+(defun cmd-patterns-reset ()
+  "Сбрасывает паттерны на значения по умолчанию."
+  (let ((ws (cl-git-tree/loc:make-workspace ".")))
+    (reset-to-defaults)
+    (format t "~A Паттерны сброшены на значения по умолчанию~%" (cl-git-tree/loc:find-emo ws "success"))))
+
 (defun cmd-patterns (&rest args)
   "Управление паттернами файлов.
 Команды:
@@ -24,115 +97,33 @@
         (sub (second args))
         (pattern (third args)))
     (cond
-    ;; Справка
-    ((or (null args) (member "--help" args :test #'string=))
-     (format t "Управление паттернами файлов.~%~%")
-     (format t "Использование:~%")
-     (format t "  git-tree patterns list [tracked|excluded]~%")
-     (format t "  git-tree patterns add tracked <pattern>~%")
-     (format t "  git-tree patterns add excluded <pattern>~%")
-     (format t "  git-tree patterns remove tracked <pattern>~%")
-     (format t "  git-tree patterns remove excluded <pattern>~%")
-     (format t "  git-tree patterns reset~%~%")
-     (format t "Примеры:~%")
-     (format t "  git-tree patterns list           ;; показать все~%")
-     (format t "  git-tree patterns list tracked   ;; только включения~%")
-     (format t "  git-tree patterns add tracked *.rs~%")
-     (format t "  git-tree patterns remove tracked *.tcl*~%")
-     (format t "  git-tree patterns reset          ;; вернуть дефолты~%"))
+      ;; Справка
+      ((or (null args) (member "--help" args :test #'string=))
+       (cmd-patterns-help))
     
-    ;; Просмотр паттернов
-    ((string= cmd "list")
-     (let ((filter (second args)))
-       (cond
-         ((null filter)
-          ;; Показываем все
-          (format t "📌 Паттерны для ВКЛЮЧЕНИЯ:~%")
-          (dolist (p (get-tracked-patterns))
-            (format t "  ✓ ~A~%" p))
-          (format t "~%🚫 Паттерны для ИСКЛЮЧЕНИЯ:~%")
-          (dolist (p (get-excluded-patterns))
-            (format t "  ✗ ~A~%" p)))
-         ((string= filter "tracked")
-          (format t "📌 Паттерны для ВКЛЮЧЕНИЯ:~%")
-          (dolist (p (get-tracked-patterns))
-            (format t "  ✓ ~A~%" p)))
-         ((string= filter "excluded")
-          (format t "🚫 Паттерны для ИСКЛЮЧЕНИЯ:~%")
-          (dolist (p (get-excluded-patterns))
-            (format t "  ✗ ~A~%" p)))
-         (t
-          (format t "❌ Неизвестный фильтр: ~A~%" filter)
-          (format t "Используйте: tracked или excluded~%")))))
+      ;; Просмотр паттернов
+      ((string= cmd "list")
+       (cmd-patterns-list sub))
     
-    ;; Добавление паттерна: новый синтаксис `add tracked|excluded <pattern>`
-    ((and (string= cmd "add")
-        (member sub '("tracked" "excluded") :test #'string=))
-     (if (null pattern)
-       (format t "❌ Укажите паттерн для добавления~%")
-       (if (string= sub "tracked")
-         (if (add-tracked-pattern pattern)
-           (format t "✅ Паттерн '~A' добавлен в включение~%" pattern)
-           (format t "⚠️  Паттерн '~A' уже есть в списке включения~%" pattern))
-         (if (add-excluded-pattern pattern)
-           (format t "✅ Паттерн '~A' добавлен в исключение~%" pattern)
-           (format t "⚠️  Паттерн '~A' уже есть в списке исключения~%" pattern)))))
+      ;; Добавление паттерна: новый синтаксис `add tracked|excluded <pattern>`
+      ((and (string= cmd "add")
+            (member sub '("tracked" "excluded") :test #'string=))
+       (cmd-patterns-add sub pattern))
 
-    ;; Удаление паттерна: новый синтаксис `remove tracked|excluded <pattern>`
-    ((and (string= cmd "remove")
-        (member sub '("tracked" "excluded") :test #'string=))
-     (if (null pattern)
-       (format t "❌ Укажите паттерн для удаления~%")
-       (if (string= sub "tracked")
-         (if (remove-tracked-pattern pattern)
-           (format t "✅ Паттерн '~A' удалён из включения~%" pattern)
-           (format t "⚠️  Паттерн '~A' не найден в списке включения~%" pattern))
-         (if (remove-excluded-pattern pattern)
-           (format t "✅ Паттерн '~A' удалён из исключения~%" pattern)
-           (format t "⚠️  Паттерн '~A' не найден в списке исключения~%" pattern)))))
-
-    ;; Обратная совместимость: старые односоставные подкоманды
-    ((string= cmd "add-tracked")
-     (if (null (second args))
-       (format t "❌ Укажите паттерн для добавления~%")
-       (let ((p (second args)))
-         (if (add-tracked-pattern p)
-           (format t "✅ Паттерн '~A' добавлен в включение (add-tracked, устарело; используйте add tracked)~%" p)
-           (format t "⚠️  Паттерн '~A' уже есть в списке включения~%" p)))))
-
-    ((string= cmd "add-excluded")
-     (if (null (second args))
-       (format t "❌ Укажите паттерн для добавления~%")
-       (let ((p (second args)))
-         (if (add-excluded-pattern p)
-           (format t "✅ Паттерн '~A' добавлен в исключение (add-excluded, устарело; используйте add excluded)~%" p)
-           (format t "⚠️  Паттерн '~A' уже есть в списке исключения~%" p)))))
-
-    ((string= cmd "remove-tracked")
-     (if (null (second args))
-       (format t "❌ Укажите паттерн для удаления~%")
-       (let ((p (second args)))
-         (if (remove-tracked-pattern p)
-           (format t "✅ Паттерн '~A' удалён из включения (remove-tracked, устарело; используйте remove tracked)~%" p)
-           (format t "⚠️  Паттерн '~A' не найден в списке включения~%" p)))))
-
-    ((string= cmd "remove-excluded")
-     (if (null (second args))
-       (format t "❌ Укажите паттерн для удаления~%")
-       (let ((p (second args)))
-         (if (remove-excluded-pattern p)
-           (format t "✅ Паттерн '~A' удалён из исключения (remove-excluded, устарело; используйте remove excluded)~%" p)
-           (format t "⚠️  Паттерн '~A' не найден в списке исключения~%" p)))))
+      ;; Удаление паттерна: новый синтаксис `remove tracked|excluded <pattern>`
+      ((and (string= cmd "remove")
+            (member sub '("tracked" "excluded") :test #'string=))
+       (cmd-patterns-remove sub pattern))
     
-    ;; Сброс на дефолты
-    ((string= cmd "reset")
-     (reset-to-defaults)
-     (format t "✅ Паттерны сброшены на значения по умолчанию~%"))
+      ;; Сброс на дефолты
+      ((string= cmd "reset")
+       (cmd-patterns-reset))
     
-    ;; Неизвестная команда
-    (t
-     (format t "❌ Неизвестная команда: ~A~%" cmd)
-     (format t "Используйте 'git-tree patterns --help' для справки~%")))))
+      ;; Неизвестная команда
+      (t
+       (let ((ws (cl-git-tree/loc:make-workspace ".")))
+         (format t "~A Неизвестная команда: ~A~%" (cl-git-tree/loc:find-emo ws "error") cmd)
+         (format t "Используйте 'git-tree patterns --help' для справки~%"))))))
 
 (eval-when (:load-toplevel :execute)
   (cl-git-tree/dispatch:register-command

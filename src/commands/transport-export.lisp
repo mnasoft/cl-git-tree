@@ -34,7 +34,7 @@
       (unless skip-reason
         (setf skip-reason "неизвестная причина"))
       (format t "~%Репозиторий: ~A~%" repo-name)
-      (format t "  ⚠️  Пропущено: ~A~%" skip-reason))
+      (format t "  ~A  Пропущено: ~A~%" (cl-git-tree/loc:find-emo ws "warning") skip-reason))
 
     ;; Архивируем для каждой найденной локации-провайдера через generic-функцию
     (when (and (not skip) provider-locs)
@@ -60,8 +60,9 @@ ARGS — список аргументов после слова export."
           do (when (string= arg "--days")
                (setf days-filter (parse-integer val :junk-allowed t))))
 
-    (unless verbose
-      (format t "📦 Архивирование репозиториев (--days ~A)...~%" days-filter))
+    (let ((ws (cl-git-tree/loc:make-workspace ".")))
+      (unless verbose
+        (format t "~A Архивирование репозиториев (--days ~A)...~%" (cl-git-tree/loc:find-emo ws "fs archive") days-filter)))
 
     ;; Обход репозиториев в стиле with-repo
     (flet ((export-one (repo-dir _args)

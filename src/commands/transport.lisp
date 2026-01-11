@@ -54,8 +54,9 @@
     ((and args (string= (first args) "export"))
      (transport-export (rest args)))
     (t
-     (format t "❌ Неизвестная подкоманда. Используйте: export, import или clean.~%")
-     (format t "Справка: git-tree transport --help~%"))))
+     (let ((ws (cl-git-tree/loc:make-workspace ".")))
+       (format t "~A Неизвестная подкоманда. Используйте: export, import или clean.~%" (cl-git-tree/loc:find-emo ws "error"))
+       (format t "Справка: git-tree transport --help~%")))))
 
 (eval-when (:load-toplevel :execute)
   (cl-git-tree/dispatch:register-command

@@ -51,7 +51,7 @@
     ;; Вызов метода repo-commit
     (let ((ws (make-instance 'cl-git-tree/loc:<workspace> :path repo-dir)))
       (let ((result (cl-git-tree/loc:repo-commit ws :all all :amend amend :message message)))
-        (format t "✅ ~A: ~A~%" repo-dir result)))))
+        (format t "~A ~A: ~A~%" (cl-git-tree/loc:find-emo ws "success") repo-dir result)))))
 
 (defun cmd-commit (&rest args)
   "CLI-команда: выполнить git commit во всех репозиториях.

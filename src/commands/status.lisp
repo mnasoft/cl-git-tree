@@ -15,7 +15,7 @@
         (cl-git-tree/git-utils:git-run repo-dir "status" "--short")
       (if (zerop code)
           (progn
-            (format t "~%📁 ~A~%" repo-dir)
+            (format t "~%~A ~A~%" (cl-git-tree/loc:find-emo ws "fs folder") repo-dir)
             (if (string= out "")
                 (format t "✔ Чисто~%")
                 (format t "~A~%" out)))

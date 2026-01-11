@@ -31,7 +31,7 @@
                 (cl-git-tree/git-utils:git-run repo-dir "pull" remote branch)
               (declare (ignore _out))
               (if (zerop code)
-                  (format t "✅ ~A: pull ~A/~A успешно~%" repo-dir remote branch)
+                  (format t "~A ~A: pull ~A/~A успешно~%" (cl-git-tree/loc:find-emo ws "success") repo-dir remote branch)
                   (format t "~A ~A: pull ~A/~A завершился с кодом ~A:~%~A"
                           (cl-git-tree/loc:find-emo ws "error")
                           repo-dir remote branch code err))))))))

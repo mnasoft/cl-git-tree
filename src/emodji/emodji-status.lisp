@@ -10,3 +10,7 @@
 (define-emodji "in-progress" :status "Выполняется"      "➤"  "🔄")
 (define-emodji "skipped"     :status "Пропущено"        "↷"  "⏭️")
 (define-emodji "blocked"     :status "Заблокировано"    "⛔" "⛔")
+(define-emodji "checked"     :status "Отмечено"         "✓"  "✓")
+(define-emodji "unchecked"   :status "Не отмечено"      "✗"  "✗")
+(define-emodji "pin"         :status "Закреплено"       "⌘"  "📌")
+(define-emodji "block"       :status "Блокировка"       "⊠"  "🚫")
