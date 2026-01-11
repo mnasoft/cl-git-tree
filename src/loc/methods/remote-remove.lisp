@@ -12,7 +12,8 @@
              (list "remote" "remove" (<location>-id provider)))
     (cond
       ((zerop code)
-       (format t "🔌 [~A] Remote-репозиторий отключен : ~25A ~A~%" 
+       (format t "~A [~A] Remote-репозиторий отключен : ~25A ~A~%" 
+               (find-emo ws "git remote remove")
                (<location>-id provider)
                (repo-name ws)
                (remote-url ws provider)))

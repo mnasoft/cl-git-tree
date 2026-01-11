@@ -187,6 +187,7 @@
      (:file "core")
      (:file "emodji-status")
      (:file "emodji-git")
+     (:file "emodji-fs")
      
      ))))
   

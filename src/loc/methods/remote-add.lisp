@@ -20,7 +20,8 @@
              (remote-url ws provider))
           (cond
             ((zerop code)
-             (format t "🔗 [~A] Bare-репозиторий подключен: ~25A ~A~%"
+             (format t "~A [~A] Bare-репозиторий подключен: ~25A ~A~%"
+                     (find-emo ws "git remote add")
                      (<location>-id provider)
                      (repo-name ws)
                      (remote-url ws provider)))

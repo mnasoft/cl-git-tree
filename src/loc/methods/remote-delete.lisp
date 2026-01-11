@@ -60,7 +60,8 @@
   (let ((target (remote-url-full ws provider)))
     (when (uiop:directory-exists-p target)
       (cl-git-tree/fs:delete-directory-tree target)
-      (format t "🗑️  [~A] Bare-репозиторий удалён: ~A~%"
+      (format t "~A [~A] Bare-репозиторий удалён: ~A~%"
+              (find-emo ws "fs delete")
               (<location>-id provider)
               (uiop:native-namestring target))
       (remote-remove ws provider))
@@ -70,7 +71,8 @@
                           &key &allow-other-keys)
   "Удалить bare-репозиторий из локальной директории через rm -r."
   (cl-git-tree/shell-utils:shell-run-single "." "rm" "-rf" (remote-url ws provider))
-  (format t "🗑️  [~A] Bare-репозиторий удалён: ~A~%"
+  (format t "~A [~A] Bare-репозиторий удалён: ~A~%"
+          (find-emo ws "fs delete")
           (<location>-id provider)
           (uiop:native-namestring
            (remote-url ws provider)))

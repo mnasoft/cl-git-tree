@@ -30,6 +30,6 @@
                              candidate))
        nil)
       (t
-       (when verbose (format t "  🗑️  Удаляю каталог remote: ~A~%" candidate))
+       (when verbose (format t "  ~A  Удаляю каталог remote: ~A~%" (find-emo ws "fs delete") candidate))
        (cl-git-tree/fs:delete-directory-tree candidate)
        t))))

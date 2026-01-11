@@ -19,6 +19,6 @@
                              tar-xz))
        nil)
       (t
-       (when verbose (format t "  🗑️  Удаляю архив: ~A~%" tar-xz))
+       (when verbose (format t "  ~A  Удаляю архив: ~A~%" (find-emo ws "fs delete") tar-xz))
        (cl-git-tree/fs:delete-directory-tree tar-xz)
        t))))

@@ -11,7 +11,7 @@
         (cl-git-tree/git-utils:git-run root "remote" "remove" remote)
       (cond
         ((zerop code)
-         (when verbose (format t "🗑️ Временный remote '~A' удалён~%" remote))
+         (when verbose (format t "~A Временный remote '~A' удалён~%" (find-emo ws "fs delete") remote))
          t)
         (t
          ;; Если команда вернула ошибку, возможно remote не существует — не считаем это фатальным
