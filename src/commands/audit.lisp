@@ -89,7 +89,11 @@
 (defun cmd-audit-status (args)
   "Показывает git status во всех репозиториях."
   (format t "Показываю git status во всех git-репозиториях (через audit).~%")
-  (cl-git-tree/fs:with-repo #'cl-git-tree/commands/status:status-repo args))
+  (flet ((status-one (repo-dir _args)
+           (declare (ignore _args))
+           (let ((ws (cl-git-tree/loc:make-workspace repo-dir)))
+             (cl-git-tree/loc:repo-status ws :verbose t))))
+    (cl-git-tree/fs:with-repo #'status-one args)))
 
 (defun cmd-audit-dirty ()
   "Находит репозитории с незакоммиченными изменениями."

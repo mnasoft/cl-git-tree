@@ -39,7 +39,7 @@
       :yes         → не задавать вопросов (по умолчанию T)
       :remote-only → удалить только удалённый репозиторий, не трогая локальный."))
 
-(defgeneric repo-status (workspace provider &key &allow-other-keys)
+(defgeneric repo-status (workspace &key &allow-other-keys)
   (:documentation
    "Вернуть статус git‑репозитория в рабочем пространстве."))
 

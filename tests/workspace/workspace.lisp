@@ -198,7 +198,7 @@
     (unwind-protect
          (progn
            (cl-git-tree/loc:git-init ws)
-           (let ((status (cl-git-tree/loc:repo-status ws (make-instance 'cl-git-tree/loc:<provider>))))
+           (let ((status (cl-git-tree/loc:repo-status ws :verbose nil)))
              (is (stringp status))))
       (when (uiop:directory-exists-p test-dir)
         (cl-git-tree/tests:force-delete-directory test-dir)))))

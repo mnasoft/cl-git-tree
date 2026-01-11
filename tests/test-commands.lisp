@@ -20,12 +20,3 @@
     ;; вызываем CLI-обёртку, которая внутри дергает git-config-set
     (is (string= (cmd-config '("set" key value)) value))
     (is (string= (cmd-config `("get" ,key)) value))))
-
-;; --- Пример теста для status ---
-
-(test cmd-status-on-empty-repo
-  "Проверяем, что status работает на пустом временном репозитории."
-  (uiop:with-temporary-directory (tmpdir)
-    ;; инициализируем пустой git-репозиторий
-    (cl-git-tree/git-utils:git-run tmpdir "init")
-    (let ((ws (make-instance '<workspace> :path tmpdir :repo-name

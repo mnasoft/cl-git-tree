@@ -334,7 +334,6 @@ cl-git-tree/
 │   │   ├── remote-delete.lisp            # Удалить remote на провайдере
 │   │   ├── remote-readd.lisp             # Заново добавить remote
 │   │   ├── remote-remove.lisp            # Удалить remote
-│   │   ├── status.lisp                   # Вспомогательные функции статуса
 │   │   ├── transport.lisp                # Справка по архивам
 │   │   ├── transport-clean.lisp          # Удалить *.tar.xz
 │   │   ├── transport-export.lisp         # Создать архивы
