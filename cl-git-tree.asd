@@ -2,7 +2,7 @@
   :description "Git location manager and sync tool in Common Lisp"
   :long-description #.(uiop:read-file-string
                        (uiop:subpathname *load-truename* "README.org"))
-  :version "0.6.3"
+  :version "0.6.4"
   :author "Mykola Matvyeyev <mnasoft@gmail.com>"
   :license "GPL-3.0-or-later"
   :depends-on (
@@ -144,7 +144,8 @@
        (:file "remote-url")
        (:file "remote-add")
        (:file "remote-readd")
-       (:file "remote-remove")
+          (:file "remote-remove")
+          (:file "find-emo")
        ))))))
 
 (defsystem "cl-git-tree/dispatch"
