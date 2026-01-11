@@ -39,7 +39,8 @@
           (unless (uiop:directory-exists-p path)
             (uiop:ensure-all-directories-exist path))
           (if (git-initialized-p ws)
-              (format t "⚠️ Git-репозиторий уже существует~%")
+              (format t "~A Git-репозиторий уже существует~%" 
+                      (cl-git-tree/loc:find-emo ws "warning"))
               (let ((args (list "init")))
                 (when bare (push "--bare" args))
                 (when quiet (push "--quiet" args))
@@ -57,7 +58,9 @@
                   (declare (ignore stdout stderr))
                   (cond
                     ((zerop code)
-                     (format t "✅ Git-репозиторий инициализирован: ~A~%" path))
+                     (format t "~A Git-репозиторий инициализирован: ~A~%" 
+                             (cl-git-tree/loc:find-emo ws "success")
+                             path))
                     (t
                      (format t "~A Ошибка при инициализации git в ~A (код ~A)~%"
                              (find-emo ws "error")

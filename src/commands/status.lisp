@@ -17,7 +17,7 @@
           (progn
             (format t "~%~A ~A~%" (cl-git-tree/loc:find-emo ws "fs folder") repo-dir)
             (if (string= out "")
-                (format t "✔ Чисто~%")
+                (format t "~A Чисто~%" (cl-git-tree/loc:find-emo ws "success"))
                 (format t "~A~%" out)))
           (format t "~A ~A: git status завершился с кодом ~A:~%~A~%"
                   (cl-git-tree/loc:find-emo ws "error")

@@ -33,7 +33,9 @@
      (git-global-config "alias.visual" "!gitk")
      (git-global-config "alias.tree" "!git-tree")
      (git-global-config "core.editor" "emacs")
-     (format t "✔ Git aliases configured globally~%"))))
+     (let ((ws (cl-git-tree/loc:make-workspace ".")))
+       (format t "~A Git aliases configured globally~%" 
+               (cl-git-tree/loc:find-emo ws "success"))))))
 
 ;; регистрация команды при загрузке
 (eval-when (:load-toplevel :execute)

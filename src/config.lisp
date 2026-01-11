@@ -39,7 +39,10 @@
   (handler-case
       (load *config-path*)
     (error (e)
-      (format *error-output* "⚠️  Ошибка загрузки конфигурации ~A: ~A~%" *config-path* e))))
+      (let ((ws (cl-git-tree/loc:make-workspace ".")))
+        (format *error-output* "~A  Ошибка загрузки конфигурации ~A: ~A~%" 
+                (cl-git-tree/loc:find-emo ws "warning")
+                *config-path* e)))))
 
 (defun reset-config ()
   "Перезаписывает конфигурационный файл дефолтными значениями."
@@ -49,4 +52,7 @@
                      :if-does-not-exist :create
                      :if-exists :supersede)
     (format s "~A~%" *config-example*))
-  (format t "✅ Конфигурация сброшена: ~A~%" *config-path*))
+  (let ((ws (cl-git-tree/loc:make-workspace ".")))
+    (format t "~A Конфигурация сброшена: ~A~%" 
+            (cl-git-tree/loc:find-emo ws "success")
+            *config-path*)))

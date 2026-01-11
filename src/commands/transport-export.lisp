@@ -25,7 +25,9 @@
                   (setf skip t skip-reason (format nil "коммит ~A дней назад" days)))
                 (when verbose
                   (format t "~%Репозиторий: ~A~%" repo-name)
-                  (format t "  ✔ Последний коммит ~A дней назад~%" days)))
+                  (format t "  ~A Последний коммит ~A дней назад~%" 
+                          (cl-git-tree/loc:find-emo ws "success")
+                          days)))
             (progn
               (setf skip t skip-reason "не удалось определить дату коммита")))))
 

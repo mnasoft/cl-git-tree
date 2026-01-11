@@ -42,7 +42,10 @@
     (let ((files (find-tracked-files (cl-git-tree/loc:git-root wk)
                                      :patterns patterns
                                      :excludes dirs)))
-      (format t "✔ ~A: найдено ~D файл(ов)~%" repo-dir (length files))
+      (format t "~A ~A: найдено ~D файл(ов)~%" 
+              (cl-git-tree/loc:find-emo wk "success")
+              repo-dir 
+              (length files))
       ;; вызываем метод repo-add
       (cl-git-tree/loc:repo-add wk :files files))))
 
