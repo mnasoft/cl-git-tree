@@ -87,13 +87,23 @@
   (format t "  git-tree audit untracked          # Найти репо с неотслеживаемыми файлами~%"))
 
 (defun cmd-audit-status (args)
-  "Показывает git status во всех репозиториях."
-  (format t "Показываю git status во всех git-репозиториях (через audit).~%")
-  (flet ((status-one (repo-dir _args)
-           (declare (ignore _args))
-           (let ((ws (cl-git-tree/loc:make-workspace repo-dir)))
-             (cl-git-tree/loc:repo-status ws :verbose t))))
-    (cl-git-tree/fs:with-repo #'status-one args)))
+  "Показывает git status только для репозиториев с изменениями."
+  (format t "Показываю git status во всех git-репозиториях с изменениями (через audit).~%")
+  (let ((total 0)
+        (with-changes 0))
+    (flet ((status-one (repo-dir _args)
+             (declare (ignore _args))
+             (incf total)
+             (let ((ws (cl-git-tree/loc:make-workspace repo-dir)))
+               ;; Сначала проверяем, есть ли изменения (без вывода)
+               (let ((status (cl-git-tree/loc:repo-status ws :verbose nil)))
+                 ;; Выводим только если есть изменения
+                 (unless (string= status "")
+                   (incf with-changes)
+                   (cl-git-tree/loc:repo-status ws :verbose t))))))
+      (cl-git-tree/fs:with-repo #'status-one args))
+    (format t "~%=== Проверено репозиториев: ~A, с изменениями: ~A ===~%" 
+            total with-changes)))
 
 (defun cmd-audit-dirty ()
   "Находит репозитории с незакоммиченными изменениями."
