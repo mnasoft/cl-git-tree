@@ -23,4 +23,4 @@
                  (find-emo ws "error")
                  remote (repo-name ws)
                  (or stderr stdout "неизвестная ошибка")))))
-    ws))
+    (values ws (zerop code))))

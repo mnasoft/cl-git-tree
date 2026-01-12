@@ -17,26 +17,33 @@
          (format t "~A Не найден путь к репозиторию для ~A~%"
                  (find-emo ws "warning")
                  repo-name))
-       nil)
+       (values nil nil))
       ((not url-xz)
        (when verbose
          (format t "~A Локация ~A (провайдер ~A) не имеет :url-xz~%"
                  (find-emo ws "warning")
                  (<location>-id provider) prov-symbol))
-       nil)
+       (values nil nil))
       (t
-       (when (repo-transport-unpack ws provider :verbose verbose)
-         ;; Подключаем временный remote (например, "<loc>-import"), делаем pull, затем отключаем
-         (let ((tmp-remote (format nil "~A-import" (<location>-id provider))))
-           (when (remote-import-connect ws provider :remote-name tmp-remote :verbose verbose)
-             ;; Выполняем pull с использованием временного remote
-             (cl-git-tree/loc:repo-pull ws provider :remote tmp-remote :branch "master")
-             ;; Отключаем временный remote
-             (remote-import-disconnect ws provider :remote-name tmp-remote :verbose verbose)
-             ;; Удаляем каталог временного remote (по умолчанию, если не keep-remote-dir)
-             (unless keep-remote-dir
-               (remote-import-cleanup-dir ws provider :verbose verbose))
-             ;; Удаляем архив (опционально)
-             (when delete-archive
-               (remote-import-delete-archive ws provider :verbose verbose)))))
-       t))))
+       (if (repo-transport-unpack ws provider :verbose verbose)
+           ;; Подключаем временный remote (например, "<loc>-import"), делаем pull, затем отключаем
+           (let ((tmp-remote (format nil "~A-import" (<location>-id provider))))
+             (if (remote-import-connect ws provider :remote-name tmp-remote :verbose verbose)
+                 (progn
+                   ;; Выполняем pull с использованием временного remote, только fast-forward
+                   (multiple-value-bind (ignore-ws success)
+                       (cl-git-tree/loc:repo-pull ws provider :remote tmp-remote :branch "master" :ff-only t)
+                     (declare (ignore ignore-ws))
+                     ;; Отключаем временный remote
+                     (remote-import-disconnect ws provider :remote-name tmp-remote :verbose verbose)
+                     ;; Удаляем каталог временного remote только при успехе и если не keep-remote-dir
+                     (unless (or keep-remote-dir (not success))
+                       (remote-import-cleanup-dir ws provider :verbose verbose))
+                     ;; Удаляем архив (опционально)
+                     (when delete-archive
+                       (remote-import-delete-archive ws provider :verbose verbose))
+                     (values success t)))
+               ;; Не удалось подключить временный remote
+               (values nil nil)))
+           ;; Распаковка архива не удалась
+           (values nil nil))))))
