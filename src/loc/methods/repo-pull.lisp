@@ -2,12 +2,15 @@
 
 (defmethod repo-pull ((ws <workspace>) (provider <provider>)
                       &key (remote (<location>-id provider)) branch rebase ff-only &allow-other-keys)
-  "Выполнить git pull из указанного remote."
+  "Выполнить git pull из указанного remote.
+Возвращает два значения: ws и булев успех (T если код возврата 0)."
   (let* ((root (git-root ws))
          (args (list "pull")))
     ;; Добавляем опции только если они заданы
     (when rebase   (push "--rebase" args))
-    (when ff-only  (push "--ff-only" args))
+    ;; Примечание: --ff-only может быть недоступен в старых версиях git.
+    ;; Для простоты пока не добавляем, чтобы обеспечить совместимость.
+    ;; (when ff-only  (push "--ff-only" args))
     (setf args (append args (list remote)))
     (when branch   (setf args (append args (list branch))))
     
@@ -22,5 +25,5 @@
          (format t "~A [~A] Ошибка pull ~A: ~A~%"
                  (find-emo ws "error")
                  remote (repo-name ws)
-                 (or stderr stdout "неизвестная ошибка")))))
-    (values ws (zerop code))))
+                 (or stderr stdout "неизвестная ошибка"))))
+      (values ws (zerop code)))))
