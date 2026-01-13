@@ -214,7 +214,7 @@
     (setf branch-names (nreverse branch-names))
     
     ;; Получаем текущий workspace
-    (let ((ws (cl-git-tree/loc:current-workspace-or-die)))
+    (let ((ws (cl-git-tree/loc:make-workspace ".")))
       (multiple-value-bind (out code)
           (cl-git-tree/loc:repo-branch
            ws

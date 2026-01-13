@@ -54,6 +54,7 @@
        :serial t
        :components
        ((:file "package")
+        (:file "branch")
         (:file "switch")
         (:file "checkout")
         (:file "ls-remote")
@@ -134,6 +135,7 @@
        (:file "repo-push")
        (:file "repo-pull")
        (:file "repo-add")
+       (:file "repo-branch")
        (:file "repo-branches")
        (:file "repo-ls-remote")
        (:file "repo-fetch")
