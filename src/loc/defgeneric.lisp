@@ -51,6 +51,66 @@
   (:documentation
    "Вернуть список веток git‑репозитория в рабочем пространстве."))
 
+(defgeneric repo-ls-remote (workspace repository &key &allow-other-keys)
+  (:documentation
+   "Получить список ссылок из удалённого репозитория REPOSITORY.
+    Ключи:
+      :branches    → T → показать только ветки (--branches)
+      :tags        → T → показать только теги (--tags)
+      :refs        → T → не показывать peeled tags (--refs)
+      :upload-pack → путь к git-upload-pack на удалённом хосте
+      :quiet       → T → не выводить URL удалённого репозитория (-q)
+      :exit-code   → T → выйти с кодом 2 если ничего не найдено (--exit-code)
+      :get-url     → T → показать URL и выйти (--get-url)
+      :sort        → ключ для сортировки результатов
+      :symref      → T → показать символьные ссылки (--symref)
+      :patterns    → список паттернов для фильтрации ссылок"))
+
+(defgeneric repo-fetch (workspace &key &allow-other-keys)
+  (:documentation
+   "Загрузить объекты и ссылки из удалённого репозитория для WORKSPACE.
+    Ключи:
+      :remote     → имя удалённого репозитория (по умолчанию \"origin\")
+      :all        → T → загрузить из всех удалённых репозиториев (--all)
+      :multiple   → T → включить несколько репозиториев (--multiple)
+      :prune      → T → удалить удалённые ссылки (--prune)
+      :prune-tags → T → удалить удалённые теги (--prune-tags)
+      :tags       → T → загрузить все теги (--tags)
+      :depth      → глубина для shallow clone (--depth)
+      :atomic     → T → использовать atomic транзакции (--atomic)
+      :no-recurse-submodules → T → не загружать подмодули (--no-recurse-submodules)
+      :dry-run    → T → пробный запуск (--dry-run)
+      :quiet      → T → подавить вывод (-q)"))
+
+(defgeneric repo-switch (workspace branch &key &allow-other-keys)
+  (:documentation
+   "Переключиться на ветку BRANCH в рабочем пространстве WORKSPACE.
+    Ключи:
+      :detach       → T → отсоединённое состояние HEAD (--detach)
+      :create       → T → создать новую ветку (-c)
+      :create-force → T → создать или пересоздать ветку (-C)
+      :orphan       → T → создать ветку-сироту без истории (--orphan)
+      :no-guess     → T → не пытаться угадать удалённую ветку (--no-guess)
+      :start-point  → начальная точка для новой ветки (коммит/ветка/тег)"))
+
+(defgeneric repo-checkout (workspace target &key &allow-other-keys)
+  (:documentation
+   "Выполнить git checkout в рабочем пространстве WORKSPACE.
+    Ключи:
+      :quiet        → T → подавить вывод (-q)
+      :force        → T → принудительный checkout (-f)
+      :merge        → T → выполнить трёхсторонее слияние (-m)
+      :detach       → T → отсоединённое состояние HEAD (--detach)
+      :create       → T → создать новую ветку (-b)
+      :create-force → T → создать или пересоздать ветку (-B)
+      :orphan       → T → создать ветку-сироту без истории (--orphan)
+      :start-point  → начальная точка для новой ветки
+      :pathspec     → список путей для восстановления файлов
+      :ours         → T → разрешить конфликты в пользу нашей версии (--ours)
+      :theirs       → T → разрешить конфликты в пользу их версии (--theirs)
+      :conflict     → стиль маркеров конфликтов (merge/diff3/zdiff3)
+      :patch        → T → интерактивный режим выбора изменений (-p)"))
+
 (defgeneric git-init (workspace &key &allow-other-keys)
   (:documentation
    "Инициализировать git-репозиторий в рабочем пространстве.

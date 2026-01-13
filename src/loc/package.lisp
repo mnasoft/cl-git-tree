@@ -81,6 +81,12 @@
    repo-status
    repo-commit
    repo-branches
+   repo-push
+   repo-pull
+   repo-fetch
+   repo-switch
+   repo-checkout
+   repo-ls-remote
    ;; конструктор и утилиты
    make-workspace
    detect-os

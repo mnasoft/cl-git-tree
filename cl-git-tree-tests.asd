@@ -1,6 +1,6 @@
 (defsystem "cl-git-tree-tests"
   :description "Тесты для cl-git-tree (global, workspace, loc, commands, fs, git-utils)"
-  :version "0.4.3"
+  :version "0.4.4"
   :author "Mykola Matvyeyev <mnasoft@gmail.com>"
   :license "GPL-3.0-or-later"
 
@@ -27,6 +27,7 @@
     (:file "test-transport")
     (:file "test-remote-import")
      ;; (:file "test-remote-create-delete-lc")  ;; временно отключён - использует неправильный синтаксис
+     ;; (:file "test-single-repo-commands")  ;; временно отключён - требует доработки тестов
      (:module "workspace"
       :serial t
       :components

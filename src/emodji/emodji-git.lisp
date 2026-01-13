@@ -20,6 +20,10 @@
 (define-emodji "git branch <name>"  :git-branch "Создать ветку" "➕⎇" "➕🌿")
 (define-emodji "git branch -d"      :git-branch "Удалить ветку" "✖⎇" "🗑️🌿")
 (define-emodji "git switch"         :git-branch "Переключиться" "⇄" "🔀")
+(define-emodji "git checkout"       :git-branch "Checkout" "⇌" "🔄")
+
+;; Fetch
+(define-emodji "git fetch"          :git-history "Загрузить" "⬇" "📥")
 
 ;; Commit
 (define-emodji "git add"            :git-commit "Добавить в индекс" "➕" "➕📄")
@@ -28,6 +32,7 @@
 (define-emodji "git log"            :git-commit "История" "☰" "📜")
 
 ;; History
+(define-emodji "git fetch"          :git-history "Загрузить" "⬇" "📥")
 (define-emodji "git merge"          :git-history "Слияние" "⇉" "🔀")
 (define-emodji "git rebase"         :git-history "Переписать историю" "⇅" "🧬")
 (define-emodji "git cherry-pick"    :git-history "Выборочный коммит" "◎" "🍒")
