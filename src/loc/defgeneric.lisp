@@ -128,6 +128,74 @@
       :conflict     → стиль маркеров конфликтов (merge/diff3/zdiff3)
       :patch        → T → интерактивный режим выбора изменений (-p)"))
 
+(defgeneric repo-branch (ws &key color no-color show-current verbose abbrev
+                                  no-abbrev column no-column sort merged
+                                  no-merged contains no-contains points-at
+                                  format remotes all list patterns track
+                                  no-track force recurse-submodules branch-name
+                                  start-point set-upstream-to unset-upstream
+                                  move move-force old-branch new-branch copy
+                                  copy-force delete delete-force delete-remotes
+                                  branch-names edit-description)
+  (:documentation
+   "Выполнить операции с ветками git (просмотр, создание, удаление, переименование, копирование).
+
+Режимы работы:
+
+1. Просмотр веток:
+  :color - цветной вывод (t или строка: always/never/auto)
+  :no-color - отключить цвет
+  :show-current - показать только текущую ветку
+  :verbose - подробный вывод с хешами и описаниями
+  :abbrev - длина сокращенного хеша (число) или t
+  :no-abbrev - не сокращать хеши
+  :column - вывод в колонках (t или строка с опциями)
+  :no-column - отключить колонки
+  :sort - ключ сортировки (refname, objecttype, etc)
+  :merged - только слитые ветки (t или коммит)
+  :no-merged - только не слитые ветки (t или коммит)
+  :contains - ветки, содержащие коммит (t или коммит)
+  :no-contains - ветки, не содержащие коммит (t или коммит)
+  :points-at - ветки, указывающие на объект
+  :format - формат вывода
+  :remotes - показать удаленные ветки
+  :all - показать все ветки
+  :list - режим списка
+  :patterns - список шаблонов для фильтрации
+
+2. Создание ветки:
+  :branch-name - имя новой ветки
+  :start-point - начальная точка (коммит/ветка)
+  :track - настроить отслеживание (t или direct/inherit)
+  :no-track - не настраивать отслеживание
+  :force - создать принудительно
+  :recurse-submodules - обновить подмодули
+
+3. Настройка upstream:
+  :set-upstream-to - установить upstream
+  :unset-upstream - удалить upstream
+
+4. Переименование:
+  :move - переименовать (-m)
+  :move-force - переименовать принудительно (-M)
+  :old-branch - старое имя
+  :new-branch - новое имя
+
+5. Копирование:
+  :copy - скопировать (-c)
+  :copy-force - скопировать принудительно (-C)
+
+6. Удаление:
+  :delete - удалить (-d)
+  :delete-force - удалить принудительно (-D)
+  :delete-remotes - удалить удаленную ветку (-r)
+  :branch-names - список имен для удаления
+
+7. Редактирование:
+  :edit-description - редактировать описание ветки
+
+Возвращает (values output exit-code)."))
+
 (defgeneric git-init (workspace &key &allow-other-keys)
   (:documentation
    "Инициализировать git-репозиторий в рабочем пространстве.

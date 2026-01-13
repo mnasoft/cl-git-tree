@@ -88,6 +88,7 @@
    repo-switch
    repo-checkout
    repo-ls-remote
+   repo-branch
    ;; конструктор и утилиты
    make-workspace
    detect-os
