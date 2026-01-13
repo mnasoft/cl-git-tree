@@ -82,6 +82,23 @@
       :dry-run    → T → пробный запуск (--dry-run)
       :quiet      → T → подавить вывод (-q)"))
 
+(defgeneric repo-merge (workspace source &key &allow-other-keys)
+  (:documentation
+   "Объединить две или более веток разработки для WORKSPACE.
+    Аргументы:
+      SOURCE → ветка/коммит для слияния
+    Ключи:
+      :no-commit  → T → не создавать коммит автоматически (--no-commit)
+      :squash     → T → сжать все коммиты в один (--squash)
+      :no-edit    → T → не редактировать сообщение коммита (--no-edit)
+      :strategy   → стратегия слияния (-s, например \"ours\", \"recursive\")
+      :strategy-option → опции стратегии (-X, например \"theirs\")
+      :allow-unrelated-histories → T → разрешить несвязанные истории
+      :message    → сообщение коммита (-m)
+      :continue   → T → продолжить после разрешения конфликтов (--continue)
+      :abort      → T → прервать слияние (--abort)
+      :quit       → T → выйти из процесса слияния (--quit)"))
+
 (defgeneric repo-switch (workspace branch &key &allow-other-keys)
   (:documentation
    "Переключиться на ветку BRANCH в рабочем пространстве WORKSPACE.

@@ -2,7 +2,7 @@
   :description "Git location manager and sync tool in Common Lisp"
   :long-description #.(uiop:read-file-string
                        (uiop:subpathname *load-truename* "README.org"))
-  :version "0.6.8"
+  :version "0.6.9"
   :author "Mykola Matvyeyev <mnasoft@gmail.com>"
   :license "GPL-3.0-or-later"
   :depends-on (
@@ -57,7 +57,8 @@
         (:file "switch")
         (:file "checkout")
         (:file "ls-remote")
-        (:file "fetch")))))
+        (:file "fetch")
+        (:file "merge")))))
      (:file "cli")))))
 
 
@@ -136,6 +137,7 @@
        (:file "repo-branches")
        (:file "repo-ls-remote")
        (:file "repo-fetch")
+       (:file "repo-merge")
        (:file "repo-switch")
        (:file "repo-checkout")
        (:file "repo-status")

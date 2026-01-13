@@ -84,6 +84,7 @@
    repo-push
    repo-pull
    repo-fetch
+   repo-merge
    repo-switch
    repo-checkout
    repo-ls-remote
