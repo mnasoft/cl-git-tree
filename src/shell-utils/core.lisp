@@ -51,6 +51,7 @@
                           :output :string
                           :error-output :string
                           :ignore-error-status t)
+      (declare (ignore err))
       (when (zerop code)
         (let ((rez (remove-if #'uiop:emptyp
                               (uiop:split-string out :separator '(#\Newline)))))
