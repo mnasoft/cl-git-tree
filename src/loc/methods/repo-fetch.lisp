@@ -3,8 +3,18 @@
 (in-package :cl-git-tree/loc)
 
 (defmethod repo-fetch ((ws <workspace>)
-                       &key remote all multiple prune prune-tags tags depth
-                            atomic no-recurse-submodules dry-run quiet
+                       &key
+                         remote
+                         all
+                         multiple
+                         prune
+                         prune-tags
+                         tags
+                         depth
+                         atomic
+                         no-recurse-submodules
+                         dry-run
+                         quiet
                        &allow-other-keys)
   "Загрузить объекты и ссылки из удалённого репозитория.
 Аргументы:
