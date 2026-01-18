@@ -20,6 +20,11 @@
       :tags          → T → отправить все теги
       :set-upstream  → T → добавить --set-upstream"))
 
+(defgeneric repo-push-all (workspace &key &allow-other-keys)
+  (:documentation
+   "Выполнить git push для всех зарегистрированных провайдеров WORKSPACE.
+Ветка определяется автоматически как текущая для WORKSPACE."))
+
 (defgeneric repo-pull (workspace provider &key &allow-other-keys)
   (:documentation
    "Выполнить git pull для указанного WORKSPACE.
@@ -29,6 +34,11 @@
       :branch  → имя ветки (по умолчанию текущая)
       :rebase  → T → использовать --rebase
       :ff-only → T → использовать --ff-only"))
+
+(defgeneric repo-pull-all (workspace &key &allow-other-keys)
+  (:documentation
+   "Выполнить git pull для всех зарегистрированных провайдеров WORKSPACE.
+Ветка определяется автоматически как текущая для WORKSPACE."))
 
 (defgeneric remote-delete (workspace provider &key &allow-other-keys)
   (:documentation

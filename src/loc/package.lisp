@@ -25,7 +25,9 @@
    repo-add
    remote-create
    repo-push
+    repo-push-all
    repo-pull
+    repo-pull-all
    remote-delete
    remote-add
    remote-remove
@@ -83,7 +85,9 @@
    repo-commit
    repo-branches
    repo-push
+    repo-push-all
    repo-pull
+    repo-pull-all
    repo-fetch
    repo-merge
    repo-switch
