@@ -35,20 +35,26 @@
        (:file "commit")
        (:file "pull")
        (:file "push")
-       (:file "remote-delete")
-       (:file "remote-add")
-       (:file "remote-remove")
-       (:file "remote-readd")
-       (:file "remote-create")
-       (:file "remote")
+       (:module "remote"
+        :serial t
+        :components
+                ((:file "remote-delete")
+                 (:file "remote-add")
+                 (:file "remote-remove")
+                 (:file "remote-readd")
+                 (:file "remote-create")
+                 (:file "remote")))
        (:file "remake-xz")
        (:file "patterns")
        (:file "locations")
        (:file "audit")
-       (:file "transport")
-       (:file "transport-clean")
-       (:file "transport-import")
-       (:file "transport-export")
+       (:module "transport"
+        :serial t
+        :components
+                ((:file "transport")
+                 (:file "transport-clean")
+                 (:file "transport-import")
+                 (:file "transport-export")))
        (:file "aliases")
        (:module "single-repo"
         :serial t
