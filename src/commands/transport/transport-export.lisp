@@ -15,7 +15,7 @@
   "Создаёт tar.xz-архивы для найденных репозиториев с учётом опций --days и --verbose.
 
 ARGS — список аргументов после слова export."
-  (let ((days-filter 30)
+  (let ((days-filter 7)
         (processed 0)
         (archived 0)
         (verbose (member "--verbose" args :test #'string=)))
