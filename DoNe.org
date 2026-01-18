@@ -1,0 +1,21 @@
+#+TITLE: cl-git-tree
+#+AUTHOR: Mykola Matvyeyev
+#+LANGUAGE: ru
+
+* [8/8] DoNe
+1. [X] Группа команд remote отделена в свой каталог.
+2. [X] Группа команд transport отделена в свой каталог.   
+3. [X] remote-delete ((ws <workspace>) (provider <local>) - выглядит
+   очень длинно - укорочены.  Ключи yes и remote-only исключены
+4. [X] При создании отдаленного репозитория методом repo-create
+   необходимо его подключить.
+5. [X] repo-create repo-clone на данный момент эти две функции делают
+   одно и то же самое. Имя repo-create более информативно. 
+6. [X] Ошибку в repo-clone, с связанную с преобразованием путей под
+   cygpath.
+7. [X] Изменить сигнатуру вызова для команд
+   - [X] git tree remote-add -> git tree remote add
+   - [X] git tree remote-remove -> git tree remote remove
+   - [X] git tree remote-readd -> git tree remote readd
+8. [X] Переопределить команду clone через repo-clone
+   
