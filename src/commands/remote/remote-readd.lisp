@@ -1,10 +1,5 @@
 ;;;; ./src/commands/remote-readd.lisp
-
-(defpackage :cl-git-tree/commands/remote-readd
-  (:use :cl)
-  (:export cmd-remote-readd))
-
-(in-package :cl-git-tree/commands/remote-readd)
+(in-package :cl-git-tree/commands/remote)
 
 (defun readd-remote-to-repo (repo-dir args)
   "Удаляет и заново добавляет remote LOC-KEY в один репозиторий."

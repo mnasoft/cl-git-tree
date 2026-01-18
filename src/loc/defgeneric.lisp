@@ -238,6 +238,13 @@
 Используется командой git-tree transport export. Возвращает количество
 созданных архивов (целое число)."))
 
+(defgeneric repo-transport-export-all (workspace &key &allow-other-keys)
+  (:documentation
+   "Выполнить экспорт tar.xz для всех провайдеров в WORKSPACE.
+Определяет список провайдеров, выполняет проверки (чистота, дата коммита)
+и вызывает repo-transport-export для каждой найденной локации.
+Возвращает количество созданных архивов (целое число)."))
+
 (defgeneric repo-transport-import (workspace provider &key verbose &allow-other-keys)
   (:documentation
    "Импортировать изменения из tar.xz архива для WORKSPACE и PROVIDER.\n\nДолжен распаковать архив из :url-xz провайдера в рабочий каталог репозитория.\nВозвращает T при успешном импорте, NIL иначе."))

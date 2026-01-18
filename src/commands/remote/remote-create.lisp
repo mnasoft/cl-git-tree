@@ -1,8 +1,4 @@
-(defpackage :cl-git-tree/commands/remote-create
-  (:use :cl)
-  (:export cmd-remote-create))
-
-(in-package :cl-git-tree/commands/remote-create)
+(in-package :cl-git-tree/commands/remote)
 
 (defun remote-create-for-workspace (repo-dir args)
   "Вспомогательная функция, вызываемая with-repo для каждого каталога.

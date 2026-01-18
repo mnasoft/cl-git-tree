@@ -1,11 +1,5 @@
 ;;;; ./src/commands/remote-remove.lisp
-
-(defpackage :cl-git-tree/commands/remote-remove
-  (:use :cl)
-  (:export cmd-remote-remove
-           remove-remote-from-repo))
-
-(in-package :cl-git-tree/commands/remote-remove)
+(in-package :cl-git-tree/commands/remote)
 
 (defun remove-remote-from-repo (repo-dir args)
   "Удаляет remote LOC-KEY из одного репозитория REPO-DIR.

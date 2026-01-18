@@ -1,11 +1,6 @@
 ;;;; ./src/commands/remote-add.lisp
 
-(defpackage :cl-git-tree/commands/remote-add
-  (:use :cl)
-  (:export add-remote-to-repo
-           cmd-remote-add))
-
-(in-package :cl-git-tree/commands/remote-add)
+(in-package :cl-git-tree/commands/remote)
 
 (defun add-remote-to-repo (repo-dir args) 
   "Добавляет remote LOC-KEY в один репозиторий."

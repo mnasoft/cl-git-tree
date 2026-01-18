@@ -1,9 +1,5 @@
 ;;;; ./src/commands/remote.lisp
 
-(defpackage :cl-git-tree/commands/remote
-  (:use :cl)
-  (:export cmd-remote))
-
 (in-package :cl-git-tree/commands/remote)
 
 (defun cmd-remote (&rest args)
@@ -36,23 +32,23 @@
     
     ;; Подкоманда 'add'
     ((string= (first args) "add")
-     (apply #'cl-git-tree/commands/remote-add:cmd-remote-add (rest args)))
+     (apply #'cmd-remote-add (rest args)))
     
     ;; Подкоманда 'remove'
     ((string= (first args) "remove")
-     (apply #'cl-git-tree/commands/remote-remove:cmd-remote-remove (rest args)))
+     (apply #'cmd-remote-remove (rest args)))
     
     ;; Подкоманда 'readd'
     ((string= (first args) "readd")
-     (apply #'cl-git-tree/commands/remote-readd:cmd-remote-readd (rest args)))
+     (apply #'cmd-remote-readd (rest args)))
 
     ;; Подкоманда 'delete' — обёртка над remote-delete
     ((string= (first args) "delete")
-     (apply #'cl-git-tree/commands/remote-delete:cmd-remote-delete (rest args)))
+     (apply #'cmd-remote-delete (rest args)))
 
     ;; Подкоманда 'create' — обёртка над remote-create
     ((string= (first args) "create")
-     (apply #'cl-git-tree/commands/remote-create:cmd-remote-create (rest args)))
+     (apply #'cmd-remote-create (rest args)))
     
     ;; Неизвестная подкоманда
     (t

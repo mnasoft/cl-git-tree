@@ -38,7 +38,8 @@
        (:module "remote"
         :serial t
         :components
-                ((:file "remote-delete")
+                ((:file "package")
+                 (:file "remote-delete")
                  (:file "remote-add")
                  (:file "remote-remove")
                  (:file "remote-readd")
@@ -51,10 +52,11 @@
        (:module "transport"
         :serial t
         :components
-                ((:file "transport")
+                ((:file "package")
                  (:file "transport-clean")
                  (:file "transport-import")
-                 (:file "transport-export")))
+                 (:file "transport-export")
+                 (:file "transport")))
        (:file "aliases")
        (:module "single-repo"
         :serial t
@@ -156,6 +158,7 @@
       (:file "days-since-last-commit")       (:file "expand-path")      (:file "repo-provider-keys")
       (:file "repo-providers")
       (:file "repo-transport-export")
+      (:file "repo-transport-export-all")
       (:file "repo-transport-import")
       (:file "repo-transport-unpack")
       (:file "remote-import-connect")

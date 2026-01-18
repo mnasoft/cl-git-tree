@@ -1,10 +1,5 @@
 ;;;; ./src/commands/remote-delete.lisp
-
-(defpackage :cl-git-tree/commands/remote-delete
-  (:use :cl)
-  (:export cmd-remote-delete))
-
-(in-package :cl-git-tree/commands/remote-delete)
+(in-package :cl-git-tree/commands/remote)
 
 (defun remote-delete-workspace (repo-dir args)
   "Удаляет репозиторий через метод remote-delete для указанной локации."

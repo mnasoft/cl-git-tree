@@ -75,6 +75,7 @@
    repo-provider-keys
    repo-providers
    repo-transport-export
+   repo-transport-export-all
    repo-transport-import
    repo-transport-unpack
    expand-path
