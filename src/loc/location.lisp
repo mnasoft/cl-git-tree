@@ -154,6 +154,21 @@ REPO-NAME — имя репозитория (строка без расшире�
     (when loc
       (concatenate 'string (<location>-url-git loc) repo-name ".git"))))
 
+(defun location->arg-string (loc)
+  "Возвращает строку CLI-аргументов для локации LOC.
+
+Поля с NIL пропускаются. Формат совместим с командами add/edit,
+например: \" :url-git https://github.com/ :tar mirror.tar :provider github\"."
+  (let ((parts '()))
+    (flet ((add (key val)
+             (when val (push (format nil "~A ~S" key val) parts))))
+      (add ":url-git" (<location>-url-git loc))
+      (add ":url-xz"  (<location>-url-xz loc))
+      (add ":tar"     (<location>-tar loc))
+      (add ":description" (<location>-description loc))
+      (add ":provider" (<location>-provider loc)))
+    (format nil "~{~A~^ ~}" (nreverse parts))))
+
 (defun print-locations ()
   "Выводит список всех зарегистрированных локаций из глобальной таблицы *locations* 
 в читаемом виде.
@@ -173,13 +188,14 @@ REPO-NAME — имя репозитория (строка без расшире�
      XZ : NIL"
   (format t "~%=== Список локаций ===~%")
   (maphash (lambda (key loc)
-             (format t "~A: ~A~%   Git: ~A~%   TAR: ~A~%   XZ : ~A~%   Provider: ~A~%~%"
-                     key
-                     (<location>-description loc)
-                     (<location>-url-git loc)
-                     (<location>-tar loc)
-                     (<location>-url-xz loc)
-                     (<location>-provider loc)))
+         (format t "~A: ~A~%   Git: ~A~%   TAR: ~A~%   XZ : ~A~%   Provider: ~A~%   Args: ~A~%~%"
+           key
+           (<location>-description loc)
+           (<location>-url-git loc)
+           (<location>-tar loc)
+           (<location>-url-xz loc)
+           (<location>-provider loc)
+           (location->arg-string loc)))
            *locations*))
 
 (defun remove-location (id)

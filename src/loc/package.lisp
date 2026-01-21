@@ -50,6 +50,7 @@
    all-location-keys
    all-locations
    repo-url
+  location->arg-string
    print-locations
    infer-local-p
    location-local-p
