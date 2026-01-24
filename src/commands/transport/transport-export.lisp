@@ -1,5 +1,22 @@
 (in-package :cl-git-tree/commands/transport)
 
+(defun print-transport-export-help ()
+  "Справка по git-tree transport export."
+  (format t "Экспорт репозиториев в tar.xz архивы.~%~%")
+  (format t "Использование:~%")
+  (format t "  git-tree transport export [--days N] [--verbose] [--help]~%~%")
+  (format t "Опции:~%")
+  (format t "  --days N     Архивировать только репозитории с коммитами не старее N дней (по умолчанию 7)~%")
+  (format t "  --verbose    Подробный вывод~%")
+  (format t "  --help       Показать эту справку~%~%")
+  (format t "Примечания:~%")
+  (format t "  Архивы создаются для каждого провайдера с заданным :url-xz. Если :url-xz = NIL, провайдер пропускается.~%~%")
+  (format t "Примеры:~%")
+  (format t "  git-tree transport export~%")
+  (format t "  git-tree transport export --days 1~%")
+  (format t "  git-tree transport export --days 3000~%")
+  (format t "  git-tree transport export --verbose~%"))
+
 (defun transport-export-repo (repo-dir days-filter verbose)
   "Выполняет экспорт tar.xz для одного репозитория REPO-DIR.
 
@@ -19,6 +36,10 @@ ARGS — список аргументов после слова export."
         (processed 0)
         (archived 0)
         (verbose (member "--verbose" args :test #'string=)))
+
+    (when (member "--help" args :test #'string=)
+      (print-transport-export-help)
+      (return-from transport-export))
 
     ;; Парсим аргументы один раз
     (loop for (arg val) on args by #'cddr

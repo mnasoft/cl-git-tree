@@ -1,5 +1,24 @@
 (in-package :cl-git-tree/commands/transport)
 
+(defun print-transport-import-help ()
+  "Справка по git-tree transport import."
+  (format t "Импорт изменений из tar.xz архивов в рабочие репозитории.~%~%")
+  (format t "Использование:~%")
+  (format t "  git-tree transport import [--keep-remote-dir] [--delete-archive] [--verbose] [--help]~%~%")
+  (format t "Опции:~%")
+  (format t "  --keep-remote-dir   Сохранить временный каталог remote после pull (по умолчанию удаляется)~%")
+  (format t "  --delete-archive    Удалить архив после успешного импорта~%")
+  (format t "  --verbose           Подробный вывод по каждому репозиторию~%")
+  (format t "  --help              Показать эту справку~%~%")
+  (format t "Примечания:~%")
+  (format t "  Архивы ищутся в :url-xz каждого провайдера и импортируются в :url-git (bare).~%")
+  (format t "  Если :url-xz = NIL, провайдер пропускается.~%~%")
+  (format t "Примеры:~%")
+  (format t "  git-tree transport import~%")
+  (format t "  git-tree transport import --keep-remote-dir~%")
+  (format t "  git-tree transport import --delete-archive~%")
+  (format t "  git-tree transport import --verbose~%"))
+
 ;; Импорт изменений для одного репозитория
 (defun transport-import-repo (repo-dir verbose &key keep-remote-dir delete-archive)
   "Импортирует изменения из tar.xz для одного репозитория REPO-DIR.
@@ -30,6 +49,10 @@
         (verbose (member "--verbose" args :test #'string=))
         (keep-remote-dir (member "--keep-remote-dir" args :test #'string=))
         (delete-archive (member "--delete-archive" args :test #'string=)))
+
+    (when (member "--help" args :test #'string=)
+      (print-transport-import-help)
+      (return-from transport-import))
     (unless verbose
       (format t "⬇ Импорт изменений из архивов для всех репозиториев...~%"))
     (flet ((import-one (repo-dir _args)

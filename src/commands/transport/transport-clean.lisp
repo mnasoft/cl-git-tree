@@ -1,5 +1,15 @@
 (in-package :cl-git-tree/commands/transport)
 
+(defun print-transport-clean-help ()
+  "Справка по git-tree transport clean."
+  (format t "Удаление tar.xz архивов в каталогах :url-xz всех зарегистрированных провайдеров.~%~%")
+  (format t "Использование:~%")
+  (format t "  git-tree transport clean [--help]~%~%")
+  (format t "Опции:~%")
+  (format t "  --help   Показать эту справку~%~%")
+  (format t "Пример:~%")
+  (format t "  git-tree transport clean~%"))
+
 (defun clean-tar-xz-archives (output-path)
   "Удаляет tar.xz архивы в каталоге output-path."
   (let* ((pattern (merge-pathnames #p"*.tar.xz" output-path))
@@ -15,8 +25,11 @@
         (format t "Архивы не найдены в ~A~%" output-path))
     deleted))
 
-(defun transport-clean ()
+(defun transport-clean (&optional args)
   "Очищает tar.xz-архивы во всех :url-xz для зарегистрированных локаций."
+  (when (member "--help" args :test #'string=)
+    (print-transport-clean-help)
+    (return-from transport-clean))
   (let ((total-deleted 0))
     (format t "🧹 Очистка архивов tar.xz из каталогов :url-xz всех провайдеров~%~%")
     (dolist (loc-key (cl-git-tree/loc:all-location-keys))
