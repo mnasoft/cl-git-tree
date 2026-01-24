@@ -5,17 +5,21 @@
   "Получает список веток (без префикса refs/heads/) из указанного remote.
 Возвращает список названий веток."
   (multiple-value-bind (stdout stderr code)
-      (cl-git-tree/git-utils:git-run root-dir (list "ls-remote" "--heads" remote-name))
+      (cl-git-tree/git-utils:git-run root-dir "ls-remote" "--heads" remote-name)
     (declare (ignore stderr))
     (cond
       ((zerop code)
        (let ((branches nil)
-             (lines (cl-ppcre:split "\\n" (string-trim '(#\Newline #\Space) stdout))))
+             (lines (cl-ppcre:split "\\n" (string-trim '(#\Newline #\Space #\Return) stdout))))
          (dolist (line lines)
            (when (> (length line) 0)
-             (let ((match (cl-ppcre:scan-to-strings "refs/heads/(.+)$" line)))
-               (when match
-                 (push (aref match 0) branches)))))
+             (multiple-value-bind (whole-match groups)
+                 (cl-ppcre:scan-to-strings "refs/heads/(.+?)\\s*$" line)
+               (declare (ignore whole-match))
+               (when (and groups (> (length groups) 0))
+                 (let ((branch-name (string-trim '(#\Space #\Return #\Newline #\Tab) (aref groups 0))))
+                   (when (> (length branch-name) 0)
+                     (push branch-name branches)))))))
          (nreverse branches)))
       (t
        nil))))
@@ -55,7 +59,7 @@
                    ;; Сначала выполняем fetch для получения всех веток
                    (when verbose
                      (format t "  Выполняю fetch для ~A~%" tmp-remote))
-                   (cl-git-tree/git-utils:git-run repo-dir (list "fetch" tmp-remote))
+                   (cl-git-tree/git-utils:git-run repo-dir "fetch" tmp-remote)
                    
                    ;; Получаем список веток из импортируемого хранилища
                    (let ((branches (get-remote-branches repo-dir tmp-remote)))
