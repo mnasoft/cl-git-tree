@@ -1,0 +1,18 @@
+@begin(section) @title(cl-git-tree/global — описание)
+Обёртка над глобальной конфигурацией Git: чтение и изменение @c(git config --global).
+@end(section)
+
+@begin(section) @title(Основные возможности)
+@begin(list)
+ @item(Получение/установка глобальных ключей: @c(user.name), @c(user.email) и др.)
+ @item(Парсинг вывода @c(config --list) через split-sequence.)
+ @item(Единый объект и методы для доступа к глобальным настройкам.)
+@end(list)
+@end(section)
+
+@begin(section) @title(Зависимости и применение)
+@begin(list)
+ @item(Зависит от @c(cl-git-tree/git-utils) и @c(split-sequence).)
+ @item(Используется CLI-командой @c(info) и тестами.)
+@end(list)
+@end(section)

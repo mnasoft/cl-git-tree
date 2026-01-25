@@ -1,0 +1,17 @@
+@begin(section) @title(cl-git-tree/emodji — описание)
+Единая таблица монохромных/цветных символов и пиктограмм для вывода git-команд.
+@end(section)
+
+@begin(section) @title(Основные возможности)
+@begin(list)
+ @item(Слоты и таблицы символов для статусов git.)
+ @item(Функции поиска эмо для CLI-вывода.)
+@end(list)
+@end(section)
+
+@begin(section) @title(Зависимости и применение)
+@begin(list)
+ @item(Без внешних зависимостей.)
+ @item(Используется в @c(cl-git-tree/loc) и CLI для визуальных индикаторов.)
+@end(list)
+@end(section)

@@ -1,8 +1,9 @@
 (defsystem "cl-git-tree"
-  :description "Git location manager and sync tool in Common Lisp"
-  :long-description #.(uiop:read-file-string
-                       (uiop:subpathname *load-truename* "README.org"))
-  :version "0.7.7"
+  ;;:description "Git location manager and sync tool in Common Lisp"
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-long-description.scr"))  
+  :version "0.7.8"
   :author "Mykola Matvyeyev <mnasoft@gmail.com>"
   :license "GPL-3.0-or-later"
   :depends-on (
@@ -19,7 +20,7 @@
                "cl-git-tree/global"
                "cl-git-tree/config"
                "cl-git-tree/shell-utils"
-               "cl-git-tree/utils"
+
                )
   :serial t
   :in-order-to ((test-op (test-op "cl-git-tree-tests")))
@@ -72,7 +73,10 @@
 
 
 (defsystem "cl-git-tree/git-utils"
-  :description "Git utility functions for cl-git-tree"
+  ;; :description "Git utility functions for cl-git-tree"
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-git-utils-long-description.scr"))
   :depends-on (:uiop)
   :serial t
   :components
@@ -82,7 +86,10 @@
      (:file "git-utils")))))
 
 (defsystem "cl-git-tree/shell-utils"
-  :description "Утилиты для запуска произвольных CLI-команд из Common Lisp"
+  ;; :description "Утилиты для запуска произвольных CLI-команд из Common Lisp"
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-shell-utils-long-description.scr"))
   :depends-on (:uiop :cl-ppcre)
   :components
   ((:module "src/shell-utils"
@@ -92,7 +99,10 @@
      (:file "ssh-utils")))))
 
 (defsystem "cl-git-tree/fs"
-  :description "Файловая подсистема для поиска и обхода git-репозиториев."
+  ;; :description "Файловая подсистема для поиска и обхода git-репозиториев."
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-fs-long-description.scr"))
   :depends-on (:uiop
                :cl-fad
                :cl-git-tree/shell-utils
@@ -106,7 +116,10 @@
      (:file "fs")))))
 
 (defsystem "cl-git-tree/config"
-  :description "Подсистема конфигурации: дефолтные паттерны включения и исключения."
+  ;; :description "Подсистема конфигурации: дефолтные паттерны включения и исключения."
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-config-long-description.scr"))
   :depends-on (:uiop)
   :serial t
   :components
@@ -117,7 +130,10 @@
      (:file "file-patterns")))))
 
 (defsystem "cl-git-tree/loc"
-  :description "Подсистема для описания локаций и провайдеров (local, github, gitlab) и связанных операций."
+  ;; :description "Подсистема для описания локаций и провайдеров (local, github, gitlab) и связанных операций."
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-loc-long-description.scr"))
   :depends-on ("uiop"
                "cl-ppcre"
                "cl-git-tree/fs"
@@ -175,7 +191,10 @@
        ))))))
 
 (defsystem "cl-git-tree/dispatch"
-  :description "Подсистема диспетчера CLI-команд для cl-git-tree"
+  ;; :description "Подсистема диспетчера CLI-команд для cl-git-tree"
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-dispatch-long-description.scr"))
   :depends-on ("uiop" "asdf")
   :serial t
   :components
@@ -185,7 +204,10 @@
      (:file "dispatcher")))))
 
 (defsystem "cl-git-tree/global"
-  :description "Подсистема для работы с глобальной конфигурацией Git (git config --global)."
+  ;; :description "Подсистема для работы с глобальной конфигурацией Git (git config --global)."
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-global-long-description.scr"))
   :depends-on (:cl-git-tree/git-utils   ; используем git-run
                :split-sequence)    ; для парсинга вывода config --list
   :components
@@ -195,16 +217,11 @@
     ((:file "package")
      (:file "git-global")))))
 
-(defsystem "cl-git-tree/utils"
-  :description "Утилиты для форматирования и вывода (двухколоночный формат и т.д.)"
-  :serial t
-  :components
-  ((:module "src/utils"
-    :components
-    ((:file "two-columns")))))
-
 (defsystem "cl-git-tree/emodji"
-  :description "Unified monochrome + color symbol table for Git commands"
+  ;; :description "Unified monochrome + color symbol table for Git commands"
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-emodji-long-description.scr"))
   :version "0.1.0"
   :serial t
   :components
@@ -217,5 +234,19 @@
      (:file "emodji-fs")
      
      ))))
+  
+
+(defsystem "cl-git-tree/docs"
+  ;; :description "Генерация документации для cl-git-tree через mnas-package и codex."
+  :description #.(uiop:read-file-string
+                  (uiop:subpathname *load-truename*
+                                    "scr/system-cl-git-tree-docs-long-description.scr"))
+  :depends-on ("cl-git-tree"
+               "mnas-package"
+               "codex")
+  :components
+  ((:module "src/docs"
+    :components
+    ((:file "docs")))))
   
 

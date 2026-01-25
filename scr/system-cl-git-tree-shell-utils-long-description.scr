@@ -1,0 +1,18 @@
+@begin(section) @title(cl-git-tree/shell-utils — описание)
+Запуск произвольных CLI-команд и SSH-вызовов из Common Lisp с контролем вывода и статусов.
+@end(section)
+
+@begin(section) @title(Основные возможности)
+@begin(list)
+ @item(@c(run) и обёртки для безопасного выполнения shell-команд.)
+ @item(Парсинг аргументов, split-args-by-keys для CLI команд.)
+ @item(SSH-хелперы в @c(ssh-utils) для подключения к удалённым хостам.)
+@end(list)
+@end(section)
+
+@begin(section) @title(Зависимости и применение)
+@begin(list)
+ @item(Зависит от @c(uiop) и @c(cl-ppcre).)
+ @item(Используется в @c(cl-git-tree/fs) и @c(cl-git-tree/loc) для системных вызовов.)
+@end(list)
+@end(section)

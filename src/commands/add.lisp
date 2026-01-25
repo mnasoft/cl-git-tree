@@ -12,8 +12,12 @@
                            &key
                              (patterns *tracked-patterns*)
                              (excludes *excludes-patterns*))
-  "Ищет файлы по шаблонам PATTERNS внутри REPO-DIR, исключая .git.
-   Команда формируется как строка."
+  "@b(Назначение:) Ищет файлы по шаблонам @code(PATTERNS) внутри @code(REPO-DIR), пропуская @code(.git).  Возвращает список относительных путей.
+@b(Пример:) @begin[lang=lisp](code)
+ (find-tracked-files #P\"~/proj/repo/\"
+   :patterns '(\"*.lisp\" \"*.asd\")
+   :excludes '(\"./.git\" \"./build\"))
+@end(code)"
   (let ((cwd
           (uiop:with-current-directory (repo-dir)
             (nth-value
@@ -28,7 +32,10 @@
                (uiop:split-string cwd :separator '(#\Newline)))))
 
 (defun add-repo (repo-dir args)
-  "Добавляет отслеживаемые файлы в git-индекс через метод repo-add."
+  "@b(Назначение:) Добавляет отслеживаемые файлы в индекс git через @code(repo-add).
+@b(Пример:) @begin[lang=lisp](code)
+ (add-repo \"/repos/demo\" '(:preamble \"*.lisp\"))
+@end(code)"
   (let* ((wk (make-instance 'cl-git-tree/loc:<workspace> :path repo-dir))
          (alist    (cl-git-tree/shell-utils:split-args-by-keys args))
          (patterns (or (cdr (assoc :ARGS alist))
@@ -50,7 +57,10 @@
       (cl-git-tree/loc:repo-add wk :files files))))
 
 (defun cmd-add (&rest args)
-  "CLI-команда: добавить отслеживаемые файлы во все git-репозитории."
+  "@b(CLI:) Добавляет отслеживаемые файлы во все git-репозитории.
+@b(Пример:) @begin[lang=lisp](code)
+ (cl-git-tree/cli:main '(\"prog\" \"add\" \"--\" \"*.lisp\" \"*.asd\"))
+@end(code)"
   (let ((alist (cl-git-tree/shell-utils:split-args-by-keys args)))
     (cond
       ;; если указан ключ --help

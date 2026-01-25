@@ -4,7 +4,11 @@
 (defmethod remote-import-cleanup-dir ((ws <workspace>)
                                       (provider <provider>)
                                       &key verbose &allow-other-keys )
-  "Удаляет каталог временного remote после отключения. Возвращает T если удалено, NIL если не найден."
+  "@b(Назначение:) Удаляет каталог временного remote после @code(remote-import-disconnect).
+@b(Пример:) @begin[lang=lisp](code)
+ (remote-import-cleanup-dir ws provider :verbose t)
+@end(code)
+Возвращает @code(T), если каталог найден и удалён, иначе @code(NIL)."
   (let* ((url-xz (and provider (<location>-url-xz provider)))
          (repo-dir (or (git-root ws)
                        (<workspace>-path ws)))

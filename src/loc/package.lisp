@@ -103,22 +103,41 @@
    find-emo
    )
   (:documentation
-   "Пакет CL-GIT-TREE/LOC инкапсулирует подсистему управления локациями.
+   " @b(Пакет:) Управление локациями и рабочими пространствами.
 
-Экспортируемые сущности:
-  • Класс <location> и его аксессоры (<location>-name, <location>-url-git и др.)
-  • Глобальная таблица *locations* для хранения всех зарегистрированных локаций
-  • Функции для работы с локациями:
-      - add-location / find-location / location-exists-p
-      - all-location-keys / all-locations
-      - repo-url / print-locations
-      - infer-local-p / location-local-p
-      - match-location-keys
+ @b(Назначение:) Инкапсулирует подсистему регистрации, поиска и
+использования шаблонов локаций (git-URL, архивы, локальные
+пути). Позволяет строить полные URL репозиториев и управлять рабочими
+пространствами для разных операционных систем.
 
-Назначение:
-  Подсистема обеспечивает регистрацию, поиск и использование шаблонов
-  локаций (git-URL, архивы, локальные пути). Используется другими
-  компонентами cl-git-tree для построения URL, проверки локальности
-  и обхода всех доступных локаций."))
+ @b(Ключевые компоненты:)
+@begin(list)
+ @item(<location> - класс для описания шаблона локации с URL-git,
+ URL-xz, провайдером;)
+ @item(*locations* - глобальная таблица всех зарегистрированных
+локаций;)
+ @item(add-location, find-location, all-locations - функции управления
+ локациями;)
+ @item(<workspace> - класс для описания рабочего пространства в
+ репозитории;)
+ @item(Generic-функции: repo-add, repo-push, repo-pull, remote-create
+ и др.;)
+
+@end(list)
+
+@b(Пример:)
+@begin[lang=lisp](code)
+ ;; Добавить локацию GitHub
+ (add-location \"gh\"
+   :url-git \"git@github.com:username/\"
+   :provider :github)
+
+ ;; Получить URL репозитория
+ (repo-url \"gh\" \"cl-git-tree\")
+ ;; => \"git@github.com:username/cl-git-tree.git\"
+
+ ;; Создать рабочее пространство
+ (make-workspace #P\"/path/to/repo\")
+@end(code)"))
 
 (in-package :cl-git-tree/loc)

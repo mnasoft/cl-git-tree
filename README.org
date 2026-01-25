@@ -183,6 +183,15 @@ sbcl --eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree))"
 ;; => ("gh" "lc")
 #+end_src
 
+* Документация
+
+Для генерации HTML-документации и графов зависимостей:
+#+begin_src lisp
+(ql:quickload :cl-git-tree/docs)
+(cl-git-tree/docs:make-all)
+#+end_src
+Требуются системы =mnas-package= и =codex=; для публикации по rsync необходим установленный =rsync=.
+
 ** Примеры в CLI
 
 Использование из командной строки через SBCL:

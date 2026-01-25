@@ -5,25 +5,40 @@
 (defclass <git-global> ()
   ()
   (:documentation
-   "Глобальная конфигурация Git (user.name, user.email и т.п.).
-   Объект не хранит состояния, а служит точкой входа для вызова git config --global."))
+   "@b(Назначение:) Представляет глобальную конфигурацию Git (user.name, user.email и др.), используя @code(git config --global).
+@b(Пример:) @begin[lang=lisp](code)
+ (git-set \"user.name\" \"Alice\")
+ (git-get \"user.name\")
+@end(code)"))
 
 (defparameter *git-global* (make-instance '<git-global>)
-  "Единственный объект для работы с глобальной конфигурацией Git.")
+  "@b(Назначение:) Единственный объект для доступа к глобальной конфигурации Git.")
 
 ;; --- Generic-функции ---
 
 (defgeneric git-config-get (global key)
-  (:documentation "Получить значение ключа KEY из глобальной конфигурации Git."))
+  (:documentation "@b(Назначение:) Получить значение ключа @code(key) из глобальной конфигурации Git.
+@b(Пример:) @begin[lang=lisp](code)
+ (git-config-get *git-global* \"user.email\")
+@end(code)"))
 
 (defgeneric git-config-set (global key value)
-  (:documentation "Установить значение VALUE для ключа KEY в глобальной конфигурации Git."))
+  (:documentation "@b(Назначение:) Установить значение @code(value) для ключа @code(key) в глобальной конфигурации Git.
+@b(Пример:) @begin[lang=lisp](code)
+ (git-config-set *git-global* \"user.name\" \"Alice Example\")
+@end(code)"))
 
 (defgeneric git-config-list (global)
-  (:documentation "Вернуть список всех глобальных настроек Git."))
+  (:documentation "@b(Назначение:) Вернуть список всех глобальных настроек Git.
+@b(Пример:) @begin[lang=lisp](code)
+ (git-config-list *git-global*)
+@end(code)"))
 
 (defgeneric git-config-unset (global key)
-  (:documentation "Удалить значение для ключа KEY из глобальной конфигурации Git."))
+  (:documentation "@b(Назначение:) Удалить значение ключа @code(key) из глобальной конфигурации Git.
+@b(Пример:) @begin[lang=lisp](code)
+ (git-config-unset *git-global* \"user.signingkey\")
+@end(code)"))
 
 ;; --- Методы ---
 
@@ -52,17 +67,29 @@
 ;; --- Хелперы для глобальной конфигурации ---
 
 (defun git-get (key)
-  "Укороченный вызов git-config-get для *git-global*."
+  "@b(Назначение:) Сокращённый вызов @code(git-config-get) для @code(*git-global*).
+@b(Пример:) @begin[lang=lisp](code)
+ (git-get \"user.email\")
+@end(code)"
   (git-config-get *git-global* key))
 
 (defun git-set (key value)
-  "Укороченный вызов git-config-set для *git-global*."
+  "@b(Назначение:) Сокращённый вызов @code(git-config-set) для @code(*git-global*).
+@b(Пример:) @begin[lang=lisp](code)
+ (git-set \"user.name\" \"Alice Example\")
+@end(code)"
   (git-config-set *git-global* key value))
 
 (defun git-unset (key)
-  "Укороченный вызов git-config-unset для *git-global*."
+  "@b(Назначение:) Сокращённый вызов @code(git-config-unset) для @code(*git-global*).
+@b(Пример:) @begin[lang=lisp](code)
+ (git-unset \"user.signingkey\")
+@end(code)"
   (git-config-unset *git-global* key))
 
 (defun git-list ()
-  "Укороченный вызов git-config-list для *git-global*."
+  "@b(Назначение:) Сокращённый вызов @code(git-config-list) для @code(*git-global*).
+@b(Пример:) @begin[lang=lisp](code)
+ (git-list)
+@end(code)"
   (git-config-list *git-global*))

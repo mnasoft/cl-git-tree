@@ -7,67 +7,70 @@
     :accessor <location>-id
     :type (or null string)
     :documentation
-    "Строковый идентификатор локации. Соответствует ключу в глобальной
-таблице *locations* и используется для поиска и сопоставления с именами remotes.")
+    "@b(Идентификатор:) Строковый ключ локации; используется как ключ в
+*locations* и совпадает с именами remotes.")
    (description 
     :initarg :description
     :initform ""
     :accessor <location>-description
     :type (or null string)
     :documentation
-    "Человекочитаемое описание или метка локации. Может использоваться
-для вывода пользователю и в справочной информации.")
+    "@b(Описание:) Человекочитаемая метка локации для CLI и справочной
+информации.")
    (url-git
     :initarg :url-git
     :initform nil
     :accessor <location>-url-git
     :type (or null string pathname)
     :documentation
-    "Базовый git-URL или локальный путь (pathname) для группы репозиториев.
-     - Для <github>/<gitlab> это строка вида \"git@github.com:user/repo.git\".
-     - Для <local> это pathname, например #P\"/tmp/repos/\".
-     Может быть NIL, если локация ещё не инициализирована.")
+    "@b(URL:) Базовый git-URL или локальный @c(pathname) для группы
+репозиториев.
+@begin(list)
+    @item(GitHub/GitLab: строки вида \"git@github.com:user/\")
+    @item(Local: @c(pathname), например @c(#P\"/tmp/repos/\"))
+@end(list)
+
+ Может быть @c(NIL), если локация ещё не инициализирована.")
    (url-xz
     :initarg :url-xz
     :initform nil
     :accessor <location>-url-xz
     :type (or null pathname)
     :documentation
-    "Путь к архиву .tar.xz, если используется для распространения
-     репозиториев в виде архивов.")
+    "@b(Архив:) Путь к @c(.tar.xz), если используется для
+распространения репозиториев в виде архивов.")
    (tar
     :initarg :tar
     :initform nil
     :accessor <location>-tar
     :type (or null string)
     :documentation
-    "Имя файла tar-архива (строка) или NIL, если не используется.
-     В дальнейшем можно заменить на pathname или специализированный тип,
-     когда появится ясность по формату и применению.")
+    "@b(TAR:) Имя tar-архива (строка) или @c(NIL); при необходимости может быть заменено на @c(pathname) в будущем.")
    (provider
     :initarg :provider
     :initform nil
     :accessor <location>-provider
     :type (or null symbol)
-    :documentation "Тип провайдера (например, :local, :github, :gitlab)."))
+    :documentation "@b(Провайдер:) Символ, определяющий тип провайдера: @c(:local),
+@c(:github) или @c(:gitlab)."))
   (:documentation
-   "Класс <location> описывает шаблон для группы репозиториев.
+   "@b(Назначение:) Описывает общий шаблон локации: идентификатор, базовые
+URL и провайдера.
 
-Основные элементы:
-- `id` — строковый ключ, под которым локация хранится в глобальной таблице *locations*.
-- `description` — человекочитаемое описание/метка.
-- `url-git` и дополнительные поля (`url-xz`, `tar`) — базовые пути для доступа к репозиториям.
-- `provider` — символ, определяющий тип провайдера (:local, :github, :gitlab).
-
-Экземпляры этого класса применяются для построения полных путей к конкретным
-репозиториям, фильтрации по типу локации и проверки соответствия с git remotes."))
+ @b(Использование:) Экземпляры применяются при сборке путей к
+репозиториям, поиске в *locations* и сопоставлении с git remotes."))
 
 (defclass <provider> (<location>) ()
-  (:documentation "Абстрактный базовый класс для всех провайдеров размещения.
-Не содержит слотов, служит для диспетчеризации методов."))
+  (:documentation "@b(Назначение:) Абстрактный базовый класс провайдеров размещения.
+
+ Слотов не добавляет и служит точкой диспетчеризации методов."))
 
 (defun detect-os ()
-  "Определяет операционную систему. Возвращает :linux, :windows или :msys2."
+  "@b(Назначение:) Определяет операционную систему среды выполнения.
+
+ @b(Возвращает:) Одно из @c(:linux), @c(:windows) или @c(:msys2).
+
+ @b(Особенности:) MSYS2 определяется по переменной окружения @c(MSYSTEM)."
   (let ((os (uiop:operating-system)))
     (cond
       ;; MSYS2 определяется по наличию переменной окружения MSYSTEM
@@ -83,42 +86,64 @@
     :accessor <workspace>-path
     :initform nil
     :type (or null pathname)
-    :documentation "Путь к рабочему каталогу (pathname) или NIL, если workspace пока не привязан.")
+    :documentation "@b(Путь:) @c(pathname) рабочего каталога или @c(NIL), если
+workspace не привязан.")
    (description
     :initarg :description
     :accessor <workspace>-description
     :initform ""
     :type string
-    :documentation "Человеко‑читаемое описание workspace, полезное для тестов и CLI help.")
+    :documentation "@b(Описание:) Человекочитаемое описание workspace для тестов и CLI-help.")
    (os-type
     :initarg :os-type
     :accessor <workspace>-os-type
     :initform (detect-os)
     :type symbol
-    :documentation "Тип операционной системы: :linux, :windows или :msys2."))
+    :documentation "@b(ОС:) Тип операционной системы: @c(:linux), @c(:windows) или @c(:msys2)."))
   (:documentation
-   "Базовый класс <workspace> описывает локальный рабочий каталог.
-    Содержит путь к каталогу, описание и тип ОС для правильной обработки путей.
-    От него наследуются специализированные классы для разных ОС."))
+   "@b(Назначение:) Базовый workspace с путём, описанием и типом ОС.
+
+ @b(Поля:)
+@begin(list)
+ @item(@c(path) - путь к каталогу workspace в виде @c(pathname);)
+ @item(@c(description) - человекочитаемое описание для CLI и тестов;)
+ @item(@c(os-type) - тип ОС: @c(:linux), @c(:windows) или @c(:msys2);)
+@end(list)
+
+ @b(Использование:) Базовый класс для OS-специфичных workspace; методы
+ @c(repo-*) используют его для нормализации путей."))
 
 (defclass <workspace-linux> (<workspace>)
   ()
-  (:documentation "Workspace для Linux. Использует прямые слеши в путях."))
+  (:documentation "@b(Назначение:) Workspace для Linux; использует прямые слеши в путях."))
 
 (defclass <workspace-windows> (<workspace>)
   ()
-  (:documentation "Workspace для Windows (без MSYS2). Использует обратные слеши."))
+  (:documentation "@b(Назначение:) Workspace для Windows (без MSYS2); использует обратные
+слеши."))
 
 (defclass <workspace-msys2> (<workspace>)
   ()
-  (:documentation "Workspace для MSYS2. Требует специальной обработки путей (прямые слеши в Unix-стиле, но работает в Windows)."))
+  (:documentation "@b(Назначение:) Workspace для MSYS2; использует Unix-стиль слешей, но работает поверх Windows, поэтому требует специальной обработки путей."))
 
 (defun make-workspace (path &key description)
-  "Создаёт экземпляр workspace для текущей ОС.
-   Автоматически выбирает подходящий класс в зависимости от detect-os.
-   
-   PATH — путь к каталогу workspace (будет создан, если не существует).
-   DESCRIPTION — человекочитаемое описание (по умолчанию — имя каталога)."
+  "@b(Назначение:) Создаёт workspace под текущую ОС и гарантирует наличие каталога.
+
+ @b(Аргументы:)
+@begin(list)
+ @item(@c(path) - путь к каталогу workspace; при отсутствии каталог создаётся;)
+ @item(@c(description) - опциональное описание; по умолчанию используется имя каталога.)
+@end(list)
+
+ @b(Логика:) Определяет ОС через @c(detect-os), выбирает
+ класс (@c(<workspace-linux>), @c(<workspace-windows>),
+ @c(<workspace-msys2>)), разворачивает тильду, создаёт каталог и
+ возвращает экземпляр с @c(truename).
+
+ @b(Пример:)
+@begin[lang=lisp](code)
+ (make-workspace \"~/proj/demo\")
+@end(code)"
   (let* ((pathname (uiop:ensure-directory-pathname
                     (cl-git-tree/fs:expand-home path)))
          (os-type (detect-os))

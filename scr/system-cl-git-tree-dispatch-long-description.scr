@@ -1,0 +1,18 @@
+@begin(section) @title(cl-git-tree/dispatch — описание)
+Диспетчер CLI-команд: хранит реестр команд и выполняет маршрутизацию вызовов.
+@end(section)
+
+@begin(section) @title(Основные возможности)
+@begin(list)
+ @item(Регистрация команд в @c(*commands*).)
+ @item(@c(dispatch-command) — вызов соответствующей реализации CLI.)
+ @item(Помощники для вывода справки и аргументов.)
+@end(list)
+@end(section)
+
+@begin(section) @title(Зависимости и применение)
+@begin(list)
+ @item(Зависит от @c(uiop) и @c(asdf).)
+ @item(Используется в @c(cl-git-tree/cli) как точка входа для CLI.)
+@end(list)
+@end(section)

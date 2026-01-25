@@ -1,0 +1,18 @@
+@begin(section) @title(cl-git-tree/git-utils — описание)
+Утилиты поверх git: запуск команд, парсинг вывода и вспомогательные функции для остальных подсистем.
+@end(section)
+
+@begin(section) @title(Основные возможности)
+@begin(list)
+ @item(@c(git-run) — оболочка для вызова git с управляемыми опциями и выводом.)
+ @item(@c(current-branch), @c(repo-remotes), @c(git-root) — быстрые запросы к состоянию репозитория.)
+ @item(Нормализация путей/опций для других модулей.)
+@end(list)
+@end(section)
+
+@begin(section) @title(Зависимости и применение)
+@begin(list)
+ @item(Зависит от @c(uiop).)
+ @item(Используется подсистемами @c(cl-git-tree/loc), @c(cl-git-tree/global) и CLI-командами.)
+@end(list)
+@end(section)

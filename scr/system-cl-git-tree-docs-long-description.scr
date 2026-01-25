@@ -1,0 +1,17 @@
+@begin(section) @title(cl-git-tree/docs — описание)
+Генерация документации cl-git-tree через @c(mnas-package) и @c(codex).
+@end(section)
+
+@begin(section) @title(Основные возможности)
+@begin(list)
+ @item(@c(make-all) — сборка HTML/графов зависимостей.)
+ @item(Использует Scriba-источники из @c(docs/) и пакует вывод.)
+@end(list)
+@end(section)
+
+@begin(section) @title(Зависимости и применение)
+@begin(list)
+ @item(Зависит от @c(cl-git-tree), @c(mnas-package), @c(codex).)
+ @item(Применяется для публикации справки и диаграмм.)
+@end(list)
+@end(section)

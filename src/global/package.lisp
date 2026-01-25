@@ -1,5 +1,10 @@
 (defpackage :cl-git-tree/global
   (:use :cl)
+  (:documentation "@b(Пакет:) Глобальная конфигурация Git (обёртка над @code(git config --global)).
+@b(Пример:) @begin[lang=lisp](code)
+ (cl-git-tree/global:git-set \"user.email\" \"alice@example.com\")
+ (cl-git-tree/global:git-get \"user.email\")
+@end(code)")
   (:export
    ;; класс
    <git-global>

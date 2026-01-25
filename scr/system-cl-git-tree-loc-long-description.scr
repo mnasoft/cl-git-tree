@@ -1,0 +1,19 @@
+@begin(section) @title(cl-git-tree/loc — описание)
+Подсистема локаций и провайдеров: хранит шаблоны URL/путей и методы для работы с remotes и workspace.
+@end(section)
+
+@begin(section) @title(Основные возможности)
+@begin(list)
+ @item(Классы @c(<location>), @c(<provider>), @c(<local>), @c(<github>), @c(<gitlab>).)
+ @item(Реестр @c(*locations*), функции @c(add-location), @c(find-location), @c(repo-url).)
+ @item(Workspace-классы для Linux/Windows/MSYS2 и нормализация путей.)
+ @item(Generic-функции @c(repo-*) и @c(remote-*) с методами для провайдеров.)
+@end(list)
+@end(section)
+
+@begin(section) @title(Зависимости и применение)
+@begin(list)
+ @item(Зависит от @c(uiop), @c(cl-ppcre), @c(cl-git-tree/fs), @c(cl-git-tree/git-utils), @c(cl-git-tree/shell-utils), @c(cl-git-tree/emodji).)
+ @item(Используется CLI-командами и диспетчером для всех операций с репозиториями.)
+@end(list)
+@end(section)

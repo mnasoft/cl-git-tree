@@ -1,0 +1,18 @@
+@begin(section) @title(cl-git-tree/config — описание)
+Конфигурация шаблонов включения и исключения файлов, дефолтные паттерны для команд.
+@end(section)
+
+@begin(section) @title(Основные возможности)
+@begin(list)
+ @item(@c(*tracked-patterns*), @c(*excludes-patterns*) — базовые списки масок.)
+ @item(Загрузка/сохранение пользовательских паттернов в файлы конфигурации.)
+ @item(API для CLI-команд @c(patterns) и внутренних вызовов.)
+@end(list)
+@end(section)
+
+@begin(section) @title(Зависимости и применение)
+@begin(list)
+ @item(Зависит от @c(uiop).)
+ @item(Используется во всех командах, где требуется фильтрация файлов.)
+@end(list)
+@end(section)

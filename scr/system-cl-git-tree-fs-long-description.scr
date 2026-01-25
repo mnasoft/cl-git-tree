@@ -1,0 +1,18 @@
+@begin(section) @title(cl-git-tree/fs — описание)
+Файловая подсистема: поиск, обход и валидация git-репозиториев в дереве каталогов.
+@end(section)
+
+@begin(section) @title(Основные возможности)
+@begin(list)
+ @item(@c(find-git-repos) — поиск репозиториев в дереве с фильтрацией.)
+ @item(@c(git-repo-p) — проверка, что каталог является git-репозиторием.)
+ @item(Расширение тильды, нормализация путей для других модулей.)
+@end(list)
+@end(section)
+
+@begin(section) @title(Зависимости и применение)
+@begin(list)
+ @item(Зависит от @c(uiop), @c(cl-fad), @c(cl-git-tree/shell-utils).)
+ @item(Используется в CLI-командах и подсистеме @c(cl-git-tree/loc) для работы с workspace.)
+@end(list)
+@end(section)
