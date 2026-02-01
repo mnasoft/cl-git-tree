@@ -3,7 +3,7 @@
   :description #.(uiop:read-file-string
                   (uiop:subpathname *load-truename*
                                     "scr/system-cl-git-tree-long-description.scr"))  
-  :version "0.7.8"
+  :version "0.7.9"
   :author "Mykola Matvyeyev <mnasoft@gmail.com>"
   :license "GPL-3.0-or-later"
   :depends-on (
@@ -58,6 +58,7 @@
                  (:file "transport-import")
                  (:file "transport-export")
                  (:file "transport-list")
+                 (:file "transport-list-git")
                  (:file "transport")))
        (:file "aliases")
        (:module "single-repo"
