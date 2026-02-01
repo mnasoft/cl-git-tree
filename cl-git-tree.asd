@@ -57,6 +57,7 @@
                  (:file "transport-clean")
                  (:file "transport-import")
                  (:file "transport-export")
+                 (:file "transport-list")
                  (:file "transport")))
        (:file "aliases")
        (:module "single-repo"
