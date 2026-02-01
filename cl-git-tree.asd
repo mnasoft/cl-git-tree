@@ -3,7 +3,7 @@
   :description #.(uiop:read-file-string
                   (uiop:subpathname *load-truename*
                                     "scr/system-cl-git-tree-long-description.scr"))  
-  :version "0.8.0"
+  :version "0.8.1"
   :author "Mykola Matvyeyev <mnasoft@gmail.com>"
   :license "GPL-3.0-or-later"
   :depends-on (

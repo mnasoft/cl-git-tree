@@ -41,15 +41,20 @@
         (concatenate 'string root "/"))))
 
 (defun %msys2-ensure-prefix (path)
-  "Если PATH начинается с '/', добавить префикс корня MSYS2. Иначе вернуть как есть."
+  "Если PATH начинается с '//', сохранить как UNC-путь. Если с '/', добавить префикс корня MSYS2. Иначе вернуть как есть."
   (let* ((has-drive (and (> (length path) 1)
                          (char= (char path 1) #\:)))
-         (starts-with-slash (and (> (length path) 0)
-                                  (char= (char path 0) #\/))))
+         (starts-with-double-slash (and (> (length path) 1)
+                                        (char= (char path 0) #\/)
+                                        (char= (char path 1) #\/)))
+         (starts-with-single-slash (and (> (length path) 0)
+                                        (char= (char path 0) #\/)
+                                        (not starts-with-double-slash))))
     (cond
       (has-drive path)
-      (starts-with-slash (concatenate 'string (%msys2-root-prefix)
-                                      (subseq path 1)))
+      (starts-with-double-slash path)  ; UNC-пути: //host/share/... сохраняем как есть
+      (starts-with-single-slash (concatenate 'string (%msys2-root-prefix)
+                                              (subseq path 1)))
       (t path))))
 
 (defmethod expand-path ((workspace <workspace-msys2>) (path string))
