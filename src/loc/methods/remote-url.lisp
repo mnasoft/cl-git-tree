@@ -28,8 +28,11 @@
 провайдере PROVIDER типа <local>.
 Возвращает строку с полным git-URL репозитория."
   (let* ((repo-name (repo-name ws))
+         (base-url (cl-git-tree/loc:<location>-url-git provider))
          (base-url-expanded
-           (cl-git-tree/fs:expand-home
-            (cl-git-tree/loc:<location>-url-git provider))))
+           ;; Для UNC-путей (начинающихся с //) сохраняем оба слеша
+           (if (uiop:string-prefix-p "//" base-url)
+               (concatenate 'string "/" (cl-git-tree/fs:expand-home base-url))
+               (cl-git-tree/fs:expand-home base-url))))
     ;; конкатенируем развернутую базу с именем репо
     (format nil "~A~A.git" base-url-expanded repo-name)))
