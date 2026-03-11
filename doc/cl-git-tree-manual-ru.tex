@@ -1,0 +1,430 @@
+\documentclass{book}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage[gen]{eurosym}
+\usepackage{textcomp}
+\usepackage{graphicx}
+\usepackage{etoolbox}
+\usepackage{titleps}
+\usepackage[utf8]{inputenc}
+\usepackage{fontspec}
+\setmainfont{DejaVu Serif} % или любой другой шрифт с кириллицей
+
+\usepackage{enumitem}
+\usepackage{float}
+% use hidelinks to remove boxes around links to be similar to Texinfo TeX
+\usepackage[hidelinks]{hyperref}
+
+\makeatletter
+\newcommand{\Texinfosettitle}{cl-git-tree: Руководство пользователя (RU)}%
+
+% redefine the \mainmatter command such that it does not clear page
+% as if in double page
+\renewcommand\mainmatter{\clearpage\@mainmattertrue\pagenumbering{arabic}}
+\newenvironment{Texinfopreformatted}{%
+  \par\GNUTobeylines\obeyspaces\frenchspacing\parskip=\z@\parindent=\z@}{}
+{\catcode`\^^M=13 \gdef\GNUTobeylines{\catcode`\^^M=13 \def^^M{\null\par}}}
+\newenvironment{Texinfoindented}{\begin{list}{}{}\item\relax}{\end{list}}
+
+
+% set defaults for lists that match Texinfo TeX formatting
+\setlist[description]{style=nextline, font=\normalfont}
+\setlist[itemize]{label=\textbullet}
+
+% used for substitutions in commands
+\newcommand{\Texinfoplaceholder}[1]{}
+
+\newpagestyle{single}{\sethead[\chaptername{} \thechapter{} \chaptertitle{}][][\thepage]
+                              {\chaptername{} \thechapter{} \chaptertitle{}}{}{\thepage}}
+
+\newpagestyle{singlepagenum}{\sethead[][][\thepage{}]
+                              {}{}{\thepage}}
+
+% allow line breaking at underscore
+\let\Texinfounderscore\_
+\renewcommand{\_}{\Texinfounderscore\discretionary{}{}{}}
+\makeatother
+% set default for @setchapternewpage
+\makeatletter
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{\Texinfoplaceholder{setchapternewpage placeholder}\clearpage}{}{}
+\makeatother
+\pagestyle{single}%
+
+
+
+
+
+
+\begin{document}
+
+\frontmatter
+\pagestyle{empty}%
+\begin{titlepage}
+\begingroup
+\newskip\titlepagetopglue \titlepagetopglue = 1.5in
+\newskip\titlepagebottomglue \titlepagebottomglue = 2pc
+\setlength{\parindent}{0pt}
+% Leave some space at the very top of the page.
+    \vglue\titlepagetopglue
+{\raggedright {\huge \bfseries cl-git-tree}}
+\vskip 4pt \hrule height 4pt width \hsize \vskip 4pt
+\rightline{Руководство пользователя}
+\rightline{Русская версия (основная)}
+\vskip 0pt plus 1filll
+\leftline{\Large \bfseries Mykola Matvyeyev}%
+\vskip4pt \hrule height 2pt width \hsize
+  \vskip\titlepagebottomglue
+\endgroup
+\end{titlepage}
+\pagestyle{singlepagenum}%
+\tableofcontents\newpage
+\mainmatter
+\pagestyle{single}%
+\label{anchor:Top}%
+\chapter{{Назначение}}
+\label{anchor:_041d_0430_0437_043d_0430_0447_0435_043d_0438_0435}%
+
+cl-git-tree помогает выполнять типовые git-операции сразу по дереву репозиториев,
+управлять локациями провайдеров (local/github/gitlab), а также переносить изменения
+между машинами через tar.xz-архивы.
+
+Ключевые задачи:
+\begin{itemize}[label=\textbullet{}]
+\item массовые операции \texttt{pull}, \texttt{add}, \texttt{commit}, \texttt{push};
+\item управление remote и локациями;
+\item аудит состояния репозиториев;
+\item офлайн-экспорт/импорт через \texttt{git tree transport ...}.
+\end{itemize}
+
+\chapter{{Установка}}
+\label{anchor:_0423_0441_0442_0430_043d_043e_0432_043a_0430}%
+
+Минимальные зависимости: \texttt{git}, \texttt{sbcl}, Quicklisp (для запуска из исходников).
+
+Сборка бинарника:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily chmod +x build-bin.sh
+sh ./build-bin.sh
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Установка бинарника и вспомогательных файлов:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily sh ./install-git-tree-bin.sh
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Запуск справки:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily ./bin/git-tree {-}{-}help
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Альтернативный запуск через SBCL:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily sbcl {-}{-}eval "(progn (require 'asdf) (asdf:load-system :cl-git-tree)
+\  (cl-git-tree/cli:main '(\textbackslash{}"prog\textbackslash{}" \textbackslash{}"{-}{-}help\textbackslash{}")))" {-}{-}quit
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+\chapter{{Быстрый старт}}
+\label{anchor:_0411_044b_0441_0442_0440_044b_0439-_0441_0442_0430_0440_0442}%
+
+Пример минимального цикла работы:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree locations list
+git-tree pull
+git-tree add {-}{-} *.lisp *.asd
+git-tree commit -am "sync"
+git-tree push
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+\chapter{{Конфигурация локаций}}
+\label{anchor:_041a_043e_043d_0444_0438_0433_0443_0440_0430_0446_0438_044f-_043b_043e_043a_0430_0446_0438_0439}%
+
+По умолчанию используются:
+\begin{itemize}[label=\textbullet{}]
+\item \texttt{\~{}/.git-tree/locations.lisp}
+\item \texttt{\~{}/.git-tree/file-patterns.lisp}
+\end{itemize}
+
+Тильда \texttt{\~{}} разворачивается в \texttt{\$HOME}. Для MSYS2/Windows используйте прямые слэши \texttt{/}
+и избегайте завершающего слэша в путях к архивам/репозиториям.
+
+Пример \texttt{locations.lisp}:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily (in-package :cl-git-tree/loc)
+
+(add-location "gh"
+\  :description "GitHub"
+\  :url-git "git@github.com:username/"
+\  :provider :github)
+
+(add-location "lc"
+\  :description "Local mirror"
+\  :url-git "\~{}/.git-tree/git/lc/"
+\  :url-xz "\~{}/.git-tree/xz/lc/"
+\  :provider :local)
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Команда для проверки текущих конфигов:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree {-}{-}help
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+\chapter{{Справочник команд}}
+\label{anchor:_0421_043f_0440_0430_0432_043e_0447_043d_0438_043a-_043a_043e_043c_0430_043d_0434}%
+
+Общий формат:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree <command> [args...]
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Основные команды:
+\begin{description}
+\item[{\parbox[b]{\linewidth}{%
+\texttt{help}}}]
+Показать справку.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{version}}}]
+Показать версию системы.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{info}}}]
+Показать информацию о системе и локациях.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{aliases}}}]
+Показать доступные команды и алиасы.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{locations}}}]
+Управление локациями: list/show/args/add/edit/remove/save/reset.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{patterns}}}]
+Управление паттернами файлов: list/add/remove/reset.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{add}}}]
+Массовый \texttt{git add} по репозиториям.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{commit}}}]
+Массовый \texttt{git commit}.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{pull}}}]
+Массовый \texttt{git pull}.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{push}}}]
+Массовый \texttt{git push}.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{audit}}}]
+Аудит: \texttt{status}, \texttt{dirty}, \texttt{staged}, \texttt{untracked}.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{remote}}}]
+Группа подкоманд управления remote.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{transport}}}]
+Группа подкоманд офлайн-транспорта архивов.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{branch,\ checkout,\ switch,\ fetch,\ merge,\ ls-remote}}}]
+Команды для работы с одним текущим репозиторием.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{remake-xz}}}]
+Служебная команда пересоздания архивов.
+\end{description}
+
+Примеры часто используемых команд:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree add [{-}{-}exclude DIR ...] {-}{-} [PATTERNS...]
+git-tree commit [-a] [-m <msg>] [-am <msg>] [{-}{-}amend]
+git-tree pull
+git-tree push
+git-tree audit status
+git-tree patterns list tracked
+git-tree locations list
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+\chapter{{Подкоманды remote}}
+\label{anchor:_041f_043e_0434_043a_043e_043c_0430_043d_0434_044b-remote}%
+
+Синтаксис:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree remote list
+git-tree remote add LOC-KEY
+git-tree remote remove LOC-KEY
+git-tree remote readd LOC-KEY
+git-tree remote create LOC-KEY [{-}{-}private]
+git-tree remote delete LOC-KEY
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Алиасы совместимости:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree remote-add LOC-KEY
+git-tree remote-remove LOC-KEY [{-}{-}verbose]
+git-tree remote-create LOC-KEY [{-}{-}private]
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Назначение:
+\begin{itemize}[label=\textbullet{}]
+\item \texttt{add/readd/remove} — массово управляют remote во всех локальных репозиториях;
+\item \texttt{create/delete} — создают или удаляют репозитории на провайдере для локальных git-проектов.
+\end{itemize}
+
+\chapter{{Подкоманды transport}}
+\label{anchor:_041f_043e_0434_043a_043e_043c_0430_043d_0434_044b-transport}%
+
+Синтаксис:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree transport export [{-}{-}days N] [{-}{-}verbose] [{-}{-}help]
+git-tree transport import [{-}{-}keep-remote-dir] [{-}{-}delete-archive] [{-}{-}verbose] [{-}{-}help]
+git-tree transport clone <archive.tar.xz> <location> [{-}{-}help]
+git-tree transport list <location> [{-}{-}help]
+git-tree transport list-git <location> [{-}{-}help]
+git-tree transport clean [{-}{-}help]
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Назначение подкоманд:
+\begin{itemize}[label=\textbullet{}]
+\item \texttt{export} — создаёт tar.xz из репозиториев (обычно чистых и не слишком старых);
+\item \texttt{import} — распаковывает архивы и синхронизирует ветки через временный remote;
+\item \texttt{clone} — клонирует репозиторий из выбранного архива в указанную локацию;
+\item \texttt{list/list-git} — показывает доступные архивы/репозитории в локации;
+\item \texttt{clean} — удаляет архивы \texttt{*.tar.xz}.
+\end{itemize}
+
+Примеры:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree transport export {-}{-}days 7 {-}{-}verbose
+git-tree transport import {-}{-}delete-archive
+git-tree transport list lc
+git-tree transport clone my-repo.tar.xz lc
+git-tree transport clean
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+\chapter{{Команды одного репозитория}}
+\label{anchor:_041a_043e_043c_0430_043d_0434_044b-_043e_0434_043d_043e_0433_043e-_0440_0435_043f_043e_0437_0438_0442_043e_0440_0438_044f}%
+
+Эти команды проксируют поведение git для текущего репозитория:
+
+\begin{description}
+\item[{\parbox[b]{\linewidth}{%
+\texttt{branch}}}]
+\texttt{git-tree branch [опции] [аргументы]} — управление ветками.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{checkout}}}]
+\texttt{git-tree checkout [опции] TARGET} или \texttt{git-tree checkout [опции] {-}{-} PATHS...}.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{switch}}}]
+\texttt{git-tree switch [опции] BRANCH}.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{fetch}}}]
+\texttt{git-tree fetch [опции] [REPOSITORY]}.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{merge}}}]
+\texttt{git-tree merge [опции] <branch>} и режимы \texttt{{-}{-}continue|{-}{-}abort|{-}{-}quit}.
+
+\item[{\parbox[b]{\linewidth}{%
+\texttt{ls-remote}}}]
+\texttt{git-tree ls-remote [опции] REPOSITORY [PATTERNS...] }.
+\end{description}
+
+Примеры:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree branch -a
+git-tree checkout -b feature/new
+git-tree switch main
+git-tree fetch {-}{-}all
+git-tree merge {-}{-}no-commit develop
+git-tree ls-remote {-}{-}tags origin
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+\chapter{{Практические сценарии}}
+\label{anchor:_041f_0440_0430_043a_0442_0438_0447_0435_0441_043a_0438_0435-_0441_0446_0435_043d_0430_0440_0438_0438}%
+
+Обновить все репозитории и отправить изменения:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree pull
+git-tree add {-}{-} *.lisp *.asd
+git-tree commit -am "batch update"
+git-tree push
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Синхронизация между машинами без интернета:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree transport export {-}{-}days 30
+\# перенос архивов
+git-tree transport import {-}{-}verbose {-}{-}delete-archive
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Массовое подключение нового remote:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree remote add gh
+git-tree remote readd gh
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+\chapter{{Диагностика}}
+\label{anchor:_0414_0438_0430_0433_043d_043e_0441_0442_0438_043a_0430}%
+
+Полезные команды проверки:
+\begin{Texinfoindented}
+\begin{Texinfopreformatted}%
+\ttfamily git-tree {-}{-}help
+git-tree locations list
+git-tree audit status
+git-tree transport {-}{-}help
+git-tree remote {-}{-}help
+\end{Texinfopreformatted}
+\end{Texinfoindented}
+
+Рекомендации:
+\begin{itemize}[label=\textbullet{}]
+\item при ошибках импорта убедитесь, что путь к архиву корректен и не оканчивается слэшем;
+\item в MSYS2 используйте прямые слэши \texttt{/};
+\item при ошибках в одном архиве продолжайте обработку остальных, фиксируя причину в логе.
+\end{itemize}
+
+\end{document}
