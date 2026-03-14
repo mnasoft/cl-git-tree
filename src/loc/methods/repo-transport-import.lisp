@@ -24,6 +24,62 @@
       (t
        nil))))
 
+(defun local-branch-exists-p (repo-dir branch-name)
+  "Проверяет, существует ли локальная ветка BRANCH-NAME в репозитории REPO-DIR."
+  (multiple-value-bind (stdout stderr code)
+      (cl-git-tree/git-utils:git-run repo-dir "show-ref" "--verify"
+                                     (format nil "refs/heads/~A" branch-name))
+    (declare (ignore stdout stderr))
+    (zerop code)))
+
+(defun switch-to-local-branch (ws repo-dir branch-name &key verbose)
+  "Переключает текущий HEAD на локальную ветку BRANCH-NAME."
+  (multiple-value-bind (stdout stderr code)
+      (cl-git-tree/git-utils:git-run repo-dir "checkout" branch-name)
+    (when (and verbose (not (zerop code)))
+      (format t "~A Не удалось переключиться на ветку ~A: ~A~%"
+              (find-emo ws "error")
+              branch-name
+              (or stderr stdout)))
+    (zerop code)))
+
+(defun create-local-branch-from-remote (ws repo-dir branch-name remote-name &key verbose)
+  "Создаёт локальную ветку BRANCH-NAME из REMOTE-NAME/BRANCH-NAME без слияния."
+  (let ((remote-ref (format nil "~A/~A" remote-name branch-name)))
+    (multiple-value-bind (stdout stderr code)
+        (cl-git-tree/git-utils:git-run repo-dir "branch" branch-name remote-ref)
+      (if (zerop code)
+          (progn
+            (when verbose
+              (format t "  Создана локальная ветка ~A из ~A~%" branch-name remote-ref))
+            t)
+          (progn
+            (when verbose
+              (format t "~A Не удалось создать ветку ~A из ~A: ~A~%"
+                      (find-emo ws "error")
+                      branch-name
+                      remote-ref
+                      (or stderr stdout)))
+            nil)))))
+
+(defun merge-remote-branch-into-local (ws repo-dir branch-name remote-name &key verbose)
+  "Переключается на локальную BRANCH-NAME и пытается влить REMOTE-NAME/BRANCH-NAME."
+  (let ((remote-ref (format nil "~A/~A" remote-name branch-name)))
+    (if (switch-to-local-branch ws repo-dir branch-name :verbose verbose)
+        (progn
+          (when verbose
+            (format t "  Выполняю merge ~A в локальную ветку ~A~%" remote-ref branch-name))
+          (multiple-value-bind (stdout stderr code)
+              (cl-git-tree/git-utils:git-run repo-dir "merge" remote-ref)
+            (when (and verbose (not (zerop code)))
+              (format t "~A Ошибка merge ~A в ~A: ~A~%"
+                      (find-emo ws "error")
+                      remote-ref
+                      branch-name
+                      (or stderr stdout)))
+            (zerop code)))
+        nil)))
+
 
 ;; cleanup-remote-dir заменён на keep-remote-dir (по умолчанию NIL, если T — каталог не удаляется)
 (defmethod repo-transport-import ((ws <workspace>) (provider <provider>)
@@ -66,16 +122,22 @@
                      (when verbose
                        (format t "  Найдено веток: ~A~%" (length branches)))
                      
-                     ;; Выполняем pull для каждой ветки
-                     (let ((pull-success t))
+                     ;; Для каждой ветки: если локальной ветки нет, создаём её из tmp-remote;
+                     ;; если есть — переключаемся на неё и пробуем merge tmp-remote/<branch>.
+                     (let ((pull-success t)
+                           (original-branch (cl-git-tree/git-utils:current-branch repo-dir)))
                        (dolist (branch branches)
-                         (when verbose
-                           (format t "  Выполняю pull ветки ~A из ~A~%" branch tmp-remote))
-                         (multiple-value-bind (ignore-ws success)
-                             (cl-git-tree/loc:repo-pull ws provider :remote tmp-remote :branch branch)
-                           (declare (ignore ignore-ws))
-                           (unless success
-                             (setf pull-success nil))))
+                         (if (local-branch-exists-p repo-dir branch)
+                             (unless (merge-remote-branch-into-local ws repo-dir branch tmp-remote :verbose verbose)
+                               (setf pull-success nil))
+                             (unless (create-local-branch-from-remote ws repo-dir branch tmp-remote :verbose verbose)
+                               (setf pull-success nil))))
+
+                       ;; Возвращаем исходную ветку, если она существовала до импорта.
+                       (when (and original-branch
+                                  (not (string= original-branch "HEAD"))
+                                  (local-branch-exists-p repo-dir original-branch))
+                         (switch-to-local-branch ws repo-dir original-branch :verbose verbose))
                        
                        ;; Отключаем временный remote
                        (remote-import-disconnect ws provider :remote-name tmp-remote :verbose verbose)
