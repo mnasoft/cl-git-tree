@@ -25,4 +25,26 @@
 #+latex_engraved_theme:
 #+latex_compiler: Lualatex
 
-* Заголовок
+* Примеры операций git
+#+begin_src bash
+  # Утановка кодировки utf-8 для gitk
+  git config --global gui.encoding utf-8
+
+  # Создание аннотированного тега
+  git tag -a <tag-name> -m "Realease v0.1.25"
+
+  # Удаление тега в рабочем каталоге
+  git tag -d <tag-name>
+
+  # Удаление тега в отдаленном расположении
+  git push origin --delete <tag-name>
+
+  # Удаление ветки в рабочем каталоге
+  git branch -d <branch-name>
+
+  # Удаление ветки в отдаленном расположении
+  git push origin --delete <branch-name>
+
+  # Добавление всех тегов в отдаленные расположения
+  git push --tags
+#+end_src
