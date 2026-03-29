@@ -25,3 +25,7 @@ git tree transport export
 cd "$WORK_DIR/place-1/test-cl-git-tree"
 
 git tree transport import
+
+echo "=== Состояние place-1 после transport import ==="
+git branch -a
+git log --oneline --all

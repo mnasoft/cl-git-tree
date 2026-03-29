@@ -5,6 +5,7 @@
 Работает для всех зарегистрированных провайдеров рабочего пространства.
 Возвращает WS."
   (let* ((root (git-root ws))
+         (original-branch (and root (cl-git-tree/git-utils:current-branch root)))
          (providers (repo-providers ws)))
     (dolist (provider providers)
       (let ((remote-name (<location>-id provider)))
@@ -32,21 +33,27 @@
                     ;; 3. Для каждой удалённой ветки создаём локальную ветку отслеживания
                     (dolist (remote-branch remote-branches)
                       (let* ((trimmed (string-trim '(#\Space) remote-branch))
-                             (parts (uiop:split-string trimmed :separator '(#\/) :max-parts 2)))
-                        (when (and (>= (length parts) 2)
+                             ;; Разбиваем "remote/branch" по первому слешу
+                             (slash-pos (position #\/ trimmed))
+                             (parts (when slash-pos
+                                      (list (subseq trimmed 0 slash-pos)
+                                            (subseq trimmed (1+ slash-pos))))))
+                        (when (and parts
                                    (string= (car parts) remote-name)
-                                   (not (string= (cadr parts) "HEAD")))
+                                   (not (string= (cadr parts) "HEAD"))
+                                   ;; пропускаем symbolic refs вида "HEAD -> branch"
+                                   (not (search "->" (cadr parts))))
                           (let ((branch-name (cadr parts)))
                             ;; Проверяем, существует ли уже локальная ветка
                             (multiple-value-bind (out1 err1 code1)
                                 (cl-git-tree/git-utils:git-run root "show-ref" "--verify" 
-                                                                (format nil "refs/heads/~A" branch-name))
+                                                               (format nil "refs/heads/~A" branch-name))
                               (declare (ignore err1))
                               (if (zerop code1)
                                   ;; Локальная ветка уже существует, делаем merge
                                   (multiple-value-bind (merge-out merge-err merge-code)
                                       (cl-git-tree/git-utils:git-run root "merge" 
-                                                                      (format nil "~A/~A" remote-name branch-name))
+                                                                     (format nil "~A/~A" remote-name branch-name))
                                     (if (zerop merge-code)
                                         (format t "~A [~A] Merge ~A успешно~%"
                                                 (find-emo ws "success")
@@ -58,7 +65,7 @@
                                   ;; Локальной ветки нет, создаём её и настраиваем отслеживание
                                   (multiple-value-bind (checkout-out checkout-err checkout-code)
                                       (cl-git-tree/git-utils:git-run root "checkout" "--track" 
-                                                                      (format nil "~A/~A" remote-name branch-name))
+                                                                     (format nil "~A/~A" remote-name branch-name))
                                     (if (zerop checkout-code)
                                         (format t "~A [~A] Создана ветка ~A~%"
                                                 (find-emo ws "success")
@@ -71,5 +78,17 @@
             (format t "~A [~A] Ошибка: ~A~%"
                     (find-emo ws "error")
                     remote-name
-                    e))))
+                    e)))))
+    ;; Возвращаемся на исходную ветку, чтобы не менять рабочий контекст пользователя.
+    (when (and original-branch (not (string= original-branch "HEAD")))
+      (multiple-value-bind (checkout-out checkout-err checkout-code)
+          (cl-git-tree/git-utils:git-run root "checkout" original-branch)
+        (if (zerop checkout-code)
+            (format t "~A Возврат на ветку ~A выполнен~%"
+                    (find-emo ws "success")
+                    original-branch)
+            (format t "~A Не удалось вернуться на ветку ~A: ~A~%"
+                    (find-emo ws "error")
+                    original-branch
+                    (or checkout-err checkout-out "неизвестная ошибка")))))
     ws))

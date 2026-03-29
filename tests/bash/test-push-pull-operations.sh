@@ -43,11 +43,16 @@ echo "=== Состояние ПОСЛЕ push/pull операций ==="
 echo "=== Place-1 ветки ==="
 cd "$WORK_DIR/place-1/test-cl-git-tree"
 git branch -a
-git log --oneline -n 3
+git log --oneline --all
 
 echo "=== Place-2 ветки ==="
 cd "$WORK_DIR/place-2/test-cl-git-tree"
 git branch -a
-git log --oneline -n 3
+git log --oneline --all
+
+echo "=== Состояние place-1 после pull ==="
+cd "$WORK_DIR/place-1/test-cl-git-tree"
+git branch -a
+git log --oneline --all
 
 echo "=== Сравнение: все ветки и их история должны быть синхронизированы между place-1 и place-2 ==="

@@ -19,7 +19,7 @@
                     ;; 2. Для каждой локальной ветки выполняем push
                     (dolist (local-branch local-branches)
                       (let* ((trimmed (string-trim '(#\Space #\*) local-branch))
-                             (branch-name (string-trim '(#\Space) 
+                             (branch-name (string-trim '(#\Space)
                                                        (if (string= (subseq trimmed 0 (min 1 (length trimmed))) "*")
                                                            (subseq trimmed 1)
                                                            trimmed))))
@@ -33,10 +33,10 @@
                                 (format t "~A [~A] Ошибка push ~A/~A: ~A~%"
                                         (find-emo ws "error")
                                         remote-name (repo-name ws) branch-name
-                                        (or push-err push-out "неизвестная ошибка"))))))))))
+                                        (or push-err push-out "неизвестная ошибка")))))))))))
           (error (e)
             (format t "~A [~A] Ошибка: ~A~%"
                     (find-emo ws "error")
                     remote-name
-                    e))))
+                    e)))))
     ws))
