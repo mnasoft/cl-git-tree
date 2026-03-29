@@ -34,6 +34,8 @@
       :components
       ((:file "add")
        (:file "commit")
+        (:file "export")
+        (:file "import")
        (:file "pull")
        (:file "push")
        (:module "remote"
