@@ -1,14 +1,25 @@
 #!/bin/bash
+#
+# Подготовка окружения для тестовых операций.
+#
+# Создаёт два связанных git-репозитория с общей историей:
+#   place-1/test-cl-git-tree  — исходный репозиторий (main-ветка)
+#   place-2/test-cl-git-tree  — клон с веткой dev и новым коммитом
+
+set -e
+
+# Корневой каталог тестового окружения
+WORK_DIR=~/work/cl-git-tree
 
 # Удаляем каталог тестирования
-rm -rf ~/work/cl-git-tree/
+rm -rf "$WORK_DIR"
 
 # Создаем каталоги тестирования
-mkdir -p ~/work/cl-git-tree/place-1/
-mkdir -p ~/work/cl-git-tree/place-2/
+mkdir -p "$WORK_DIR/place-1"
+mkdir -p "$WORK_DIR/place-2"
 
 # Переходим в первый каталог
-cd ~/work/cl-git-tree/place-1/
+cd "$WORK_DIR/place-1"
 
 # Создаем каталог для тестового репо 1
 mkdir test-cl-git-tree
@@ -19,7 +30,7 @@ cd test-cl-git-tree
 # Создаем тестовый файл
 echo "place 1" > README.org
 
-# Инициализируем пустой репо 
+# Инициализируем пустой репо
 git init
 
 # Добавляем файл README.org в репо 1
@@ -34,7 +45,7 @@ git tree remote delete lc
 git tree remote create lc
 
 # Переходим во второй каталог
-cd ~/work/cl-git-tree/place-2/
+cd "$WORK_DIR/place-2"
 
 # Клонируем репо во второй каталог
 git clone ~/.git-tree/git/lc/test-cl-git-tree.git/
@@ -59,14 +70,3 @@ git add RM.org
 
 # Делаем коммит на ветке dev
 git commit -am "dev"
-
-# Создаем транспортный файл
-git tree transport export
-
-# Переходим в первый каталог
-cd ~/work/cl-git-tree/place-1/
-cd test-cl-git-tree
-
-# Переходим в первый каталог
-git tree transport import
-

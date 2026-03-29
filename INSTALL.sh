@@ -21,6 +21,9 @@ BIN_WRAPPER_DEST="$BIN_DEST_DIR/git-tree"
 ACTION="install"
 MODE="script"
 
+# Сохраняем оригинальные аргументы для корректной передачи при перезапуске через sudo
+ORIG_ARGS=("$@")
+
 # Debug/test output removed for cleaner installer output
 
 ##################################################
@@ -52,9 +55,9 @@ ensure_sudo() {
     then
         echo "⚠️  Нужен sudo для записи в /usr/local/"
         if command -v bash >/dev/null 2>&1; then
-            exec sudo bash "$0" "$@"
+            exec sudo bash "$0" "${ORIG_ARGS[@]}"
         else
-            exec sudo "$0" "$@"
+            exec sudo "$0" "${ORIG_ARGS[@]}"
         fi
     fi
 }

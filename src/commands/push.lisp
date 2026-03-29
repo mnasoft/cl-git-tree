@@ -8,16 +8,17 @@
 (in-package :cl-git-tree/commands/push)
 
 (defun push-repo (repo-dir args)
-  "Делает git push для всех remotes текущей ветки и печатает статус."
+  "Выполняет git push для всех веток на все remotes."
   (declare (ignore args))
   (let ((ws (cl-git-tree/loc:make-workspace repo-dir)))
     (cl-git-tree/loc:repo-push-all ws)))
 
 (defun cmd-push (&rest args)
-  "CLI-команда: выполнить git push для всех remotes текущей ветки во всех репозиториях."
+  "CLI-команда: выполнить git push для всех веток на все remotes во всех репозиториях."
   (cond
     ((member "--help" args :test #'string=)
-     (format t "Выполняет git push для всех remotes текущей ветки во всех git-репозиториях.~%~%")
+     (format t "Выполняет git push для всех локальных веток~%")
+     (format t "на все зарегистрированные remotes во всех git-репозиториях.~%~%")
      (format t "Использование:~%  git-tree push~%")
      (format t "Пример:~%  git-tree push~%"))
     (t
@@ -25,4 +26,4 @@
 
 (eval-when (:load-toplevel :execute)
   (cl-git-tree/dispatch:register-command
-   "push" #'cmd-push "Выполнить git push во всех репозиториях"))
+   "push" #'cmd-push "Выполнить git push всех веток на все remotes"))
