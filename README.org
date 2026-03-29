@@ -277,6 +277,31 @@ git tree transport import [--keep-remote-dir] [--delete-archive] [--verbose] [--
 git tree transport clean [--help]
 #+end_src
 
+*** Standalone Export/Import (без привязки к локациям)
+
+Новые команды =git tree export= и =git tree import= работают с единым каталогом архивов
+и не зависят от настроек провайдера/локации (то есть без =:url-xz=).
+
+#+begin_src bash
+git tree export [--days N] [--xz-dir PATH] [--verbose] [--help]
+git tree import [--xz-dir PATH] [--keep-remote-dir] [--delete-archive] [--verbose] [--help]
+#+end_src
+
+Примеры:
+
+#+begin_src bash
+git tree export
+git tree export --days 7 --xz-dir ~/.git-tree/xz
+
+git tree import
+git tree import --xz-dir ~/.git-tree/xz --delete-archive
+#+end_src
+
+Опции:
+- =--xz-dir PATH= — каталог для сохранения/чтения tar.xz архивов (по умолчанию =~/.git-tree/xz=).
+- Для =export=: =--days N=, =--verbose=.
+- Для =import=: =--keep-remote-dir=, =--delete-archive=, =--verbose=.
+
 *** Export — создание архивов
 
 Архивирует чистые репозитории (без незакоммиченных изменений) в tar.xz файлы для последующего переноса на другие машины.
