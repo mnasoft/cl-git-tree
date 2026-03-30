@@ -45,6 +45,15 @@
   # Удаление ветки в отдаленном расположении
   git push origin --delete <branch-name>
 
+  # Просмотр всех тегов из отдаленного расположения <remote>
+  git ls-remote --tags <remote>
+
   # Добавление всех тегов в отдаленные расположения
   git push --tags
+
+  # Добавление всех тегов в отдаленное расположение <remote>
+  git push --tags <remote>
+
+  # Долучение всех тегов из отдаленного расположения <remote>
+  git fetch <remote> --tags  
 #+end_src
