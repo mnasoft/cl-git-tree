@@ -3,7 +3,9 @@
 #+LANGUAGE: ru
 
 * [0/3] ToDo
-1. [ ] Протестировать команду transport export на предмет
-   использования аргумента days.
-2. [ ] Протестировать команду transport import 
+1. [ ] git-tree transport import:
+   - [ ] протестировать команду;
+2. [ ] git-tree transport export;
+   - [ ] протестировать команду transport export на предмет
+     использования аргумента days.
 3. [ ] сделать аналог команды git-timecapsule
