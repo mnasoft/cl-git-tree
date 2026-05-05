@@ -2,7 +2,7 @@
 #+AUTHOR: Mykola Matvyeyev
 #+LANGUAGE: ru
 
-* [8/8] DoNe
+* [9/9] DoNe
 1. [X] Группа команд remote отделена в свой каталог.
 2. [X] Группа команд transport отделена в свой каталог.   
 3. [X] remote-delete ((ws <workspace>) (provider <local>) - выглядит
@@ -18,4 +18,5 @@
    - [X] git tree remote-remove -> git tree remote remove
    - [X] git tree remote-readd -> git tree remote readd
 8. [X] Переопределить команду clone через repo-clone
-   
+9. [X] git tree transport export - протестировать команду на предмет
+   использования аргумента days.

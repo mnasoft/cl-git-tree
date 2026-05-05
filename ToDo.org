@@ -2,10 +2,7 @@
 #+AUTHOR: Mykola Matvyeyev
 #+LANGUAGE: ru
 
-* [0/3] ToDo
+* [0/2] ToDo
 1. [ ] git-tree transport import:
    - [ ] протестировать команду;
-2. [ ] git-tree transport export;
-   - [ ] протестировать команду transport export на предмет
-     использования аргумента days.
-3. [ ] сделать аналог команды git-timecapsule
+2. [ ] сделать аналог команды git-timecapsule
